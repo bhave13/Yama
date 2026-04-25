@@ -592,35 +592,25 @@
                     <a class="nav-link" tabindex="0">Number <span class="nav-caret">▾</span></a>
                     <ul class="dropdown">
                         <li><a href="#" class="dropdown-link" onclick="loadModule('metric_units'); return false;">Metric Units</a></li>
-                        <!--li><a href="#" class="dropdown-link" onclick="loadModule('ScientificNotation'); return false;">Scientific Notation</a></li>
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('area'); return false;">Area of Shapes</a></li-->
                     </ul>
                 </li>
+                
                 <li class="nav-item">
                     <a class="nav-link" tabindex="0">Measurement <span class="nav-caret">▾</span></a>
                     <ul class="dropdown">
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('area2'); return false;">Area of Shapes</a></li>
-                        <!--li><a href="#" class="dropdown-link" onclick="loadModule('ScientificNotation'); return false;">Scientific Notation</a></li>
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('area'); return false;">Area of Shapes</a></li-->
+                        <!-- Updated to use loadJSModule for modern area.js integration -->
+                        <li><a href="#" class="dropdown-link" onclick="loadJSModule('../module/area'); return false;">Area of Shapes</a></li>
                     </ul>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" tabindex="0">Level 1 <span class="nav-caret">▾</span></a>
                     <ul class="dropdown">
-                        <!--li><a href="#" class="dropdown-link" onclick="loadModule('WritingEquations'); return false;">Writing Equations</a></li>
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('SimultaneousEquations'); return false;">Simultaneous Equations</a></li>
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('FormingLinearEquations'); return false;">Forming Linear Equations</a></li>
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('Trigonometry'); return false;">Trigonometry</a></li-->
                     </ul>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" tabindex="0">Level 2 <span class="nav-caret">▾</span></a>
-                    <!--ul class="dropdown">
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('CoodGeom'); return false;">Coordinate Geometry</a></li>
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('Networks'); return false;">Networks</a></li>
-                    </ul-->
                 </li>
 
             </ul>
@@ -671,9 +661,6 @@
                     <p>
                         <strong>Sunil Bhave</strong><br>
                         <a href="mailto:sunil.bhave@gmail.com">sunil.bhave@gmail.com</a><br>
-                        <!-- <a href="https://www.patreon.com/" target="_blank" rel="noopener noreferrer" class="patreon-btn">
-                            ❤️ Support me on Patreon
-                        </a> -->
                     </p>
                 </div>
                 <div class="footer-section">
@@ -719,7 +706,7 @@
             location.reload();
         }
 
-        // ── Module loader ────────────────────────────────────────────
+        // ── Legacy HTML Module loader ────────────────────────────────
         function loadModule(name) {
             const slot = document.getElementById('module-slot');
 
@@ -738,13 +725,9 @@
                     return r.text();
                 })
                 .then(html => {
-                    // Inject HTML structure (styles + DOM elements render fine,
-                    // but browsers intentionally skip <script> tags in innerHTML)
                     slot.innerHTML = html;
                     initWorksheet();
 
-                    // Re-execute scripts: replace each inert parsed <script> node
-                    // with a freshly created one — the browser executes those on insertion
                     slot.querySelectorAll('script').forEach(oldScript => {
                         const newScript = document.createElement('script');
                         Array.from(oldScript.attributes).forEach(attr =>
@@ -754,7 +737,6 @@
                         oldScript.parentNode.replaceChild(newScript, oldScript);
                     });
 
-                    // MathJax after scripts have had a tick to initialise
                     setTimeout(() => {
                         if (typeof MathJax !== 'undefined') {
                             MathJax.typesetPromise().catch(e => console.warn('MathJax:', e));
@@ -768,6 +750,47 @@
                                 <h1 style="font-size:1.3rem;color:#dc2626;">Module not found</h1>
                                 <div class="welcome-rule"></div>
                                 <p style="color:var(--text-muted);font-size:0.9rem;">Could not load <strong>${name}.html</strong> — ${err.message}</p>
+                            </div>
+                        </div>`;
+                });
+
+            mainNav.classList.remove('active');
+            mobileBtn.classList.remove('open');
+        }
+
+        // ── JS Module loader (For new ES6 architecture) ──────────────
+        function loadJSModule(name) {
+            const slot = document.getElementById('module-slot');
+
+            // Loading placeholder
+            slot.innerHTML = `
+                <div class="content-card">
+                    <div class="card-inner-padding" style="text-align:center;padding:5rem 2rem;color:var(--text-muted);">
+                        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--amber);margin-bottom:1rem;opacity:0.5;">∑</div>
+                        <p style="font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">Loading…</p>
+                    </div>
+                </div>`;
+
+            // Dynamically import the ES6 module
+            import(`./modules/${name}.js`)
+                .then(module => {
+                    // Create a fresh container for the module to attach to
+                    slot.innerHTML = '<div id="module-container" style="width:100%;"></div>';
+                    
+                    // Call the exported loadModule function
+                    if (module.loadModule) {
+                        module.loadModule('module-container');
+                    } else if (module.default) {
+                        module.default('module-container');
+                    }
+                })
+                .catch(err => {
+                    slot.innerHTML = `
+                        <div class="content-card">
+                            <div class="card-inner-padding">
+                                <h1 style="font-size:1.3rem;color:#dc2626;">Module not found</h1>
+                                <div class="welcome-rule"></div>
+                                <p style="color:var(--text-muted);font-size:0.9rem;">Could not load <strong>${name}.js</strong> — ${err.message}</p>
                             </div>
                         </div>`;
                 });
