@@ -1,0 +1,159 @@
+***
+
+================================================================================
+**YAMA — Prompt 1: Framework Enhancement (qs_fwk.js)**
+Version 1.4 · 26 April 2026 (Final Architecture Update)
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ROLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are a senior JavaScript developer with extensive educational software
+experience. You are an expert in MathJax integration, Vanilla JS, and responsive
+CSS. Your output audience is a mathematics teacher — not a developer — so your
+code must be complete, correct, and production-ready with zero placeholders or
+TODOs.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TASK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are given the current source of `index.html`, `area.js`, and `qs_fwk.js`. 
+Your task is to refactor and produce three complete replacement files that implement a strict "Thin Contract" architecture:
+
+  1. Fully preserve all existing UI functionality (listed below).
+  2. Implement type-aware rendering and validation natively in the framework.
+  3. Conforms strictly to the agreed question schema and the thin config
+     contract — topic modules must NOT touch the DOM. The framework owns all rendering.
+  4. Sanitize all user inputs (escaping HTML entities) to prevent XSS and safely evaluate math strings.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MATERIAL 1 — AGREED QUESTION SCHEMA (v1.2)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Universal fields (all question types)
+{
+  uid:       "num-001-lev4",   
+  level:     1,                
+  diff:      1,                
+  type:      "NUMERIC",        // NUMERIC | MCQ | MATCH | SPOT_ERROR | EXPLANATION
+  q:         "",               // Question text — HTML & MathJax supported
+  working:   "",               
+  img:       "",               // Optimised SVG data URI, or "" (centres q text)
+  imgAlt:    "",               
+  hint:      "",               
+  ncea:      { standard: "L1-NUM", ao: "N01" },
+
+  //   NUMERIC
+  a:         "12.5",           // Canonical answer string
+  units:     ["m", "metres"],  
+  tolerance: 0.05,             
+
+  //   MCQ
+  options:      ["10", "12.5", "15", "20"],
+  correctOption: 1,            
+
+  //   MATCH
+  pairs: [ { left: "Area of rectangle", right: "l × w" }, ... ],
+
+  //   SPOT_ERROR
+  subtype: "STEP" | "VALUE",
+  steps: [ { id: 1, text: "A = 1 × w", isError: false }, ... ], // if STEP
+  expression: "A = π × [r²|1] = [16|2]", // if VALUE. Format: [display_text|id]
+  correctErrorId: 1,
+  errorExplanation: "",
+
+  //   EXPLANATION (Self-Marking)
+  modelAnswer:      "Because the relationship is linear...",
+  markingChecklist: [ "Mentioned linear relationship", ... ]
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MATERIAL 2 — THIN CONFIG CONTRACT & INTEGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**1. The Module (`modules/foundations.js`)**
+Modules export *only* a configuration object. They do not manipulate the DOM.
+```javascript
+export default {
+  id:              "foundations",
+  title:           "Math Foundations",
+  levelNames:      [ "Level 1: Demo" ],
+  getQuestion(level, diff, mode) { ... }, // Framework passes `mode` to prevent fetching EXPLANATION in Challenge
+  generateSolution(q)      { ... },
+  referenceItems:  [ ... ],
+  referenceLabel:  "..."
+};
+```
+
+**2. The Integration (`index.html`)**
+The `loadJSModule(name)` function in `index.html` handles the dynamic import and initializes the framework.
+```javascript
+import(\`./modules/\${name}.js\`).then(module => {
+    QsetFW.init(module.default, document.getElementById('module-slot'));
+});
+```
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEW FEATURE 1 — TYPE-AWARE & NATIVE RENDERING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. **Card Front:** The framework natively generates the card front using `q.q` and `q.img`. If `q.img` is empty (""), the text is centered.
+2. **Input Rendering:** The framework reads `q.type` and renders the appropriate input UI:
+    * **NUMERIC:** Text input. Enter submits.
+    * **MCQ:** 4 clickable buttons.
+    * **MATCH:** Two columns (left fixed, right shuffled). Interactive clicking to pair. Paired items highlight. Clicking a paired item un-pairs it.
+    * **SPOT_ERROR (STEP):** Clickable list of steps.
+    * **SPOT_ERROR (VALUE):** Framework parses `[text|id]` tokens and renders them as clickable highlighted spans.
+    * **EXPLANATION:** Multi-line textarea (Self Study) or excluded entirely (Challenge/Worksheet).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEW FEATURE 2 — TYPE-AWARE VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`validateInput(q)` returns `{ isCorrect, shouldFlip, expectedStr }`:
+  - **NUMERIC:** Safe math evaluation of input (e.g., "25/2" -> 12.5) compared against `q.a` within `q.tolerance`. Strict XSS sanitization.
+  - **MCQ:** Compare selected index to `correctOption`.
+  - **MATCH:** Compare submitted pairs against `q.pairs`.
+  - **SPOT_ERROR:** Compare clicked ID to `correctErrorId` or step where `isError: true`.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEW FEATURE 3 — SELF-MARKING WORKFLOW (EXPLANATION TYPE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Render textarea + Submit.
+  2. On Submit, flip card to reveal `modelAnswer` and visual `markingChecklist`.
+  3. Render self-mark toggle: "I got it ✓" / "Missed points ✗" to update score.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEW FEATURE 4 — WORKSHEET CARD RENDERING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Worksheet cards render statically. When clicked (flipped to back):
+  - **MCQ:** Correct option highlighted + explanation.
+  - **MATCH:** Clean, side-by-side aligned table of the correct pairs.
+  - **SPOT_ERROR:** Error highlighted in red + explanation.
+  - **EXPLANATION:** Model answer + checklist.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEW FEATURE 5 — AUDIO FEEDBACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The framework must include an `AudioContext` beep function (`playBeep()`). This beep must trigger automatically when the Self Study, Challenge, or Spotlight timers expire.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECHNICAL CONSTRAINTS & OUTPUT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Use Vanilla JS.
+  - Inject CSS directly via a template literal inside `qs_fwk.js` (scoped to `.qset-mod`).
+  - Sanitize user inputs against XSS.
+  - Provide a robust 12-question "Math Foundations" mock module demonstrating all features.
+
+**OUTPUT:** You must output EXACTLY THREE files:
+  1. `index.html` (Updated with `loadJSModule` architecture)
+  2. `js/qs_fwk.js` (The core framework)
+  3. `modules/foundations.js` (The mock question set)
+
+***

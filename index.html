@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yes! another math app</title>
+    <title>YAMA | Yet Another Math App</title>
 
-    <!-- Fonts: Playfair Display (display/headings) + DM Sans (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- MathJax -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
         /* ═══════════════════════════════════════════════════════════════
-           DESIGN SYSTEM
-           Palette: Deep navy (#0d1b2a) + chalk white (#f5f0e8) + amber (#e8a020)
-           Typography: Playfair Display (display) / DM Sans (body)
+           GLOBAL APP STYLES 
            ═══════════════════════════════════════════════════════════════ */
         :root {
             --navy:        #0d1b2a;
@@ -35,17 +31,11 @@
             --text-main:   #0d1b2a;
             --text-muted:  #5a6a7a;
             --border:      #ddd8ce;
-
-            /* Legacy aliases used by module files */
-            --accent-blue:  #e8a020;
-            --bg-light:     #f5f0e8;
-            --border-color: #ddd8ce;
+            --accent-blue: #e8a020;
+            --border-color:#ddd8ce;
         }
 
-        /* ── Reset ─────────────────────────────────────────────────── */
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
         body {
             font-family: 'DM Sans', sans-serif;
             font-size: 16px;
@@ -56,523 +46,88 @@
             flex-direction: column;
             min-height: 100vh;
         }
-
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
 
-        /* ════════════════════════════════════════════════════════════
-           HEADER & NAV
-           ════════════════════════════════════════════════════════════ */
-        header {
-            background-color: var(--navy);
-            color: var(--chalk);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-top: 4px solid var(--amber);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-        }
+        header { background-color: var(--navy); color: var(--chalk); position: sticky; top: 0; z-index: 1000; border-top: 4px solid var(--amber); box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+        .nav-container { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: stretch; padding: 0 2rem; min-height: 58px; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; cursor: pointer; }
+        .logo-mark { width: 38px; height: 38px; background: var(--amber); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.25rem; color: var(--navy); }
+        .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
+        .logo-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.05rem; letter-spacing: 0.02em; color: var(--chalk); }
+        .logo-sub { font-size: 0.625rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); }
 
-        .nav-container {
-            max-width: 1280px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: stretch;
-            padding: 0 2rem;
-            min-height: 58px;
-        }
-
-        /* ── Wordmark ───────────────────────────────────────────────── */
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-
-        .logo-mark {
-            width: 38px;
-            height: 38px;
-            background: var(--amber);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 1.25rem;
-            color: var(--navy);
-            flex-shrink: 0;
-        }
-
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.15;
-        }
-
-        .logo-title {
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 1.05rem;
-            letter-spacing: 0.02em;
-            color: var(--chalk);
-        }
-
-        .logo-sub {
-            font-size: 0.625rem;
-            font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--amber);
-        }
-
-        /* ── Desktop Nav ────────────────────────────────────────────── */
-        .nav-menu {
-            display: flex;
-            align-items: stretch;
-        }
-
-        .nav-item {
-            position: relative;
-            display: flex;
-            align-items: stretch;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0 1.25rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--chalk-muted);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: color 0.2s;
-            position: relative;
-            /* Amber slide-underline — the signature nav detail */
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 1.25rem;
-            right: 1.25rem;
-            height: 3px;
-            background: var(--amber);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
-        }
-
+        .nav-menu { display: flex; align-items: stretch; }
+        .nav-item { position: relative; display: flex; align-items: stretch; }
+        .nav-link { display: flex; align-items: center; gap: 0.4rem; padding: 0 1.25rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--chalk-muted); cursor: pointer; white-space: nowrap; transition: color 0.2s; position: relative; }
+        .nav-link::after { content: ''; position: absolute; bottom: 0; left: 1.25rem; right: 1.25rem; height: 3px; background: var(--amber); transform: scaleX(0); transform-origin: left; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
         .nav-item:hover .nav-link { color: var(--white); }
         .nav-item:hover .nav-link::after { transform: scaleX(1); }
-
-        .nav-caret {
-            font-size: 0.55rem;
-            opacity: 0.55;
-            transition: transform 0.2s;
-            margin-top: 1px;
-        }
-
+        .nav-caret { font-size: 0.55rem; opacity: 0.55; transition: transform 0.2s; margin-top: 1px; }
         .nav-item:hover .nav-caret { transform: rotate(180deg); }
 
-        /* ── Dropdown ───────────────────────────────────────────────── */
-        .dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: var(--navy-mid);
-            min-width: 250px;
-            box-shadow: 0 20px 48px rgba(0,0,0,0.45);
-            border-top: 3px solid var(--amber);
-            border-radius: 0 0 4px 4px;
-            overflow: hidden;
-            animation: dd-appear 0.18s ease;
-        }
+        .dropdown { display: none; position: absolute; top: 100%; left: 0; background-color: var(--navy-mid); min-width: 250px; box-shadow: 0 20px 48px rgba(0,0,0,0.45); border-top: 3px solid var(--amber); border-radius: 0 0 4px 4px; overflow: hidden; }
+        .nav-item:hover .dropdown { display: block; animation: dd-appear 0.18s ease; }
+        @keyframes dd-appear { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown-link { padding: 0.85rem 1.25rem 0.85rem 1rem; display: flex; align-items: center; font-size: 0.85rem; font-weight: 500; color: var(--chalk-dim); border-bottom: 1px solid var(--navy-border); transition: 0.15s; }
+        .dropdown-link::before { content: ''; display: inline-block; width: 0; height: 2px; background: var(--amber); vertical-align: middle; transition: width 0.2s, margin-right 0.2s; }
+        .dropdown-link:hover { background-color: var(--navy-light); color: var(--white); padding-left: 1.5rem; }
+        .dropdown-link:hover::before { width: 14px; margin-right: 0.5rem; }
 
-        @keyframes dd-appear {
-            from { opacity: 0; transform: translateY(-8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .nav-item:hover .dropdown { display: block; }
-
-        .dropdown-link {
-            padding: 0.85rem 1.25rem 0.85rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--chalk-dim);
-            border-bottom: 1px solid var(--navy-border);
-            transition: background 0.15s, color 0.15s, padding-left 0.2s;
-            position: relative;
-        }
-
-        .dropdown-link::before {
-            content: '';
-            display: inline-block;
-            width: 0;
-            height: 2px;
-            background: var(--amber);
-            vertical-align: middle;
-            margin-right: 0;
-            transition: width 0.2s, margin-right 0.2s;
-            flex-shrink: 0;
-        }
-
-        .dropdown-link:hover {
-            background-color: var(--navy-light);
-            color: var(--white);
-            padding-left: 1.5rem;
-        }
-
-        .dropdown-link:hover::before {
-            width: 14px;
-            margin-right: 0.5rem;
-        }
-
-        .dropdown li:last-child .dropdown-link { border-bottom: none; }
-
-        /* ── Mobile Toggle ──────────────────────────────────────────── */
-        .menu-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            gap: 5px;
-            cursor: pointer;
-            padding: 0.5rem;
-            background: none;
-            border: none;
-            margin-left: auto;
-        }
-
-        .menu-toggle span {
-            display: block;
-            width: 22px;
-            height: 2px;
-            background-color: var(--chalk);
-            border-radius: 2px;
-            transition: transform 0.28s, opacity 0.28s;
-        }
-
+        .menu-toggle { display: none; flex-direction: column; justify-content: center; gap: 5px; cursor: pointer; padding: 0.5rem; background: none; border: none; margin-left: auto; }
+        .menu-toggle span { display: block; width: 22px; height: 2px; background-color: var(--chalk); border-radius: 2px; transition: transform 0.28s, opacity 0.28s; }
         .menu-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .menu-toggle.open span:nth-child(2) { opacity: 0; }
         .menu-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        /* ════════════════════════════════════════════════════════════
-           MAIN CONTENT
-           ════════════════════════════════════════════════════════════ */
-        main {
-            flex: 1;
-            max-width: 1080px;
-            margin: 0 auto;
-            padding: 2.5rem 2rem 4rem;
-            width: 100%;
-        }
-
-        /* ── Content Card ───────────────────────────────────────────── */
-        .content-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(13,27,42,0.06), 0 8px 32px rgba(13,27,42,0.04);
-            animation: fade-up 0.4s ease both;
-        }
-
-        /* Amber top stripe on every card */
-        .content-card::before {
-            content: '';
-            display: block;
-            height: 4px;
-            background: linear-gradient(90deg, var(--amber) 0%, var(--amber-light) 50%, transparent 100%);
-        }
-
+        main { flex: 1; max-width: 1080px; margin: 0 auto; padding: 2.5rem 2rem 4rem; width: 100%; }
+        .content-card { background: var(--white); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(13,27,42,0.06), 0 8px 32px rgba(13,27,42,0.04); position: relative; }
+        .content-card::before { content: ''; display: block; height: 4px; background: linear-gradient(90deg, var(--amber) 0%, var(--amber-light) 50%, transparent 100%); }
         .card-inner-padding { padding: 2.5rem 3rem; }
-
-        /* ── Headings ───────────────────────────────────────────────── */
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 2.1rem;
-            color: var(--navy);
-            line-height: 1.2;
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-rule {
-            width: 48px;
-            height: 4px;
-            background: var(--amber);
-            margin-bottom: 1.25rem;
-        }
-
-        .welcome-intro {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            max-width: 58ch;
-            margin-bottom: 2.5rem;
-        }
-
-        /* ── Math Example Blocks ────────────────────────────────────── */
-        .examples-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .math-example {
-            background: var(--chalk);
-            border: 1px solid var(--border);
-            padding: 1.5rem 1.5rem 1.5rem 1.75rem;
-            position: relative;
-            transition: box-shadow 0.2s, transform 0.2s;
-        }
-
-        .math-example:hover {
-            box-shadow: 0 6px 20px rgba(13,27,42,0.1);
-            transform: translateY(-2px);
-        }
-
-        .math-example::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--amber);
-        }
-
-        .math-label {
-            display: inline-block;
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--amber-dim);
-            background: var(--white);
-            border: 1px solid var(--border);
-            padding: 0.18rem 0.55rem;
-            margin-bottom: 0.85rem;
-        }
-
-        .math-example p {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-bottom: 0.6rem;
-        }
-
-        /* ── Staggered load animations ──────────────────────────────── */
-        @keyframes fade-up {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .math-example:nth-child(1) { animation: fade-up 0.4s 0.07s ease both; }
-        .math-example:nth-child(2) { animation: fade-up 0.4s 0.14s ease both; }
-        .math-example:nth-child(3) { animation: fade-up 0.4s 0.21s ease both; }
-
-        /* ════════════════════════════════════════════════════════════
-           LEGACY FLASHCARD / WORKSHEET SYSTEM
-           ════════════════════════════════════════════════════════════ */
-        .worksheet-container { max-width: 1400px; margin: 0 auto; }
-
-        .flashcard-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .flashcard { perspective: 1000px; cursor: pointer; height: 160px; position: relative; }
-
-        .card-inner {
-            position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d;
-            transition: transform 0.55s;
-        }
-
-        .flashcard.flipped .card-inner { transform: rotateY(180deg); }
-
-        .card-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden;
-            display: flex; align-items: center; justify-content: center;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            font-size: 0.875rem; text-align: center;
-        }
-
-        .card-face.question { background: var(--white); }
-        .card-face.answer   { background: #d1fae5; transform: rotateY(180deg); }
-
-        .std-btn {
-            margin-top: 1rem; margin-right: 0.5rem;
-            padding: 0.55rem 1.4rem;
-            background: var(--navy); color: var(--chalk);
-            border: none; cursor: pointer;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em;
-            transition: background 0.15s;
-        }
-
-        .std-btn:hover { background: var(--navy-light); }
-
-        /* ════════════════════════════════════════════════════════════
-           FOOTER
-           ════════════════════════════════════════════════════════════ */
-        footer {
-            background-color: var(--navy);
-            color: var(--chalk-muted);
-            border-top: 4px solid var(--amber);
-            margin-top: auto;
-        }
-
-        .footer-inner {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 3rem 2rem 2rem;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 2.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .footer-section h4 {
-            font-family: 'Playfair Display', serif;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--chalk);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--navy-border);
-        }
-
-        .footer-section p {
-            font-size: 0.82rem;
-            line-height: 2;
-            color: var(--chalk-muted);
-        }
-
-        .footer-section a { color: var(--amber); transition: color 0.15s; }
-        .footer-section a:hover { color: var(--amber-light); }
-
-        .patreon-btn {
-            display: inline-block;
-            margin-top: 0.75rem;
-            padding: 0.45rem 1.1rem;
-            background-color: #ff424d;
-            color: #ffffff !important;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border-radius: 4px;
-            letter-spacing: 0.02em;
-            transition: background-color 0.2s, transform 0.2s;
-        }
         
-        .patreon-btn:hover {
-            background-color: #e63b45;
-            transform: translateY(-1px);
-        }
+        h1 { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 2.1rem; color: var(--navy); line-height: 1.2; margin-bottom: 0.5rem; }
+        .welcome-rule { width: 48px; height: 4px; background: var(--amber); margin-bottom: 1.25rem; }
+        .welcome-intro { font-size: 0.95rem; color: var(--text-muted); max-width: 58ch; margin-bottom: 2.5rem; }
 
-        .footer-bottom {
-            border-top: 1px solid var(--navy-border);
-            padding-top: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            font-size: 0.775rem;
-            color: var(--chalk-muted);
-        }
+        /* ── Math Example Blocks (Restored from old_index) ─────────── */
+        .examples-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+        .math-example { background: var(--chalk); border: 1px solid var(--border); padding: 1.5rem 1.5rem 1.5rem 1.75rem; position: relative; transition: 0.2s; animation: fade-up 0.4s ease both; }
+        .math-example:hover { box-shadow: 0 6px 20px rgba(13,27,42,0.1); transform: translateY(-2px); }
+        .math-example::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--amber); }
+        .math-label { display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber-dim); background: var(--white); border: 1px solid var(--border); padding: 0.18rem 0.55rem; margin-bottom: 0.85rem; }
+        .math-example p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.6rem; }
 
-        .footer-amber { color: var(--amber); }
+        footer { background-color: var(--navy); color: var(--chalk-muted); border-top: 4px solid var(--amber); margin-top: auto; }
+        .footer-inner { max-width: 1280px; margin: 0 auto; padding: 3rem 2rem 2rem; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2.5rem; margin-bottom: 2.5rem; }
+        .footer-section h4 { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--chalk); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--navy-border); }
+        .footer-section p { font-size: 0.82rem; line-height: 2; color: var(--chalk-muted); }
+        .footer-section a { color: var(--amber); transition: 0.15s; }
+        .footer-section a:hover { color: var(--amber-light); }
+        .footer-bottom { border-top: 1px solid var(--navy-border); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem; }
 
-        /* ════════════════════════════════════════════════════════════
-           RESPONSIVE
-           ════════════════════════════════════════════════════════════ */
+        @keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
         @media (max-width: 768px) {
             .menu-toggle { display: flex; }
-
-            .nav-menu {
-                display: none;
-                flex-direction: column;
-                align-items: stretch;
-                position: absolute;
-                top: 100%;
-                left: 0; right: 0;
-                background-color: var(--navy-mid);
-                border-top: 1px solid var(--navy-border);
-                box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-                padding-bottom: 0.5rem;
-            }
-
+            .nav-menu { display: none; flex-direction: column; align-items: stretch; position: absolute; top: 100%; left: 0; right: 0; background-color: var(--navy-mid); border-top: 1px solid var(--navy-border); box-shadow: 0 16px 40px rgba(0,0,0,0.4); padding-bottom: 0.5rem; }
             .nav-menu.active { display: flex; }
-
             .nav-item { flex-direction: column; }
-
-            .nav-link {
-                padding: 0.9rem 1.5rem;
-                border-bottom: 1px solid var(--navy-border);
-                justify-content: space-between;
-            }
-
+            .nav-link { padding: 0.9rem 1.5rem; border-bottom: 1px solid var(--navy-border); justify-content: space-between; }
             .nav-link::after { display: none; }
-
-            .dropdown {
-                position: static;
-                display: none;
-                border-top: none;
-                border-radius: 0;
-                box-shadow: none;
-                background: var(--navy-light);
-                animation: none;
-                min-width: unset;
-            }
-
+            .dropdown { position: static; display: none; border-top: none; border-radius: 0; box-shadow: none; background: var(--navy-light); animation: none; min-width: unset; }
             .nav-item.mobile-open .dropdown { display: block; }
             .nav-item.mobile-open .nav-caret { transform: rotate(180deg); }
-
             .card-inner-padding { padding: 1.75rem 1.25rem; }
-            h1 { font-size: 1.65rem; }
-            .examples-grid { grid-template-columns: 1fr; }
-            .flashcard-grid { grid-template-columns: repeat(2, 1fr); }
             main { padding: 1.5rem 1rem 3rem; }
-        }
-
-        /* ════════════════════════════════════════════════════════════
-           PRINT
-           ════════════════════════════════════════════════════════════ */
-        @media print {
-            .no-print { display: none !important; }
-            .flashcard-grid { grid-template-columns: repeat(5, 1fr); page-break-inside: avoid; }
-            @page { size: A4 landscape; margin: 1cm; }
         }
     </style>
 </head>
-
 <body>
 
-    <!-- ══════════════════════════════════════════════════════════════
-         HEADER
-         ══════════════════════════════════════════════════════════════ -->
     <header class="no-print">
         <nav class="nav-container">
-
-            <!-- Wordmark -->
-            <div class="logo" onclick="loadHome()" role="button" tabindex="0" aria-label="Home">
+            <div class="logo" onclick="location.reload()">
                 <div class="logo-mark">∑</div>
                 <div class="logo-text">
                     <span class="logo-title">YAMA</span>
@@ -580,53 +135,29 @@
                 </div>
             </div>
 
-            <!-- Hamburger -->
             <button class="menu-toggle" id="mobile-menu-btn" aria-label="Toggle navigation">
                 <span></span><span></span><span></span>
             </button>
 
-            <!-- Desktop nav -->
             <ul class="nav-menu" id="main-nav">
-
-                <li class="nav-item">
-                    <a class="nav-link" tabindex="0">Number <span class="nav-caret">▾</span></a>
-                    <ul class="dropdown">
-                        <li><a href="#" class="dropdown-link" onclick="loadModule('metric_units'); return false;">Metric Units</a></li>
-                    </ul>
-                </li>
-                
                 <li class="nav-item">
                     <a class="nav-link" tabindex="0">Measurement <span class="nav-caret">▾</span></a>
                     <ul class="dropdown">
-                        <!-- Updated to use loadJSModule for modern area.js integration -->
-                        <li><a href="#" class="dropdown-link" onclick="loadJSModule('../module/area'); return false;">Area of Shapes</a></li>
+                        <li><a href="#" class="dropdown-link" onclick="loadJSModule('area_todel'); return false;">Area of Shapes</a></li>
+                        <li><a href="#" class="dropdown-link" onclick="loadJSModule('test'); return false;">Test Module</a></li>
                     </ul>
                 </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" tabindex="0">Level 1 <span class="nav-caret">▾</span></a>
-                    <ul class="dropdown">
-                    </ul>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" tabindex="0">Level 2 <span class="nav-caret">▾</span></a>
-                </li>
-
             </ul>
         </nav>
     </header>
 
-    <!-- ══════════════════════════════════════════════════════════════
-         MAIN — module slot
-         ══════════════════════════════════════════════════════════════ -->
     <main id="module-slot">
         <div class="content-card" id="home-card">
             <div class="card-inner-padding">
                 <h1>Welcome to YAMA</h1>
                 <div class="welcome-rule"></div>
                 <p class="welcome-intro" style="margin-bottom: 0.75rem;">A fun and free way to learn basic mathematics.</p>
-                <p class="welcome-intro">Select a topic from the navigation bar above to begin your lesson. All formulas are rendered with MathJax for professional clarity — on screen and in print.</p>
+                <p class="welcome-intro">Select a topic from the navigation bar above to begin your lesson. All formulas are rendered with MathJax for professional clarity.</p>
 
                 <div class="examples-grid">
                     <div class="math-example">
@@ -650,9 +181,6 @@
         </div>
     </main>
 
-    <!-- ══════════════════════════════════════════════════════════════
-         FOOTER
-         ══════════════════════════════════════════════════════════════ -->
     <footer class="no-print">
         <div class="footer-inner">
             <div class="footer-content">
@@ -670,25 +198,21 @@
             </div>
             <div class="footer-bottom">
                 <span>&copy; 2026 Sunil Bhave</span>
-                <span class="footer-amber">∑ Striving for Academic Excellence</span>
+                <span style="color: var(--amber);">∑ Striving for Academic Excellence</span>
             </div>
         </div>
     </footer>
 
-    <!-- ══════════════════════════════════════════════════════════════
-         SCRIPTS
-         ══════════════════════════════════════════════════════════════ -->
+    <script src="js/qs_fwk.js"></script>
+
     <script>
-        // ── Mobile menu ──────────────────────────────────────────────
+        // Mobile Menu Logic
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const mainNav   = document.getElementById('main-nav');
-
         mobileBtn.addEventListener('click', () => {
             const open = mainNav.classList.toggle('active');
             mobileBtn.classList.toggle('open', open);
         });
-
-        // Mobile accordion dropdowns
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 if (window.innerWidth > 768) return;
@@ -696,93 +220,24 @@
             });
         });
 
-        // Logo keyboard support
-        document.querySelector('.logo').addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') loadHome();
-        });
-
-        // ── Home ─────────────────────────────────────────────────────
-        function loadHome() {
-            location.reload();
-        }
-
-        // ── Legacy HTML Module loader ────────────────────────────────
-        function loadModule(name) {
-            const slot = document.getElementById('module-slot');
-
-            // Loading placeholder
-            slot.innerHTML = `
-                <div class="content-card">
-                    <div class="card-inner-padding" style="text-align:center;padding:5rem 2rem;color:var(--text-muted);">
-                        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--amber);margin-bottom:1rem;opacity:0.5;">∑</div>
-                        <p style="font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">Loading…</p>
-                    </div>
-                </div>`;
-
-            fetch(`modules/${name}.html`)
-                .then(r => {
-                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                    return r.text();
-                })
-                .then(html => {
-                    slot.innerHTML = html;
-                    initWorksheet();
-
-                    slot.querySelectorAll('script').forEach(oldScript => {
-                        const newScript = document.createElement('script');
-                        Array.from(oldScript.attributes).forEach(attr =>
-                            newScript.setAttribute(attr.name, attr.value)
-                        );
-                        newScript.textContent = oldScript.textContent;
-                        oldScript.parentNode.replaceChild(newScript, oldScript);
-                    });
-
-                    setTimeout(() => {
-                        if (typeof MathJax !== 'undefined') {
-                            MathJax.typesetPromise().catch(e => console.warn('MathJax:', e));
-                        }
-                    }, 100);
-                })
-                .catch(err => {
-                    slot.innerHTML = `
-                        <div class="content-card">
-                            <div class="card-inner-padding">
-                                <h1 style="font-size:1.3rem;color:#dc2626;">Module not found</h1>
-                                <div class="welcome-rule"></div>
-                                <p style="color:var(--text-muted);font-size:0.9rem;">Could not load <strong>${name}.html</strong> — ${err.message}</p>
-                            </div>
-                        </div>`;
-                });
-
-            mainNav.classList.remove('active');
-            mobileBtn.classList.remove('open');
-        }
-
-        // ── JS Module loader (For new ES6 architecture) ──────────────
+        // ES6 Module Loader (Thin Contract Architecture)
         function loadJSModule(name) {
             const slot = document.getElementById('module-slot');
-
-            // Loading placeholder
+            
             slot.innerHTML = `
                 <div class="content-card">
                     <div class="card-inner-padding" style="text-align:center;padding:5rem 2rem;color:var(--text-muted);">
-                        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--amber);margin-bottom:1rem;opacity:0.5;">∑</div>
-                        <p style="font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">Loading…</p>
+                        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--amber);margin-bottom:1rem;">∑</div>
+                        <p style="font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">Loading Module…</p>
                     </div>
                 </div>`;
 
-            // Dynamically import the ES6 module
-            import(`./modules/${name}.js`)
+            const moduleUrl = new URL('./modules/' + name + '.js', window.location.href).href;
+
+            import(moduleUrl)
                 .then(module => {
-                    // Create a fresh container for the module to attach to
-                    slot.innerHTML = '<div id="module-container" style="width:100%;"></div>';
-                    
-                    // Call the exported loadModule function
-                    if (module.loadModule) {
-                        module.loadModule('module-container');
-                    } else if (module.default) {
-                        module.default('module-container');
-                    }
+                    slot.innerHTML = `<div class="content-card"><div class="card-inner-padding" id="module-container"></div></div>`;
+                    QsetFW.init(module.default, document.getElementById('module-container'));
                 })
                 .catch(err => {
                     slot.innerHTML = `
@@ -790,69 +245,17 @@
                             <div class="card-inner-padding">
                                 <h1 style="font-size:1.3rem;color:#dc2626;">Module not found</h1>
                                 <div class="welcome-rule"></div>
-                                <p style="color:var(--text-muted);font-size:0.9rem;">Could not load <strong>${name}.js</strong> — ${err.message}</p>
+                                <p style="color:var(--text-muted);font-size:0.9rem;">Could not load <strong>${name}.js</strong>.</p>
+                                <div style="background:#fee2e2; border:1px solid #fca5a5; padding:1.25rem; border-radius:6px; font-size:0.85rem; color:#991b1b; text-align:left; margin-top: 1rem;">
+                                    <strong>Error:</strong> ${err.message}
+                                </div>
                             </div>
                         </div>`;
                 });
 
-            // Close mobile menu
             mainNav.classList.remove('active');
             mobileBtn.classList.remove('open');
         }
-
-        // ── Legacy Worksheet / Flashcard system ──────────────────────
-        const Worksheet = {
-            generate() {
-                const container = document.querySelector('.module-container');
-                const module    = container?.dataset.module || 'generic';
-                const questions = this.getQuestions(module);
-
-                document.getElementById('module-slot').innerHTML = `
-                    <div class="content-card">
-                        <div class="card-inner-padding">
-                            <h1 style="font-size:1.5rem;">${module.replace(/([A-Z])/g, ' $1').trim()} Worksheet</h1>
-                            <div class="welcome-rule"></div>
-                            <div class="flashcard-grid">
-                                ${questions.map(q => `
-                                    <div class="flashcard" onclick="Worksheet.flip(this)">
-                                        <div class="card-inner">
-                                            <div class="card-face question">${q.question}</div>
-                                            <div class="card-face answer">${q.answer}</div>
-                                        </div>
-                                    </div>`).join('')}
-                            </div>
-                            <button class="std-btn" onclick="Worksheet.reset()">Reset</button>
-                            <button class="std-btn" onclick="window.print()">🖨 Print</button>
-                        </div>
-                    </div>`;
-                if (typeof MathJax !== 'undefined') MathJax.typesetPromise().catch(e => console.warn('MathJax:', e));
-            },
-
-            flip(card) { card.classList.toggle('flipped'); },
-            reset()    { document.querySelectorAll('.flashcard').forEach(c => c.classList.remove('flipped')); },
-
-            getQuestions(module) {
-                const data = {
-                    ScientificNotation: [
-                        { question: 'Write 4500 in scientific notation',                    answer: '\\(4.5 \\times 10^3\\)' },
-                        { question: 'Write 0.00067 in scientific notation',                 answer: '\\(6.7 \\times 10^{-4}\\)' },
-                        { question: 'Write \\(3.2 \\times 10^4\\) as an ordinary number',  answer: '32 000' },
-                        { question: 'Write \\(5.1 \\times 10^{-3}\\) as an ordinary number', answer: '0.0051' },
-                        { question: 'Write 0.000045 in scientific notation',                answer: '\\(4.5 \\times 10^{-5}\\)' },
-                    ],
-                    generic: Array(10).fill({ question: 'Sample Question', answer: 'Sample Answer' })
-                };
-                return data[module] || data.generic;
-            }
-        };
-
-        // Wire up .std-worksheet buttons that modules may inject
-        function initWorksheet() {
-            document.querySelectorAll('.std-worksheet').forEach(btn => {
-                btn.onclick = () => Worksheet.generate();
-            });
-        }
     </script>
-
 </body>
 </html>
