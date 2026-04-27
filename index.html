@@ -10,6 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+			window.MathJax = {
+					tex: {
+						inlineMath: [['$', '$'], ['\\(', '\\)']]
+					}
+			};
+	</script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
@@ -136,14 +143,16 @@
                     <a class="nav-link" tabindex="0">Year 9-10 <span class="nav-caret">▾</span></a>
                     <ul class="dropdown">
                         <li><a href="#" class="dropdown-link" onclick="handleModuleClick(this, 'area1')">Measurement</a></li>
+                        <li><a href="#" class="dropdown-link" onclick="handleModuleClick(this, 'pytha-claude')">Pythagoras</a></li>
                         <li><a href="#" class="dropdown-link" onclick="handleModuleClick(this, 'test')">Test Module</a></li>
                     </ul>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" tabindex="0">Numeracy <span class="nav-caret">▾</span></a>
-                    <ul class="dropdown"><li><span class="dropdown-link" style="opacity:0.5;">Coming Soon</span></li></ul>
-                </li>
+                    <ul class="dropdown">
+                        <li><a href="#" class="dropdown-link" onclick="handleModuleClick(this, 'numeracy')">Explain...</a></li>
+		    </ul>
 
                 <li class="nav-item">
                     <a class="nav-link" tabindex="0">Level 1 <span class="nav-caret">▾</span></a>
