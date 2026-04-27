@@ -32,7 +32,6 @@
             --text-muted:  #5a6a7a;
             --border:      #ddd8ce;
             --accent-blue: #e8a020;
-            --border-color:#ddd8ce;
         }
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -50,8 +49,8 @@
         ul { list-style: none; }
 
         header { background-color: var(--navy); color: var(--chalk); position: sticky; top: 0; z-index: 1000; border-top: 4px solid var(--amber); box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
-        .nav-container { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: stretch; padding: 0 2rem; min-height: 58px; }
-        .logo { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; cursor: pointer; }
+        .nav-container { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: stretch; padding: 0 1rem; min-height: 58px; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; cursor: pointer; flex-shrink: 0; }
         .logo-mark { width: 38px; height: 38px; background: var(--amber); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.25rem; color: var(--navy); }
         .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
         .logo-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.05rem; letter-spacing: 0.02em; color: var(--chalk); }
@@ -59,26 +58,28 @@
 
         .nav-menu { display: flex; align-items: stretch; }
         .nav-item { position: relative; display: flex; align-items: stretch; }
-        .nav-link { display: flex; align-items: center; gap: 0.4rem; padding: 0 1.25rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--chalk-muted); cursor: pointer; white-space: nowrap; transition: color 0.2s; position: relative; }
-        .nav-link::after { content: ''; position: absolute; bottom: 0; left: 1.25rem; right: 1.25rem; height: 3px; background: var(--amber); transform: scaleX(0); transform-origin: left; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
-        .nav-item:hover .nav-link { color: var(--white); }
-        .nav-item:hover .nav-link::after { transform: scaleX(1); }
-        .nav-caret { font-size: 0.55rem; opacity: 0.55; transition: transform 0.2s; margin-top: 1px; }
+        
+        /* Reduced horizontal padding for menu density */
+        .nav-link { display: flex; align-items: center; gap: 0.35rem; padding: 0 0.85rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--chalk-muted); cursor: pointer; white-space: nowrap; transition: color 0.2s; position: relative; }
+        .nav-link::after { content: ''; position: absolute; bottom: 0; left: 0.85rem; right: 0.85rem; height: 3px; background: var(--amber); transform: scaleX(0); transform-origin: left; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+        
+        /* Active Class Styles */
+        .nav-item:hover .nav-link, .nav-link.active-link { color: var(--white); }
+        .nav-item:hover .nav-link::after, .nav-link.active-link::after { transform: scaleX(1); }
+        
+        .nav-caret { font-size: 0.5rem; opacity: 0.55; transition: transform 0.2s; margin-top: 1px; }
         .nav-item:hover .nav-caret { transform: rotate(180deg); }
 
-        .dropdown { display: none; position: absolute; top: 100%; left: 0; background-color: var(--navy-mid); min-width: 250px; box-shadow: 0 20px 48px rgba(0,0,0,0.45); border-top: 3px solid var(--amber); border-radius: 0 0 4px 4px; overflow: hidden; }
+        .dropdown { display: none; position: absolute; top: 100%; left: 0; background-color: var(--navy-mid); min-width: 200px; box-shadow: 0 20px 48px rgba(0,0,0,0.45); border-top: 3px solid var(--amber); border-radius: 0 0 4px 4px; overflow: hidden; }
         .nav-item:hover .dropdown { display: block; animation: dd-appear 0.18s ease; }
         @keyframes dd-appear { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .dropdown-link { padding: 0.85rem 1.25rem 0.85rem 1rem; display: flex; align-items: center; font-size: 0.85rem; font-weight: 500; color: var(--chalk-dim); border-bottom: 1px solid var(--navy-border); transition: 0.15s; }
-        .dropdown-link::before { content: ''; display: inline-block; width: 0; height: 2px; background: var(--amber); vertical-align: middle; transition: width 0.2s, margin-right 0.2s; }
+        
+        .dropdown-link { padding: 0.85rem 1.25rem 0.85rem 1rem; display: flex; align-items: center; font-size: 0.85rem; font-weight: 500; color: var(--chalk-dim); border-bottom: 1px solid var(--navy-border); transition: 0.15s; cursor: pointer; }
         .dropdown-link:hover { background-color: var(--navy-light); color: var(--white); padding-left: 1.5rem; }
-        .dropdown-link:hover::before { width: 14px; margin-right: 0.5rem; }
+        .dropdown-link.active-sub { color: var(--amber); font-weight: 700; background-color: var(--navy-light); }
 
         .menu-toggle { display: none; flex-direction: column; justify-content: center; gap: 5px; cursor: pointer; padding: 0.5rem; background: none; border: none; margin-left: auto; }
         .menu-toggle span { display: block; width: 22px; height: 2px; background-color: var(--chalk); border-radius: 2px; transition: transform 0.28s, opacity 0.28s; }
-        .menu-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .menu-toggle.open span:nth-child(2) { opacity: 0; }
-        .menu-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
         main { flex: 1; max-width: 1080px; margin: 0 auto; padding: 2.5rem 2rem 4rem; width: 100%; }
         .content-card { background: var(--white); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(13,27,42,0.06), 0 8px 32px rgba(13,27,42,0.04); position: relative; }
@@ -89,37 +90,28 @@
         .welcome-rule { width: 48px; height: 4px; background: var(--amber); margin-bottom: 1.25rem; }
         .welcome-intro { font-size: 0.95rem; color: var(--text-muted); max-width: 58ch; margin-bottom: 2.5rem; }
 
-        /* ── Math Example Blocks (Restored from old_index) ─────────── */
         .examples-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
         .math-example { background: var(--chalk); border: 1px solid var(--border); padding: 1.5rem 1.5rem 1.5rem 1.75rem; position: relative; transition: 0.2s; animation: fade-up 0.4s ease both; }
         .math-example:hover { box-shadow: 0 6px 20px rgba(13,27,42,0.1); transform: translateY(-2px); }
         .math-example::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--amber); }
         .math-label { display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber-dim); background: var(--white); border: 1px solid var(--border); padding: 0.18rem 0.55rem; margin-bottom: 0.85rem; }
-        .math-example p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.6rem; }
 
         footer { background-color: var(--navy); color: var(--chalk-muted); border-top: 4px solid var(--amber); margin-top: auto; }
         .footer-inner { max-width: 1280px; margin: 0 auto; padding: 3rem 2rem 2rem; }
-        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2.5rem; margin-bottom: 2.5rem; }
-        .footer-section h4 { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--chalk); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--navy-border); }
-        .footer-section p { font-size: 0.82rem; line-height: 2; color: var(--chalk-muted); }
-        .footer-section a { color: var(--amber); transition: 0.15s; }
-        .footer-section a:hover { color: var(--amber-light); }
         .footer-bottom { border-top: 1px solid var(--navy-border); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem; }
 
-        @keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 1024px) {
+            .nav-link { padding: 0 0.5rem; font-size: 0.7rem; }
+        }
 
         @media (max-width: 768px) {
             .menu-toggle { display: flex; }
-            .nav-menu { display: none; flex-direction: column; align-items: stretch; position: absolute; top: 100%; left: 0; right: 0; background-color: var(--navy-mid); border-top: 1px solid var(--navy-border); box-shadow: 0 16px 40px rgba(0,0,0,0.4); padding-bottom: 0.5rem; }
+            .nav-menu { display: none; flex-direction: column; align-items: stretch; position: absolute; top: 100%; left: 0; right: 0; background-color: var(--navy-mid); border-top: 1px solid var(--navy-border); padding-bottom: 0.5rem; }
             .nav-menu.active { display: flex; }
             .nav-item { flex-direction: column; }
             .nav-link { padding: 0.9rem 1.5rem; border-bottom: 1px solid var(--navy-border); justify-content: space-between; }
-            .nav-link::after { display: none; }
-            .dropdown { position: static; display: none; border-top: none; border-radius: 0; box-shadow: none; background: var(--navy-light); animation: none; min-width: unset; }
+            .dropdown { position: static; display: none; border-top: none; background: var(--navy-light); box-shadow: none; }
             .nav-item.mobile-open .dropdown { display: block; }
-            .nav-item.mobile-open .nav-caret { transform: rotate(180deg); }
-            .card-inner-padding { padding: 1.75rem 1.25rem; }
-            main { padding: 1.5rem 1rem 3rem; }
         }
     </style>
 </head>
@@ -141,11 +133,31 @@
 
             <ul class="nav-menu" id="main-nav">
                 <li class="nav-item">
-                    <a class="nav-link" tabindex="0">Measurement <span class="nav-caret">▾</span></a>
+                    <a class="nav-link" tabindex="0">Year 9-10 <span class="nav-caret">▾</span></a>
                     <ul class="dropdown">
-                        <li><a href="#" class="dropdown-link" onclick="loadJSModule('area_todel'); return false;">Area of Shapes</a></li>
-                        <li><a href="#" class="dropdown-link" onclick="loadJSModule('test'); return false;">Test Module</a></li>
+                        <li><a href="#" class="dropdown-link" onclick="handleModuleClick(this, 'area1')">Measurement</a></li>
+                        <li><a href="#" class="dropdown-link" onclick="handleModuleClick(this, 'test')">Test Module</a></li>
                     </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" tabindex="0">Numeracy <span class="nav-caret">▾</span></a>
+                    <ul class="dropdown"><li><span class="dropdown-link" style="opacity:0.5;">Coming Soon</span></li></ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" tabindex="0">Level 1 <span class="nav-caret">▾</span></a>
+                    <ul class="dropdown"><li><span class="dropdown-link" style="opacity:0.5;">Coming Soon</span></li></ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" tabindex="0">Level 2 <span class="nav-caret">▾</span></a>
+                    <ul class="dropdown"><li><span class="dropdown-link" style="opacity:0.5;">Coming Soon</span></li></ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" tabindex="0">Level 3 <span class="nav-caret">▾</span></a>
+                    <ul class="dropdown"><li><span class="dropdown-link" style="opacity:0.5;">Coming Soon</span></li></ul>
                 </li>
             </ul>
         </nav>
@@ -157,7 +169,7 @@
                 <h1>Welcome to YAMA</h1>
                 <div class="welcome-rule"></div>
                 <p class="welcome-intro" style="margin-bottom: 0.75rem;">A fun and free way to learn basic mathematics.</p>
-                <p class="welcome-intro">Select a topic from the navigation bar above to begin your lesson. All formulas are rendered with MathJax for professional clarity.</p>
+                <p class="welcome-intro">Select a topic from the navigation bar above to begin your lesson.</p>
 
                 <div class="examples-grid">
                     <div class="math-example">
@@ -165,15 +177,13 @@
                         <p>For any equation \(ax^2 + bx + c = 0\):</p>
                         $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
                     </div>
-
                     <div class="math-example">
                         <span class="math-label">Simultaneous Equations</span>
-                        <p>Given \(2x + 3y = 12\) and \(x - y = 1\), substitution into the first equation yields a unique solution for both \(x\) and \(y\).</p>
+                        <p>Given \(2x + 3y = 12\) and \(x - y = 1\).</p>
                     </div>
-
                     <div class="math-example">
                         <span class="math-label">Law of Cosines</span>
-                        <p>Finding an unknown side in any triangle:</p>
+                        <p>Finding an unknown side:</p>
                         $$c^2 = a^2 + b^2 - 2ab\cos(C)$$
                     </div>
                 </div>
@@ -183,19 +193,6 @@
 
     <footer class="no-print">
         <div class="footer-inner">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Contact</h4>
-                    <p>
-                        <strong>Sunil Bhave</strong><br>
-                        <a href="mailto:sunil.bhave@gmail.com">sunil.bhave@gmail.com</a><br>
-                    </p>
-                </div>
-                <div class="footer-section">
-                    <h4>System</h4>
-                    <p>Version 1.0.5<br>MathJax v3.2<br>Vanilla JS / CSS3</p>
-                </div>
-            </div>
             <div class="footer-bottom">
                 <span>&copy; 2026 Sunil Bhave</span>
                 <span style="color: var(--amber);">∑ Striving for Academic Excellence</span>
@@ -206,52 +203,42 @@
     <script src="js/qs_fwk.js"></script>
 
     <script>
-        // Mobile Menu Logic
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const mainNav   = document.getElementById('main-nav');
+        
         mobileBtn.addEventListener('click', () => {
             const open = mainNav.classList.toggle('active');
             mobileBtn.classList.toggle('open', open);
         });
+
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
-                if (window.innerWidth > 768) return;
-                link.closest('.nav-item').classList.toggle('mobile-open');
+                if (window.innerWidth <= 768) link.closest('.nav-item').classList.toggle('mobile-open');
             });
         });
 
-        // ES6 Module Loader (Thin Contract Architecture)
+        function handleModuleClick(element, moduleName) {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active-link'));
+            document.querySelectorAll('.dropdown-link').forEach(l => l.classList.remove('active-sub'));
+
+            const topLink = element.closest('.nav-item').querySelector('.nav-link');
+            topLink.classList.add('active-link');
+            element.classList.add('active-sub');
+
+            loadJSModule(moduleName);
+        }
+
         function loadJSModule(name) {
             const slot = document.getElementById('module-slot');
-            
-            slot.innerHTML = `
-                <div class="content-card">
-                    <div class="card-inner-padding" style="text-align:center;padding:5rem 2rem;color:var(--text-muted);">
-                        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--amber);margin-bottom:1rem;">∑</div>
-                        <p style="font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">Loading Module…</p>
-                    </div>
-                </div>`;
+            slot.innerHTML = `<div class="content-card"><div class="card-inner-padding" style="text-align:center;padding:5rem 2rem;">Loading Module...</div></div>`;
 
             const moduleUrl = new URL('./modules/' + name + '.js', window.location.href).href;
-
-            import(moduleUrl)
-                .then(module => {
-                    slot.innerHTML = `<div class="content-card"><div class="card-inner-padding" id="module-container"></div></div>`;
-                    QsetFW.init(module.default, document.getElementById('module-container'));
-                })
-                .catch(err => {
-                    slot.innerHTML = `
-                        <div class="content-card">
-                            <div class="card-inner-padding">
-                                <h1 style="font-size:1.3rem;color:#dc2626;">Module not found</h1>
-                                <div class="welcome-rule"></div>
-                                <p style="color:var(--text-muted);font-size:0.9rem;">Could not load <strong>${name}.js</strong>.</p>
-                                <div style="background:#fee2e2; border:1px solid #fca5a5; padding:1.25rem; border-radius:6px; font-size:0.85rem; color:#991b1b; text-align:left; margin-top: 1rem;">
-                                    <strong>Error:</strong> ${err.message}
-                                </div>
-                            </div>
-                        </div>`;
-                });
+            import(moduleUrl).then(module => {
+                slot.innerHTML = `<div class="content-card"><div class="card-inner-padding" id="module-container"></div></div>`;
+                QsetFW.init(module.default, document.getElementById('module-container'));
+            }).catch(err => {
+                slot.innerHTML = `<div class="content-card"><div class="card-inner-padding"><h1>Module not found</h1><p>${err.message}</p></div></div>`;
+            });
 
             mainNav.classList.remove('active');
             mobileBtn.classList.remove('open');
