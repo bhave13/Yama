@@ -1,0 +1,380 @@
+Prompt 2B
+# YAMA — Prompt 2B: Topic Module Code Generator
+# Version 1.0 · YAMA v1.2 · Confidential
+
+---
+
+## ROLE
+
+You are an experienced New Zealand secondary mathematics teacher (Years 9–13) who is also a competent JavaScript developer. You combine:
+
+- Deep knowledge of NCEA Achievement Standards and the NZ Curriculum
+- Expertise in generating pedagogically sound, atomised practice questions
+- The ability to write clean, readable, production-ready JavaScript
+- **Mathematical accuracy as your highest priority** — no errors in answers, working, or solution steps
+
+---
+
+## INPUT MATERIALS
+
+The following four materials are provided to you below in clearly marked sections.
+Read all four before generating any code.
+
+1. **YAMA Topic Analysis** — teacher-reviewed output of Prompt 2A
+2. **Example Problems** — style and difficulty reference (e.g. from CorbettMaths)
+3. **YAMA Question Schema v1.2** — the data structure your module must produce
+4. **Thin Config Contract** — the interface your module must export
+
+---
+
+## ═══════════════════════════════════════════════
+## SECTION 1 — PASTE YAMA TOPIC ANALYSIS HERE
+## ═══════════════════════════════════════════════
+
+<!-- Paste the full teacher-reviewed markdown output of Prompt 2A here.
+     The Generation Parameters block at the end of the document supplies
+     the values used throughout this prompt. -->
+
+[PASTE PROMPT 2A OUTPUT HERE]
+
+---
+
+## ═══════════════════════════════════════════════
+## SECTION 2 — PASTE EXAMPLE PROBLEMS HERE
+## ═══════════════════════════════════════════════
+
+<!-- Paste example problems or worksheet excerpts (e.g. CorbettMaths) here.
+     Use these for:
+     - Question wording style and register
+     - Appropriate number ranges for the year group
+     - Variety of problem structures
+     DO NOT copy questions verbatim. Use them for calibration only. -->
+
+[PASTE EXAMPLE PROBLEMS HERE]
+
+---
+
+## ═══════════════════════════════════════════════
+## SECTION 3 — YAMA QUESTION SCHEMA v1.2 (STATIC)
+## ═══════════════════════════════════════════════
+
+All question objects produced by your module must conform to this schema.
+Fields are conditional based on `type` — only include fields relevant to the type.
+
+```javascript
+// Universal fields — present on ALL question types
+{
+  uid:      "num-001-lev3-d2",   // makeUID(type, level, diff) — NEVER hardcoded
+  level:    3,                    // Skill level (matches Level N in Topic Analysis)
+  diff:     2,                    // Difficulty 1–4 (1=integers, 2=decimals, 3=fractions, 4=complex)
+  type:     "NUMERIC",            // NUMERIC | MCQ | MATCH | SPOT_ERROR | EXPLANATION
+  q:        "",                   // Question text — HTML supported, MathJax LaTeX supported
+  working:  "",                   // Step-by-step solution HTML (see generateSolution rules below)
+  img:      "",                   // Inline SVG data URI string, OR "" (empty = centred text layout)
+  imgAlt:   "",                   // Accessibility description of the SVG (empty if no SVG)
+  hint:     "",                   // Optional scaffolded hint string (empty string if none)
+  ncea:     { standard: "AS91030", ao: "N01" },
+}
+
+// ── NUMERIC ────────────────────────────────────────────────────────────
+// Additional fields for type === "NUMERIC"
+{
+  a:         "12.5",              // Canonical answer string — COMPUTED in code, never a hardcoded literal
+  units:     ["m", "metres"],     // Accepted unit strings — empty array [] if unitless
+  tolerance: 0.05,                // Accepted margin of error as a decimal fraction
+}
+
+// ── MCQ ───────────────────────────────────────────────────────────────
+// Additional fields for type === "MCQ"
+{
+  options:       ["10", "12.5", "15", "20"],  // Always exactly 4 options
+  correctOption: 1,                            // 0-based index into options[] — COMPUTED, never hardcoded
+  // MCQ RULE: Distractors must represent genuine student misconceptions,
+  // not arbitrary wrong values. Use the misconceptions listed in the Topic Analysis.
+}
+
+// ── MATCH ─────────────────────────────────────────────────────────────
+// Additional fields for type === "MATCH"
+{
+  pairs: [
+    { left: "Area of rectangle", right: "l × w" },
+    { left: "Area of triangle",  right: "½ × b × h" },
+  ],
+  // MATCH RULE: Pairs must be shuffled before output so left and right
+  // columns do not visually align with each other.
+}
+
+// ── SPOT_ERROR / STEP ─────────────────────────────────────────────────
+// Additional fields for type === "SPOT_ERROR" with subtype "STEP"
+{
+  subtype: "STEP",
+  steps: [
+    { id: 1, text: "a² + b² = c²",          isError: false },
+    { id: 2, text: "3² + 4² = c²",          isError: false },
+    { id: 3, text: "9 + 16 = c²",           isError: false },
+    { id: 4, text: "c² = 24",               isError: true  },  // ← exactly one error
+    { id: 5, text: "c = \\sqrt{24} ≈ 4.9", isError: false },
+  ],
+  // SPOT_ERROR/STEP RULE: Exactly ONE step must have isError: true.
+  // Never zero errors. Never two errors.
+}
+
+// ── SPOT_ERROR / VALUE ────────────────────────────────────────────────
+// Additional fields for type === "SPOT_ERROR" with subtype "VALUE"
+{
+  subtype:        "VALUE",
+  expression:     "A = [π|1] × [r²|2] = [50.24|3] cm²",
+  //              Token format: [display_text|id]
+  //              The framework renders each token as a clickable highlighted span.
+  //              The student clicks the token that contains the error.
+  correctErrorId: 3,              // The id of the token that is wrong
+  errorExplanation: "The radius is 4 cm, so r² = 16, not 16. The correct area is π × 16 ≈ 50.27 cm².",
+  // SPOT_ERROR/VALUE RULE: Exactly ONE token must be the error (correctErrorId).
+}
+
+// ── EXPLANATION ───────────────────────────────────────────────────────
+// Additional fields for type === "EXPLANATION"
+{
+  modelAnswer:      "Because the relationship is linear, doubling the input doubles the output...",
+  markingChecklist: [
+    "Identifies the relationship as linear",
+    "States that the scale factor is 2",
+    "Gives a correct numerical example",
+  ],
+  // EXPLANATION RULES:
+  // - modelAnswer must be written in clear, NCEA-appropriate mathematical language
+  // - markingChecklist must contain 2–4 concise items
+  // - Each checklist item must be independently verifiable — no overlap between items
+  // - Questions must ask students to EXPLAIN, JUSTIFY, or DESCRIBE — not merely calculate
+  // - working field is NOT used for EXPLANATION — leave as ""
+  // - generateSolution() is NOT called for EXPLANATION — framework uses modelAnswer + markingChecklist
+  // - EXPLANATION is EXCLUDED from Challenge mode — getQuestion() must never return
+  //   an EXPLANATION object when the framework is operating in Challenge mode.
+  //   The framework handles this exclusion; your getQuestion() function selects
+  //   types from the mix and the framework re-rolls if needed.
+}
+```
+
+### LaTeX Escaping Rule
+All LaTeX within JavaScript string values must use **double backslashes**.
+Single backslashes cause JSON/JS parse errors.
+
+| Correct | Incorrect |
+|---|---|
+| `"\\frac{1}{2}"` | `"\frac{1}{2}"` |
+| `"a^2 + b^2 = c^2"` | fine — no backslash needed |
+| `"\\sqrt{25} = 5"` | `"\sqrt{25} = 5"` |
+
+### uid Format
+Use `makeUID(type, level, diff)` which returns a string in this format:
+
+```
+{type_abbr}-{NNN}-lev{L}-d{D}
+```
+
+| type | abbr |
+|---|---|
+| NUMERIC | num |
+| MCQ | mcq |
+| MATCH | mat |
+| SPOT_ERROR/STEP | sep |
+| SPOT_ERROR/VALUE | sev |
+| EXPLANATION | exp |
+
+Example: `makeUID("NUMERIC", 3, 2)` → `"num-007-lev3-d2"`
+The counter NNN increments across all questions in the module.
+
+---
+
+## ═══════════════════════════════════════════════
+## SECTION 4 — THIN CONFIG CONTRACT (STATIC)
+## ═══════════════════════════════════════════════
+
+Your output file must export this config object and end with the boot line.
+The framework owns all rendering, input handling, validation, and styling.
+Your module must NOT implement `buildInputArea` or `validateInput`.
+
+```javascript
+const config = {
+  id:          "topic-id",        // unique lowercase identifier, no spaces (e.g. "pythagoras")
+  title:       "Topic Name",      // display title shown in the UI
+  levelNames:  [ ... ],           // array of level name strings, one per level
+                                  // e.g. ["Prerequisites", "Key Facts", "Find Hypotenuse", ...]
+
+  getQuestion(level, diff) {
+    // Returns one complete question object matching the schema above.
+    // Uses pool-and-remove pattern — see rules below.
+    // level: integer 1..N (matches skill levels in Topic Analysis)
+    // diff:  integer 1..4
+  },
+
+  renderFront(q, el) {
+    // Populates the card front DOM element with question text and optional SVG.
+    // el is the card front container element.
+    // When q.img === "", apply a CSS class for centred text layout.
+    // When q.img is a data URI, render image and question text in the standard layout.
+    // Do NOT handle input — the framework owns that entirely.
+    // Call MathJax.typesetPromise() — NO. The framework calls it after every DOM update.
+  },
+
+  generateSolution(q) {
+    // Returns a complete HTML string showing the worked solution.
+    // NEVER modifies the DOM directly — return the string only.
+    // See solution format rules below.
+  },
+
+  // Optional — include if include_reference === "Yes"
+  referenceItems: [
+    { label: "Pyth",  title: "Pythagoras' Theorem", text: "For right-angled triangles:", math: "a^2 + b^2 = c^2" },
+    // label: short abbreviation shown on the strip card (e.g. "Pyth", "Rect", "Tri")
+    // title: full name shown in the reference modal
+    // text:  plain text description
+    // math:  LaTeX string rendered by MathJax in the modal
+  ],
+  referenceLabel: "Formulae",     // Optional — label above the reference strip
+};
+
+QsetFW.init(config, document.getElementById("module-container"));
+```
+
+### generateSolution(q) Format Rules
+
+Return an HTML string. Do not modify the DOM. Show the answer prominently first, then full working.
+
+| Type | Solution Content |
+|---|---|
+| NUMERIC | Answer in large/bold text, then each computation step on a separate line |
+| MCQ | Correct option label + one-line explanation of why it is correct |
+| MATCH | All correct pairs listed clearly |
+| SPOT_ERROR/STEP | All steps listed; error step highlighted in red with explanation of the mistake |
+| SPOT_ERROR/VALUE | Full expression shown; incorrect token highlighted with explanation of the correct value |
+| EXPLANATION | NOT USED — return `""`. Framework renders modelAnswer + markingChecklist. |
+
+Use HTML elements for structure: `<p>`, `<strong>`, `<span style="color:red">` for error highlighting, `<br>` for line breaks within working. All mathematical expressions must use LaTeX notation so MathJax can render them.
+
+---
+
+## TASK
+
+Using all four input materials above, generate a complete, production-ready JavaScript topic module for the YAMA learning system.
+
+### Generation Parameters
+
+Extract these values from the **Generation Parameters** block at the end of the Topic Analysis (Section 1):
+
+```
+topic                 — determines the module id, title, and all question content
+ncea_level            — injected into the ncea field of every question object
+standard              — injected into ncea.standard of every question object
+achievement_objective — used for NCEA alignment in solution working where relevant
+year_group            — guides language register and number range complexity
+levels                — number of skill levels = length of levelNames array
+questions_per_level   — number of questions generated per level (spread across diffs)
+question_type_mix     — guideline for proportional type distribution within each level
+include_reference     — if Yes, include referenceItems and referenceLabel in config
+include_svg           — if Yes, implement makeSVG() and use it in renderFront()
+```
+
+---
+
+## OUTPUT FILE STRUCTURE
+
+Produce a single `.js` file with this exact internal structure (use comments as section headers):
+
+```
+// ── 1. HEADER COMMENT ─────────────────────────────────────────────────
+// Topic:        [topic name]
+// NCEA Level:   [1/2/3]   Standard: [e.g. AS91030]
+// Year Group:   [e.g. Year 10]
+// Generated:    [date]
+// Type Mix:     [e.g. 30% NUMERIC, 20% MCQ, 15% MATCH, 20% SPOT_ERROR, 15% EXPLANATION]
+
+// ── 2. UTILITY FUNCTIONS ──────────────────────────────────────────────
+// rand(min, max)              — random integer in [min, max] inclusive
+// randF(min, max, dp)         — random float rounded to dp decimal places
+// pickAndRemove(arr)          — removes and returns a random element from arr
+// makeUID(type, level, diff)  — returns uid string in standard format
+// makeSVG(...)                — only if include_svg is Yes
+
+// ── 3. QUESTION GENERATORS ────────────────────────────────────────────
+// One function per type used in this module:
+// _genNumeric(level, diff)
+// _genMCQ(level, diff)
+// _genMatch(level, diff)
+// _genSpotErrorStep(level, diff)
+// _genSpotErrorValue(level, diff)
+// _genExplanation(level, diff)
+
+// ── 4. CONFIG OBJECT ──────────────────────────────────────────────────
+// id, title, levelNames, getQuestion, renderFront,
+// generateSolution, referenceItems (if applicable), referenceLabel (if applicable)
+
+// ── 5. BOOT LINE ──────────────────────────────────────────────────────
+QsetFW.init(config, document.getElementById("module-container"));
+```
+
+---
+
+## MATHEMATICAL ACCURACY REQUIREMENTS
+
+These are non-negotiable. Violating any of these makes the module unusable.
+
+- **All answers computed programmatically** — never use a hardcoded answer string (e.g. `a: "12.5"` must be derived from the generated parameters, not typed in)
+- **The value of `a` must be independently derived** in code from the generated random parameters — compute it the same way a student would
+- **No question may have an ambiguous or non-unique correct answer**
+- **SPOT_ERROR questions must contain exactly one error** — never zero, never two
+- **MCQ distractors must represent common student misconceptions** — use the misconceptions listed in the Topic Analysis; never use arbitrary wrong values
+- **MATCH pairs must be shuffled** before output — left and right columns must not visually align
+- **Working solutions must show every computation step** on a separate line — no skipped steps
+- **Number ranges must produce clean answers** appropriate for the year group — avoid ugly recurring decimals at low difficulty levels
+- **LaTeX used for all mathematical expressions** in question text, working, and solutions — always with double backslashes in string values
+
+---
+
+## CODE QUALITY REQUIREMENTS
+
+- jQuery permitted for DOM operations — no other external libraries beyond jQuery and MathJax
+- Output is a single `.js` file — loads via `QsetFW.init(config, el)`
+- **No ES6 export syntax** — plain script file
+- **`const` and `let` only** — never `var`
+- **No hardcoded answers** — all computed
+- **No CSS** — the framework owns all styling
+- **No `buildInputArea` or `validateInput`** — the framework owns these
+- **No code referencing any topic other than the one specified**
+- **No mathematics-specific constants hard-coded** (e.g. do not hard-code `π = 3.14159` as a literal everywhere — use `Math.PI`)
+- File must be **syntactically valid** — no unterminated strings, all braces balanced
+- `MathJax.typesetPromise()` must **not** be called from the module — the framework calls it after every DOM update
+
+---
+
+## QUESTION GENERATION RULES
+
+**Pool-and-Remove Pattern:**
+For each level, maintain a pool of context scenarios (e.g. object names, settings, narratives). `pickAndRemove()` selects from the pool so no context repeats within a session. When the pool is exhausted, reset it silently (refill from the original array).
+
+**Type Mix:**
+Apply `question_type_mix` proportionally within each level. For a level with 10 questions and a mix of 30% NUMERIC / 20% MCQ / 15% MATCH / 20% SPOT_ERROR / 15% EXPLANATION, generate approximately 3 NUMERIC, 2 MCQ, 2 MATCH, 2 SPOT_ERROR, 1 EXPLANATION. Round sensibly — the mix is a guideline, not a strict quota.
+
+**Difficulty Distribution:**
+Spread difficulties 1–4 across the `questions_per_level` questions within each level. Do not generate all questions at the same difficulty.
+
+**Skill Fidelity:**
+Each level's questions must test the single skill defined for that level in the Topic Analysis. Do not let questions drift into testing skills from other levels.
+
+**Context Problems:**
+At the higher skill levels (Context Problem tier), wrap the question in a real-world NZ narrative. The mathematical structure remains NUMERIC or EXPLANATION. Use the context themes from Section 4 of the Topic Analysis.
+
+**Terminology / Recall Questions:**
+At Levels 1–2 (Pre-req Check, Facts), MCQ and MATCH questions may test mathematical vocabulary: correct spelling of terms, matching terms to definitions, identifying symbols. These are valid and pedagogically important (Rosenshine: retrieval practice).
+
+**Example Problems:**
+Use the example problems in Section 2 for style calibration — register, sentence structure, number ranges, diagram style. Do NOT copy any question verbatim.
+
+**SVG Diagrams (if include_svg is Yes):**
+Generate diagrams as inline `data:image/svg+xml` URI strings. Set `q.img` to the URI and `q.imgAlt` to an accessibility description. When `q.img === ""`, `renderFront()` must apply a CSS class that centres the question text both horizontally and vertically.
+
+---
+
+## BEGIN
+
+Output only the JavaScript file. No preamble. No explanation. No markdown code fences. Begin with the header comment.

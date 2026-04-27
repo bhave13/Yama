@@ -1,0 +1,274 @@
+Pythagoras Theorem
+
+## Topic: Pythagoras' Theorem
+## Year Group: Year 10
+## Curriculum Strand: Geometry and Measurement
+## Achievement Objective: Apply the properties of right-angled triangles, including Pythagoras' theorem, to solve problems involving lengths in two-dimensional situations (NZ Curriculum Level 5)
+
+---
+
+## 1. Prerequisites
+
+Prerequisites are skills the student must have consolidated before beginning this topic.
+Each row is a single, independently learnable skill, ordered from most fundamental.
+
+| # | Prerequisite Skill | Why It Is Needed |
+|---|---|---|
+| 1 | Calculate the square of an integer or simple decimal (e.g. 6² = 36, 1.5² = 2.25) | The formula requires squaring both known sides before adding |
+| 2 | Calculate the square root of a perfect square and simple decimal (e.g. √49 = 7, √6.25 = 2.5) | The final step always requires finding a square root to obtain the side length |
+| 3 | Apply order of operations correctly (BEDMAS) — specifically that a² + b² must be computed in full before the square root is taken | Students must add the squared values first; they cannot apply √ to each term separately |
+| 4 | Rearrange a simple one-step equation to isolate a squared variable (e.g. b² = c² − a²) | Required to solve for a shorter side rather than the hypotenuse |
+| 5 | Recognise and name parts of a triangle: vertices, sides, and the right-angle marker | Required to correctly identify and label which sides are a, b, and c in a given diagram |
+
+---
+
+## 2. Facts and Formulas
+
+Facts and formulas the student must be able to recall and apply without derivation.
+
+| # | Fact / Formula | Example / Notes |
+|---|---|---|
+| 1 | Pythagoras' Theorem: a² + b² = c² | c is always the hypotenuse; a and b are the two shorter sides |
+| 2 | The hypotenuse is the longest side of a right-angled triangle and is always opposite the right angle | It is never adjacent to the right angle |
+| 3 | Pythagoras' Theorem applies ONLY to right-angled triangles | The presence of a right angle must be confirmed before applying the theorem |
+| 4 | To find a shorter side, rearrange the formula: b² = c² − a² | Subtract the square of the known shorter side from the square of the hypotenuse |
+| 5 | The converse of Pythagoras' Theorem: if a² + b² = c² holds for three side lengths, the triangle is right-angled | Used to test whether a triangle with three given sides contains a right angle |
+| 6 | Correct spelling: "Pythagoras" and "hypotenuse" | Both are commonly misspelled; correct spelling is expected in written responses |
+
+---
+
+## 3. Skill Levels
+
+ATOMISATION RULE: Each level tests exactly ONE new, independently assessable skill.
+Level count is determined by the topic — use as many as needed.
+
+---
+
+### Level 1: Squares and Square Roots
+
+**Tier:** Pre-req Check
+**Single Skill Tested:** Calculate the square or square root of a given number
+**Recommended Question Types:** NUMERIC, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Square or square root of a positive integer that is a perfect square | 7² = 49; √64 = 8 |
+| 2 | Square or square root of a decimal to 1–2 d.p. | 1.5² = 2.25; √12.25 = 3.5 |
+| 3 | Square or square root of a simple fraction | (¾)² = 9/16; √(4/9) = 2/3 |
+| 4 | Square root of a non-perfect integer — answer left as a surd or rounded decimal | √50 = 5√2 ≈ 7.07 |
+
+**Example Question Stem:** "Calculate the value of 9²."
+
+**Common Misconceptions:**
+- Student doubles instead of squaring: 5² = 10 rather than 25
+- Student halves instead of finding the square root: √36 = 18 rather than 6
+
+---
+
+### Level 2: Identify the Hypotenuse
+
+**Tier:** Pre-req Check
+**Single Skill Tested:** Identify and correctly label the hypotenuse in a right-angled triangle
+**Recommended Question Types:** MCQ, MATCH
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Standard orientation — right angle at bottom-left, hypotenuse clearly the longest side | Triangle ABC with right angle at C |
+| 2 | Non-standard orientation — triangle rotated so the hypotenuse is not at the bottom | Right angle at the top vertex |
+| 3 | Triangle labelled with variables (a, b, c) — identify which label is the hypotenuse | "Which variable in a² + b² = c² is the hypotenuse?" |
+| 4 | Diagram with two or more triangles — identify the hypotenuse in each | Compound shape containing two right-angled triangles |
+
+**Example Question Stem:** "In triangle PQR, the right angle is at R. Which side is the hypotenuse?"
+
+**Common Misconceptions:**
+- Student selects the longest-looking side by visual estimation rather than finding the side opposite the right angle
+- Student confuses the right-angle marker with a side label and points to an adjacent side
+
+---
+
+### Level 3: Recall and State the Theorem
+
+**Tier:** Facts
+**Single Skill Tested:** State Pythagoras' Theorem correctly in symbols and words, including its condition and correct terminology
+**Recommended Question Types:** MCQ, MATCH
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Recall the exact formula and identify which variable is the hypotenuse | "In a² + b² = c², which variable represents the hypotenuse?" |
+| 2 | Select the correct statement of the theorem from distractors containing subtle errors | Distractor options: a + b = c; a² − b² = c²; a² × b² = c² |
+| 3 | Identify the correct condition for the theorem (right-angled triangles only) | "For which type of triangle does Pythagoras' Theorem apply?" |
+| 4 | Correct spelling of 'Pythagoras' and 'hypotenuse' chosen from common misspellings | Options: Pythagoraus, Pythagoris, Pythagorean; Hypoteneuse, Hypotonuse |
+
+**Example Question Stem:** "What is the correct formula for Pythagoras' Theorem?"
+
+**Common Misconceptions:**
+- Student writes a + b = c, adding sides without squaring them
+- Student believes the theorem applies to all triangles, not exclusively right-angled ones
+
+---
+
+### Level 4: Find the Hypotenuse
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the length of the hypotenuse given the two shorter sides, using c² = a² + b²
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer inputs producing a clean integer answer (Pythagorean triple) | a = 3, b = 4 → c = 5 |
+| 2 | Integer inputs producing a decimal answer, rounded to 1 d.p. | a = 5, b = 7 → c ≈ 8.6 |
+| 3 | Decimal inputs producing a decimal answer, rounded to 2 d.p. | a = 2.4, b = 3.2 → c = 4.00 |
+| 4 | One input is a simple surd — answer expressed as a surd or simplified form | a = √3, b = √5 → c = √8 = 2√2 |
+
+**Example Question Stem:** "A right-angled triangle has shorter sides of 6 cm and 8 cm. Find the length of the hypotenuse."
+
+**Common Misconceptions:**
+- Student adds sides without squaring: c = 6 + 8 = 14
+- Student squares and adds correctly but omits the final square root: states c² = 100, answer = 100
+- Student rounds intermediate values, causing accumulated rounding error in the final answer
+
+---
+
+### Level 5: Find a Shorter Side
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the length of a shorter side given the hypotenuse and one other side, using b² = c² − a²
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer inputs producing a clean integer answer (Pythagorean triple) | c = 13, a = 5 → b = 12 |
+| 2 | Integer inputs producing a decimal answer to 1 d.p. | c = 11, a = 6 → b ≈ 9.2 |
+| 3 | Decimal inputs producing a decimal answer to 2 d.p. | c = 7.5, a = 4.5 → b ≈ 5.98 |
+| 4 | Input includes a surd — answer as a surd or exact decimal | c = √20, a = 2 → b² = 16 → b = 4 |
+
+**Example Question Stem:** "A right-angled triangle has a hypotenuse of 17 cm and one shorter side of 8 cm. Find the length of the missing shorter side."
+
+**Common Misconceptions:**
+- Student adds instead of subtracts: b² = c² + a² (uses the hypotenuse formula even when finding a shorter side)
+- Student correctly subtracts but forgets to take the square root of the result
+- Student misidentifies which side is the hypotenuse and substitutes it as a shorter side
+
+---
+
+### Level 6: Pythagoras in Non-Right Triangles
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Apply Pythagoras' Theorem to a non-right-angled triangle by constructing a perpendicular height to create two right-angled triangles
+**Recommended Question Types:** NUMERIC, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Isosceles or equilateral triangle — altitude bisects the base evenly; all values integers | Equilateral triangle with side 10 cm — find the perpendicular height |
+| 2 | Isosceles triangle with decimal side lengths — altitude bisects base | Equal sides 7.5 cm, base 9 cm — find height |
+| 3 | Scalene triangle where the altitude splits the base into two unequal lengths that must be found first | Base 16 cm, one partial base segment 6 cm, slant side 10 cm — find other slant side |
+| 4 | Compound shape requiring two altitude constructions (e.g. kite or arrowhead) | Kite with given diagonals — find side lengths |
+
+**Example Question Stem:** "An isosceles triangle has a base of 10 cm and equal sides of 13 cm. Calculate the perpendicular height of the triangle."
+
+**Common Misconceptions:**
+- Student attempts to apply Pythagoras directly to the non-right-angled triangle without constructing an altitude
+- Student forgets to halve the base of an isosceles triangle when using the altitude as a line of symmetry
+
+---
+
+### Level 7: Multi-Step and Algebraic Problems
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Solve a problem that requires applying Pythagoras' Theorem more than once, or in combination with algebraic reasoning
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Two-step Pythagoras: find an intermediate length, then use it in a second application | Find the diagonal of a rectangle; use that diagonal as a side in a second triangle |
+| 2 | Sides expressed as algebraic expressions — form and solve a simple equation | Sides are x and x + 7, hypotenuse is 13 — find x |
+| 3 | Pythagoras applied to coordinate geometry — find the distance between two points | Distance between (2, 1) and (6, 4) |
+| 4 | Combined Pythagoras and algebra in a diagram with two connected right-angled triangles | Two triangles sharing a common side — find an unknown using both triangles |
+
+**Example Question Stem:** "The two shorter sides of a right-angled triangle are x cm and (x + 2) cm. The hypotenuse is 10 cm. Find the value of x."
+
+**Common Misconceptions:**
+- Student does not recognise that a quadratic from Pythagoras may have two solutions and fails to reject the negative root (which is not a valid length)
+- Student applies Pythagoras to the wrong pair of sides when the diagram contains multiple triangles
+
+---
+
+### Level 8: Context Problems
+
+**Tier:** Context Problem
+**Single Skill Tested:** Apply Pythagoras' Theorem to solve a problem presented in a real-world narrative, correctly identifying the right-angled triangle within the context
+**Recommended Question Types:** NUMERIC, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Single-step application with integer values — the right angle is stated explicitly | A 5 m ladder leans against a wall, base 3 m from wall — find the height reached |
+| 2 | Single-step with decimal measurements — right angle implied by context | Diagonal of a sports field; diagonal of a screen |
+| 3 | Two-step problem with decimals — requires identifying which measurements form the right angle | Path along two roads at right angles; find the direct distance across a paddock |
+| 4 | Multi-step problem — right angle not explicitly stated; student must identify or justify it | Navigation: ship travels north then east, find straight-line return distance; building rafter design |
+
+**Example Question Stem:** "A 6-metre ladder leans against a wall. The base of the ladder is 2.5 m from the wall. How high up the wall does the ladder reach? Give your answer to 1 decimal place."
+
+**Common Misconceptions:**
+- Student cannot identify which two measurements are the shorter sides and which is the hypotenuse from a written description
+- Student correctly sets up the calculation but uses inconsistent units (e.g. some measurements in cm, others in m)
+
+---
+
+## 4. Context Themes
+
+Real-world scenarios suitable for context problems at the higher skill levels.
+NZ-relevant scenarios preferred.
+
+| Theme | Example Scenario |
+|---|---|
+| Construction | Ladder against a wall; length of a roof rafter; diagonal brace for a fence panel; staircase rise and run |
+| Sports and recreation | Diagonal of a rugby field or basketball court; distance across a swimming pool; cricket pitch diagonal |
+| Navigation | Straight-line distance when a route follows two roads at right angles; boat returning to harbour |
+| Farming | Diagonal fencing across a rectangular paddock; irrigation pipe layout across a field |
+| Technology and screens | Diagonal measurement of a TV screen, phone screen, or laptop display |
+| Māori design | Geometric diagonal lengths in tukutuku panel patterns; diagonal dimensions of a wharenui floor plan |
+| Cooking and food | Diagonal of a square baking tin; cutting a sandwich diagonally — find the diagonal length |
+
+---
+
+## 5. Curriculum / NCEA Alignment
+
+**Strand:** Geometry and Measurement
+**Achievement Objective:** Apply the properties of right-angled triangles, including Pythagoras' theorem, to solve problems involving lengths in two-dimensional situations (NZ Curriculum Level 5)
+
+<!-- Year 10 — no NCEA achievement standard applies. Grade criteria table not applicable. -->
+
+---
+
+## 6. Generation Parameters
+
+These values are passed directly to Prompt 2B. Review and edit before passing to the code generator.
+
+```
+topic:                 Pythagoras' Theorem
+year_group:            Year 10
+ncea_level:            N/A
+standard:              N/A
+achievement_objective: Apply properties of right-angled triangles using Pythagoras' theorem (NZ Curriculum Level 5)
+levels:                8
+questions_per_level:   10
+question_type_mix:     35% NUMERIC, 20% MCQ, 10% MATCH, 20% SPOT_ERROR, 15% EXPLANATION
+include_reference:     Yes
+include_svg:           Yes
+```
