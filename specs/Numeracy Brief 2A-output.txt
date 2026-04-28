@@ -1,0 +1,179 @@
+#Numeracy Brief
+# YAMA Topic Analysis
+
+## Topic: Numeracy PO3 Justifications (Measurement, Time & Data)
+## Year Group: NCEA Level 1
+## Curriculum Strand: Number and Algebra / Measurement and Geometry / Statistics
+## Achievement Objective: Use mathematics and statistics to meet the numeracy demands of a range of situations (US32406)
+
+## NCEA Level: 1
+## Achievement Standard: US32406
+
+---
+
+## 1. Prerequisites
+
+Prerequisites are skills the student must have consolidated before beginning this topic. Each row is a single, independently learnable skill, ordered from most fundamental.
+
+| # | Prerequisite Skill | Why It Is Needed |
+|---|---|---|
+| 1 | Calculate area and volume of rectangles and rectangular prisms. | Required to generate the numerical evidence needed for woodwork and material comparisons. |
+| 2 | Perform time calculations including 24-hour time and elapsed duration. | Required to evaluate digital technology and scheduling scenarios. |
+| 3 | Read scales, timetables, and extract data from statistical charts. | Required to find the starting values for Money Matters and business comparisons. |
+| 4 | Understand the PEEL (Point, Evidence, Explanation, Link) or SEXY (Statement, Explanation, eXample, whY) paragraph structure. | Required to formulate a cohesive written response that meets Process Outcome 3 (PO3) expectations. |
+
+---
+
+## 2. Facts and Formulas
+
+Facts and formulas the student must be able to recall and apply without derivation. Include correct mathematical notation. 
+
+| # | Fact / Formula | Example / Notes |
+|---|---|---|
+| 1 | Area of a rectangle: $A = b \times h$ | Used in spatial calculations (e.g., floor plans). |
+| 2 | Volume of a rectangular prism: $V = l \times w \times h$ | Used in capacity and material calculations. |
+| 3 | Range: $Range = Maximum - Minimum$ | Used to compare consistency between two sets of data. |
+| 4 | 1 hour = 60 minutes | Essential for converting decimal time back to hours/minutes. |
+| 5 | Metric Conversions: 1000g = 1kg, 1000mL = 1L, 10mm = 1cm, 100cm = 1m | Required for standardizing units before comparing two different options. |
+
+---
+
+## 3. Skill Levels
+
+*Note: As per user specifications, standard atomisation rules are suspended for this capstone topic. These "levels" represent rich, comparative contexts requiring comprehensive PO3 justifications using the PEEL format.*
+
+---
+
+### Context: Hospitality
+
+**Tier:** Context Problem
+**Single Skill Tested:** Evaluates two catering or recipe options involving mass, capacity, and cost, justifying a recommendation using the PEEL structure and comparative numerical evidence.
+**Recommended Question Types:** EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Whole numbers for mass/capacity and straightforward serving multipliers. | Comparing two recipes where Recipe A makes 10 servings and Recipe B makes 20 servings. |
+| 2 | Decimal multipliers or decimal costs per serving. | Comparing ingredient costs that total $14.50 vs $12.75. |
+| 3 | Fractional scaling or combining mixed metric units. | Scaling a recipe up by 1.5 times, requiring conversion from mL to L. |
+| 4 | Multi-step calculations involving wastage, fractional scaling, and mixed metric conversions. | Comparing bulk buying options where 15% of the produce is unusable. |
+
+**Example Question Stem:** "You are catering a school camp for 80 students. Supplier A sells 5L bottles of juice for $12, while Supplier B sells 750mL bottles in packs of 6 for $10. Which supplier is the most cost-effective option to ensure every student gets a 250mL serving? State your position and explain your choice using numbers from both options."
+
+**Common Misconceptions:**
+- Student states a position but provides no numerical calculations to back it up (fails to provide "Evidence").
+- Student calculates the cost for one supplier but ignores the other, failing to make a true comparison.
+- Student forgets to standardize the units (e.g., comparing liters directly to milliliters without conversion).
+
+---
+
+### Context: Woodwork
+
+**Tier:** Context Problem
+**Single Skill Tested:** Evaluates two building plans or material supply options involving area, volume, and metric length conversions, justifying a choice using the PEEL structure and comparative numerical evidence.
+**Recommended Question Types:** EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Whole number side lengths in the same metric unit. | Comparing two rectangular planter boxes measured in meters. |
+| 2 | Decimal side lengths or simple single-step conversions. | Calculating area where lengths are given as 2.4m and 1.2m. |
+| 3 | Mismatched metric units requiring conversion before calculation. | Comparing a board that is 2000mm long with one that is 1.8m long. |
+| 4 | Multi-step compound volume calculations or calculating minimizing wastage off a larger sheet. | Comparing the yield of cut pieces from two differently sized standard plywood sheets. |
+
+**Example Question Stem:** "You are building raised garden beds. Design 1 requires a volume of soil measuring 2m by 1m by 0.5m. Design 2 requires a volume measuring 150cm by 120cm by 60cm. Soil costs $40 per cubic meter. Which design is cheaper to fill, and by how much? Write a PEEL paragraph to justify your answer, referring to both designs."
+
+**Common Misconceptions:**
+- Student multiplies mixed units (e.g., $150 \times 1.2 \times 60$) without converting them to a common unit first.
+- Student calculates volume correctly but forgets the final step of calculating and comparing the cost.
+
+---
+
+### Context: Digital Technology
+
+**Tier:** Context Problem
+**Single Skill Tested:** Evaluates technology scenarios involving 24-hour time, duration, and data capacity, justifying a schedule or plan using the PEEL structure and comparative numerical evidence.
+**Recommended Question Types:** EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Whole hour elapsed times and integer data capacities. | Comparing a 2-hour render time vs a 4-hour render time. |
+| 2 | Durations involving 30-minute intervals and decimal file sizes. | Comparing a backup that takes 1.5 hours vs 45 minutes. |
+| 3 | Calculations crossing the hour mark or converting minutes to fractional hours. | Comparing a process starting at 09:45 and ending at 11:20. |
+| 4 | Complex scheduling involving multiple sequential tasks and 24-hour time across midnight. | Comparing two overnight server backup schedules that must finish before 06:00. |
+
+**Example Question Stem:** "Server Backup A takes 145 minutes and must start after 22:30. Server Backup B takes 2 hours and 15 minutes but can only start at 23:00. The system needs to be back online by 01:00. Which backup option meets the deadline? Use a PEEL paragraph to explain your answer, showing the finish times for both options."
+
+**Common Misconceptions:**
+- Student treats time as a base-10 decimal system (e.g., treating 145 minutes as 1.45 hours).
+- Student incorrectly calculates time elapsed across midnight.
+
+---
+
+### Context: Money Matters
+
+**Tier:** Context Problem
+**Single Skill Tested:** Evaluates business performance or staff scheduling using statistical charts, min/max, and range, justifying a business decision using the PEEL structure and comparative numerical evidence.
+**Recommended Question Types:** EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Extracting whole number integers from simple bar charts or tables. | Comparing weekly sales totals of $500 vs $600. |
+| 2 | Extracting decimal values (currency) from tables and calculating simple ranges. | Comparing the highest and lowest daily profit from a provided table. |
+| 3 | Reading grouped data charts or calculating hourly wages with fractional hours. | Comparing two staff rosters where shifts are 4.5 hours long. |
+| 4 | Synthesizing data from multiple visual sources (e.g., a table and a line graph) to make a compound decision. | Evaluating whether Business A's consistent low range is better than Business B's high maximum but massive range. |
+
+**Example Question Stem:** "Look at the sales graphs for Cafe A and Cafe B over a 7-day period. Cafe A has a maximum daily sale of $1200 but a minimum of $200. Cafe B's daily sales range between $750 and $900. If you were looking to buy a business with reliable, steady income, which cafe would you choose? Support your decision with numbers from both graphs and compare their ranges."
+
+**Common Misconceptions:**
+- Student misreads the scale on the axes of the provided charts.
+- Student references only the maximum value (the "peak") and ignores the range/consistency when evaluating reliability.
+
+---
+
+## 4. Context Themes
+
+Real-world scenarios suitable for context problems at the higher skill levels. NZ-relevant scenarios preferred.
+
+| Theme | Example Scenario |
+|---|---|
+| Hospitality | Comparing costs and yields of ingredients for a school marae catering event or local cafe. |
+| Woodwork | Calculating material requirements and costs for building a deck, planter box, or standard timber framing. |
+| Digital Technology | Scheduling overnight data backups or comparing gigabyte data plans from NZ telecom providers. |
+| Money Matters | Analyzing shift-work wages, public holiday surcharge impacts, or comparing small business sales charts. |
+
+---
+
+## 5. Curriculum / NCEA Alignment
+
+**Strand:** Number and Algebra / Measurement and Geometry / Statistics (Cross-curricular Numeracy)
+**Achievement Objective:** Use mathematics and statistics to meet the numeracy demands of a range of situations.
+
+**Standard:** US32406
+
+| Grade | Criteria Summary |
+|---|---|
+| Achieved | Student independently uses mathematics/statistics in real-life contexts. Specifically for PO3: Formulates a written position/decision, compares both data sets, and justifies the answer using correct numerical evidence and logical reasoning (PEEL). |
+| Merit | N/A (Unit Standard) - *Pedagogical note: Higher level responses will seamlessly integrate multiple steps (e.g., unit conversions + cost analysis) into a highly cohesive SEXY paragraph without calculation errors.* |
+| Excellence | N/A (Unit Standard) - *Pedagogical note: Highest level responses will actively synthesize data, explicitly addressing why the alternative option was rejected using comparative mathematical language.* |
+
+---
+
+## 6. Generation Parameters
+
+topic:                 Numeracy PO3 Justifications (Measurement, Time & Data)
+year_group:            NCEA Level 1
+ncea_level:            1
+standard:              US32406
+achievement_objective: Meet numeracy demands of a range of situations.
+levels:                4
+questions_per_level:   10
+question_type_mix:     100% EXPLANATION
+include_reference:     No
+include_svg:           Yes
