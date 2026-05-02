@@ -169,6 +169,100 @@ const makeNumberLineSVG = (q, showAnswer) => {
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg.trim());
 };
 
+// ── 2b. GLOBAL SLIDER INJECTION LOGIC ─────────────────────────────────
+
+if (typeof window !== 'undefined' && !window.initPercSlider) {
+    window.initPercSlider = function(uid, level, total, part, pLabel, pVal, imgEl) {
+        // Small delay ensures qs_fwk.js has finished mounting the input area
+        setTimeout(() => {
+            // Safety check: Only inject slider if this question is currently visible on the Study Card Front
+            if (!imgEl || !imgEl.closest('#qset-front')) return;
+
+            const inpArea = document.getElementById('qset-input-area');
+            if (!inpArea || document.getElementById('perc-slider-wrap-' + uid)) return;
+
+            const wrap = document.createElement('div');
+            wrap.id = 'perc-slider-wrap-' + uid;
+            wrap.style.cssText = 'margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); text-align: left;';
+
+            let min = 0, max = 100, step = 1, startVal = 50;
+            let instruction = '';
+
+            if (level === 1) { // Find Part
+                max = 100; step = 1; startVal = 50;
+                instruction = `<div style="font-size:0.9rem; font-weight:600; color:#334155; margin-bottom:8px;">Estimation Tool: Try sliding to estimate the part!</div>
+                               <div style="font-size:0.95rem; color:#0f172a; margin-bottom:12px;">If the percentage were <strong id="val-${uid}" style="color:#2563eb;">50%</strong>, the part would be <strong id="res-${uid}" style="color:#16a34a;">...</strong></div>`;
+            } else if (level === 2) { // Find Percentage
+                max = total; step = total < 20 ? 0.5 : 1; startVal = Math.round(total / 2);
+                instruction = `<div style="font-size:0.9rem; font-weight:600; color:#334155; margin-bottom:8px;">Estimation Tool: Try sliding to estimate the percentage!</div>
+                               <div style="font-size:0.95rem; color:#0f172a; margin-bottom:12px;">If the part was <strong id="val-${uid}" style="color:#2563eb;">...</strong>, that would be <strong id="res-${uid}" style="color:#16a34a;">...</strong></div>`;
+            } else if (level === 3) { // Find Total
+                max = Math.ceil(total * 1.5);
+                if (max % 10 !== 0) max += (10 - (max % 10)); // Round max nicely
+                step = max <= 50 ? 0.5 : 1;
+                startVal = Math.round(max / 2);
+                instruction = `<div style="font-size:0.9rem; font-weight:600; color:#334155; margin-bottom:8px;">Estimation Tool: Estimate the total so the calculated part equals <span style="color:#dc2626; font-weight:800;">${part}</span>!</div>
+                               <div style="font-size:0.95rem; color:#0f172a; margin-bottom:12px;">If the total was <strong id="val-${uid}" style="color:#2563eb;">...</strong>, then \\(${pLabel}\\%\\) would be <strong id="res-${uid}" style="color:#16a34a;">...</strong></div>`;
+            }
+
+            wrap.innerHTML = `
+                ${instruction}
+                <div style="position:relative; width:100%; height:24px; display:flex; align-items:center;">
+                    <input type="range" id="slider-${uid}" min="${min}" max="${max}" step="${step}" value="${startVal}"
+                        style="width:100%; -webkit-appearance:none; appearance:none; height:8px; border-radius:4px; background:#e2e8f0; outline:none; margin:0;">
+                </div>
+                <style>
+                    #slider-${uid}::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:#2563eb; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 2px solid white; transition: transform 0.1s; }
+                    #slider-${uid}::-webkit-slider-thumb:hover { transform: scale(1.15); }
+                    #slider-${uid}::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:#2563eb; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 2px solid white; transition: transform 0.1s; }
+                    #slider-${uid}::-moz-range-thumb:hover { transform: scale(1.15); }
+                </style>
+            `;
+
+            // Prepend so the estimation tool sits above the text input field
+            inpArea.insertBefore(wrap, inpArea.firstChild);
+
+            // Re-render MathJax inside the injection (useful for fraction labels in Level 3)
+            if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                MathJax.typesetPromise([wrap]).catch(() => {});
+            }
+
+            const slider = document.getElementById('slider-' + uid);
+            const valEl = document.getElementById('val-' + uid);
+            const resEl = document.getElementById('res-' + uid);
+
+            const formatNum = (n) => {
+                const rounded = Math.round(n * 100) / 100;
+                return Number.isInteger(rounded) ? rounded : rounded.toFixed(1);
+            };
+
+            const updateSlider = () => {
+                const val = parseFloat(slider.value);
+                const percent = ((val - min) / (max - min)) * 100;
+                
+                // Active track coloring
+                slider.style.background = `linear-gradient(to right, #93c5fd 0%, #3b82f6 ${percent}%, #e2e8f0 ${percent}%, #e2e8f0 100%)`;
+
+                if (level === 1) {
+                    valEl.textContent = val + '%';
+                    resEl.textContent = formatNum((val / 100) * total);
+                } else if (level === 2) {
+                    valEl.textContent = val;
+                    resEl.textContent = formatNum((val / total) * 100) + '%';
+                } else if (level === 3) {
+                    valEl.textContent = val;
+                    resEl.textContent = formatNum((pVal / 100) * val);
+                }
+            };
+
+            slider.addEventListener('input', updateSlider);
+            updateSlider(); // Initialize logic immediately
+
+        }, 30);
+    };
+}
+
+
 // ── 3. CONFIG OBJECT ──────────────────────────────────────────────────
 
 const config = {
@@ -224,6 +318,14 @@ const config = {
         
         let questionText = q.text;
         const uid = makeUID('NUMERIC', q.level, q.diff);
+
+        // -- SLIDER INJECTION HOOK FOR LEVELS 1, 2, AND 3 --
+        if (q.level === 1 || q.level === 2 || q.level === 3) {
+            // Encode the pLabel to ensure fractional LaTeX formatting doesn't break the string payload
+            let encodedPLabel = encodeURIComponent(q.pLabel);
+            let onloadTrigger = `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" onload="if(window.initPercSlider) window.initPercSlider('${uid}', ${q.level}, ${q.total}, ${q.part}, decodeURIComponent('${encodedPLabel}'), ${q.p}, this)" style="display:none;" />`;
+            questionText += onloadTrigger;
+        }
 
         if (q.level === 6) {
             const typeOptionsHtml = Object.values(CALC_TYPES).map(type => `

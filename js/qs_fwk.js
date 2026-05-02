@@ -2,6 +2,7 @@
  * qs_fwk.js — Updated Qset Framework
  * Flashcard-style Grid Mode with 50% larger answers and auto-scrolling overflow.
  * Self-Study mode handles all question types: NUMERIC, MCQ, MATCH, SPOT_ERROR, EXPLANATION.
+ * Challenge mode features an adjustable timer, skipped-question handling, and a color-coded details scoreboard.
  */
 (function (global) {
     'use strict';
@@ -88,7 +89,6 @@
         .qset-card.flipped { transform: rotateY(180deg); }
         .qset-card-front, .qset-card-back { position: absolute; width: 100%; min-height: 300px; backface-visibility: hidden; border-radius: 10px; padding: 1.5rem; display: flex; flex-direction: column; text-align: center; box-sizing: border-box; overflow-y: auto; }
 
-        /* Thin Scrollbar for Cards */
         .qset-card-back, .qset-ws-face.back { scrollbar-width: thin; scrollbar-color: #6ee7b7 #f0fdf4; }
         .qset-card-back::-webkit-scrollbar, .qset-ws-face.back::-webkit-scrollbar { width: 6px; }
         .qset-card-back::-webkit-scrollbar-thumb, .qset-ws-face.back::-webkit-scrollbar-thumb { background-color: #6ee7b7; border-radius: 10px; }
@@ -99,7 +99,6 @@
         .qset-q-text { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; width: 100%; line-height: 1.4; }
         .qset-q-img { max-width: 100%; max-height: 180px; object-fit: contain; }
 
-        /* Optimized Grid Mode Flashcards */
         .qset-ws-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
         .qset-ws-card { perspective: 1000px; cursor: pointer; height: 180px; }
         .qset-ws-card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); }
@@ -108,28 +107,8 @@
         .qset-ws-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; background: white; transition: border-color 0.2s; }
         .qset-ws-face.front:hover { border-color: #2563eb; }
 
-        /* ANSWER SIDE (BACK): Overflow auto added for scrollbar functionality */
-        .qset-ws-face.back {
-            background: #f0fdf4;
-            border-color: #6ee7b7;
-            transform: rotateY(180deg);
-            font-weight: 800;
-            color: #065f46;
-            font-size: 2.1rem;
-            text-align: center;
-            word-break: break-word;
-            line-height: 1.1;
-            overflow-y: auto;
-        }
-
-        .qset-ws-face .qset-q-text {
-            font-size: 0.85rem !important;
-            margin-bottom: 0.4rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        .qset-ws-face.back { background: #f0fdf4; border-color: #6ee7b7; transform: rotateY(180deg); font-weight: 800; color: #065f46; font-size: 2.1rem; text-align: center; word-break: break-word; line-height: 1.1; overflow-y: auto; }
+        .qset-ws-face .qset-q-text { font-size: 0.85rem !important; margin-bottom: 0.4rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .qset-ws-face img { max-height: 80px; max-width: 100%; object-fit: contain; margin-top: 4px; }
 
         .qset-spotlight { display: none; position: fixed; inset: 0; z-index: 1500; align-items: flex-start; justify-content: center; padding-top: 5vh; }
@@ -141,60 +120,41 @@
         .urgent { color: #f87171 !important; }
         .qset-hidden { display: none !important; }
 
-        /* Self-Study: MCQ option buttons */
         .qset-mcq-opts { display: flex; flex-direction: column; gap: 6px; width: 100%; }
-        .qset-mcq-opt {
-            width: 100%; text-align: left; padding: 9px 12px;
-            border: 2px solid #cbd5e1; border-radius: 6px;
-            background: white; cursor: pointer; font-size: 0.92rem;
-            transition: border-color 0.15s, background 0.15s;
-        }
+        .qset-mcq-opt { width: 100%; text-align: left; padding: 9px 12px; border: 2px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; font-size: 0.92rem; transition: border-color 0.15s, background 0.15s; }
         .qset-mcq-opt:hover { border-color: #2563eb; background: #eff6ff; }
         .qset-mcq-opt.selected { border-color: #2563eb; background: #dbeafe; font-weight: 700; }
         .qset-mcq-opt.correct  { border-color: #16a34a; background: #dcfce7; font-weight: 700; }
         .qset-mcq-opt.wrong    { border-color: #dc2626; background: #fee2e2; }
 
-        /* Self-Study: SPOT_ERROR step rows */
-        .qset-step-row {
-            padding: 8px 12px; border: 2px solid #cbd5e1; border-radius: 6px;
-            margin-bottom: 6px; cursor: pointer; font-size: 0.92rem;
-            transition: border-color 0.15s, background 0.15s;
-        }
+        .qset-step-row { padding: 8px 12px; border: 2px solid #cbd5e1; border-radius: 6px; margin-bottom: 6px; cursor: pointer; font-size: 0.92rem; transition: border-color 0.15s, background 0.15s; }
         .qset-step-row:hover { border-color: #f59e0b; background: #fef9c3; }
         .qset-step-row.selected { border-color: #f59e0b; background: #fef3c7; font-weight: 700; }
         .qset-step-row.correct  { border-color: #16a34a; background: #dcfce7; font-weight: 700; }
         .qset-step-row.wrong    { border-color: #dc2626; background: #fee2e2; }
 
-        /* Self-Study: SPOT_ERROR value tokens */
-        .qset-val-token {
-            display: inline-block; padding: 3px 10px; margin: 2px;
-            border: 2px solid #cbd5e1; border-radius: 20px;
-            cursor: pointer; font-size: 0.95rem;
-            transition: border-color 0.15s, background 0.15s;
-        }
+        .qset-val-token { display: inline-block; padding: 3px 10px; margin: 2px; border: 2px solid #cbd5e1; border-radius: 20px; cursor: pointer; font-size: 0.95rem; transition: border-color 0.15s, background 0.15s; }
         .qset-val-token:hover { border-color: #f59e0b; background: #fef9c3; }
         .qset-val-token.selected { border-color: #f59e0b; background: #fef3c7; font-weight: 700; }
         .qset-val-token.correct  { border-color: #16a34a; background: #dcfce7; font-weight: 700; }
         .qset-val-token.wrong    { border-color: #dc2626; background: #fee2e2; }
 
-        /* Self-Study: EXPLANATION textarea */
-        .qset-expl-area {
-            width: 100%; padding: 10px; font-size: 0.92rem; line-height: 1.5;
-            border: 2px solid #cbd5e1; border-radius: 6px; resize: vertical;
-            min-height: 120px; font-family: inherit;
-        }
+        .qset-expl-area { width: 100%; padding: 10px; font-size: 0.92rem; line-height: 1.5; border: 2px solid #cbd5e1; border-radius: 6px; resize: vertical; min-height: 120px; font-family: inherit; }
         .qset-expl-hint { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
-
-        /* Solution back: checklist */
         .qset-checklist { list-style: none; padding: 0; margin: 8px 0 0; }
         .qset-checklist li { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; margin-bottom: 6px; }
         .qset-checklist li::before { content: '\\2610'; font-size: 1rem; flex-shrink: 0; }
-
-        /* Solution back: match pairs */
         .qset-match-pair { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; margin-bottom: 6px; }
         .qset-match-pair .left { font-weight: 700; min-width: 120px; }
         .qset-match-pair .arrow { color: #6b7280; }
         .qset-match-pair .right { color: #065f46; }
+
+        /* Challenge Result Table Styles */
+        .qset-ch-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        .qset-ch-table th, .qset-ch-table td { padding: 10px 12px; border: 1px solid #cbd5e1; vertical-align: middle; }
+        .qset-ch-table th { background: #f8fafc; font-weight: bold; color: #1e293b; position: sticky; top: 0; box-shadow: 0 1px 0 #cbd5e1; }
+        .row-correct { background: #dcfce7; }
+        .row-wrong { background: #fee2e2; }
         `;
         document.head.appendChild(s);
     }
@@ -220,9 +180,6 @@
         el.innerHTML = html;
     }
 
-    /**
-     * Render the back-of-card solution for all question types.
-     */
     function renderSolutionBack(q, result) {
         var html = '<div style="width:100%; text-align:left;">';
 
@@ -254,7 +211,6 @@
 
         } else if (q.type === 'SPOT_ERROR' && q.subtype === 'VALUE') {
             html += '<div style="font-size:0.7rem; text-transform:uppercase; color:#059669; font-weight:bold; margin-bottom:8px;">Error Location</div>';
-            // Same LaTeX-boundary fix as the input renderer: close \( before each token span
             var rendered = q.expression.replace(/\[([^\|]+)\|(\d+)\]/g, function(_, val, id) {
                 var isErr = parseInt(id) === q.correctErrorId;
                 var style = isErr
@@ -281,13 +237,7 @@
         return html;
     }
 
-    /**
-     * Render the answer input UI for Self-Study mode based on question type.
-     * Returns a { getResult } object — call getResult() when Check Answer is clicked.
-     */
     function renderStudyInput(q, inpEl) {
-
-        // NUMERIC
         if (q.type === 'NUMERIC') {
             inpEl.innerHTML = '<input type="text" id="study-inp" style="width:100%; padding:12px; font-size:1.1rem; text-align:center; border:2px solid #cbd5e1; border-radius:6px;" placeholder="Answer...">';
             mjax(inpEl);
@@ -307,7 +257,6 @@
             };
         }
 
-        // MCQ
         if (q.type === 'MCQ') {
             var mcqHtml = '<div class="qset-mcq-opts">';
             q.options.forEach(function(opt, i) {
@@ -340,7 +289,6 @@
             };
         }
 
-        // MATCH — use click-to-pair UI since MathJax cannot render inside <option> elements
         if (q.type === 'MATCH') {
             var rights = q.pairs.map(function(p) { return p.right; });
             var shuffled = rights.slice().sort(function() { return Math.random() - 0.5; });
@@ -398,7 +346,6 @@
             };
         }
 
-        // SPOT_ERROR / STEP
         if (q.type === 'SPOT_ERROR' && q.subtype === 'STEP') {
             var stepHtml = '<div>';
             q.steps.forEach(function(step) {
@@ -432,17 +379,11 @@
             };
         }
 
-        // SPOT_ERROR / VALUE
         if (q.type === 'SPOT_ERROR' && q.subtype === 'VALUE') {
-            // Tokens like [r^2|1] sit INSIDE \( \) LaTeX blocks in the expression string.
-            // Injecting an HTML span inside a math block breaks MathJax parsing.
-            // Fix: close the \( block before each token, emit the token as plain HTML,
-            // then reopen \( for the remainder — so MathJax only sees valid math chunks.
             var valHtml = '<div style="font-size:0.95rem; line-height:2.2; margin-bottom:4px;">';
             valHtml += q.expression.replace(/\[([^\|]+)\|(\d+)\]/g, function(_, val, id) {
                 return '\\) <span class="qset-val-token" data-id="' + id + '" style="display:inline-block;">' + val + '</span> \\(';
             });
-            // Strip any dangling empty \(\) pairs that may result at start/end
             valHtml = valHtml.replace(/\\\(\s*\\\)/g, '');
             valHtml += '</div><div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Click the value you think is wrong.</div>';
             inpEl.innerHTML = valHtml;
@@ -471,7 +412,6 @@
             };
         }
 
-        // EXPLANATION
         if (q.type === 'EXPLANATION') {
             inpEl.innerHTML = '<textarea class="qset-expl-area" id="study-expl" placeholder="Write your explanation here..."></textarea><div class="qset-expl-hint">This is self-marked — write your best answer, then flip to compare with the model answer.</div>';
             return {
@@ -481,7 +421,6 @@
             };
         }
 
-        // Fallback
         inpEl.innerHTML = '<div style="color:#94a3b8; font-size:0.9rem;">No input available for this question type.</div>';
         return {
             getResult: function() { return { isCorrect: false, isSelfMark: true }; }
@@ -512,9 +451,25 @@
           '<button class="qset-btn qset-hidden" style="background:#1e293b; color:#fff; padding:10px; border-radius:6px; flex:1; font-weight:bold; cursor:pointer; border:none;" id="qset-next">Next ➔</button>' +
           '</div></div></div></div>' +
           '<div class="qset-panel" id="qset-panel-challenge">' +
-          '<div style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:2px solid #e2e8f0; padding-bottom:8px;"><div class="qset-ch-timer" id="qset-ch-timer">02:00</div><div style="font-weight:bold;">Score: <span id="qset-ch-score">0</span></div></div>' +
-          '<div id="qset-ch-start" style="text-align:center; padding:2rem;"><button style="background:#2563eb; color:#fff; padding:12px 30px; border-radius:6px; font-weight:bold; cursor:pointer; border:none;" id="qset-ch-start-btn">START CHALLENGE</button></div>' +
-          '<div id="qset-ch-play" class="qset-hidden"><div id="qset-ch-qbox" style="background:#fff; border:2px solid #e2e8f0; padding:20px; border-radius:8px; text-align:center; margin-bottom:15px; min-height:100px;"></div><div id="qset-ch-ctrl"></div><div id="qset-ch-fb" style="text-align:center; font-weight:bold; margin-top:10px;"></div></div>' +
+              '<div style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:2px solid #e2e8f0; padding-bottom:8px;"><div class="qset-ch-timer" id="qset-ch-timer">10:00</div><div style="font-weight:bold;">Score: <span id="qset-ch-score">0</span></div></div>' +
+              '<div id="qset-ch-start" style="text-align:center; padding:2rem;">' +
+                  '<div style="color:#dc2626; font-weight:800; font-size:1.1rem; margin-bottom:1rem;">Be prepared. Get a calculator, pen and paper before we start.</div>' +
+                  '<div style="margin-bottom:1.5rem; font-weight:600; color:#1e293b;">Time: <input type="number" id="ch-time-input" value="10" min="1" max="60" style="width:60px; padding:6px; border:2px solid #cbd5e1; border-radius:6px; text-align:center; font-weight:bold;"> minutes</div>' +
+                  '<button style="background:#2563eb; color:#fff; padding:12px 30px; border-radius:6px; font-weight:bold; cursor:pointer; border:none;" id="qset-ch-start-btn">START CHALLENGE</button>' +
+              '</div>' +
+              '<div id="qset-ch-play" class="qset-hidden">' +
+                  '<div id="qset-ch-qbox" style="background:#fff; border:2px solid #e2e8f0; padding:20px; border-radius:8px; text-align:center; margin-bottom:15px; min-height:100px;"></div>' +
+                  '<div id="qset-ch-ctrl" style="display:flex; justify-content:center; align-items:center; gap:10px;"></div>' +
+                  '<div id="qset-ch-fb" style="text-align:center; font-weight:bold; margin-top:10px; height:24px;"></div>' +
+              '</div>' +
+              '<div id="qset-ch-end" class="qset-hidden" style="text-align:center; padding:2rem;">' +
+                  '<h3 style="font-size:1.8rem; color:#1e293b; margin-bottom:10px;">Time\'s Up!</h3>' +
+                  '<div style="font-size:1.3rem; margin-bottom:20px; font-weight:bold;">Final Score: <span id="qset-ch-final-score" style="color:#16a34a;">0</span> / <span id="qset-ch-final-total">0</span></div>' +
+                  '<div style="display:flex; justify-content:center; gap:10px;">' +
+                      '<button id="qset-ch-show-btn" style="background:#10b981; color:#fff; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; border:none;">Show Details</button>' +
+                      '<button id="qset-ch-restart-btn" style="background:#64748b; color:#fff; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; border:none;">Restart</button>' +
+                  '</div>' +
+              '</div>' +
           '</div>' +
           '<div class="qset-panel" id="qset-panel-worksheet">' +
           '<div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h2 id="qset-ws-title" style="font-size:1.1rem; font-weight:800;"></h2><button id="qset-ws-gen" style="background:#2563eb; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">Generate New</button></div>' +
@@ -522,13 +477,29 @@
           '<div class="qset-spotlight" id="qset-spotlight">' +
           '<div class="qset-backdrop" id="qset-backdrop"></div>' +
           '<div class="qset-spotlight-wrap"><div class="qset-sp-timer-box" id="qset-sp-timer">00:30</div><div class="qset-card-wrap"><div class="qset-card" id="qset-sp-card"><div class="qset-card-front" id="qset-sp-front"></div><div class="qset-card-back" id="qset-sp-back"></div></div></div><p style="color:rgba(255,255,255,0.7); font-size:0.8rem;">Click card to reveal answer · Esc to close</p></div>' +
-          '</div></div></div>';
+          '</div></div>' +
+          
+          /* Challenge Results Modal Overlay */
+          '<div class="qset-spotlight" id="qset-ch-modal">' +
+              '<div class="qset-backdrop" id="qset-ch-bd"></div>' +
+              '<div class="qset-spotlight-wrap" style="background:white; padding:20px; border-radius:8px; width:min(800px, 95vw); max-height:85vh; overflow-y:auto; color:#1e293b; display:block;">' +
+                  '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">' +
+                      '<h2 style="margin:0; font-size:1.4rem;">Challenge Results</h2>' +
+                      '<button id="qset-ch-close" style="background:none; border:none; font-size:1.5rem; cursor:pointer; line-height:1; color:#64748b;">&times;</button>' +
+                  '</div>' +
+                  '<table class="qset-ch-table">' +
+                      '<thead><tr><th style="width:40px; text-align:center;">#</th><th>Question</th><th style="text-align:center;">Your Answer</th><th style="text-align:center;">Correct Answer</th></tr></thead>' +
+                      '<tbody id="qset-ch-results-body"></tbody>' +
+                  '</table>' +
+              '</div>' +
+          '</div>' +
+          '</div>';
 
         var state = {
             mode: 'study',
             level: 1,
             study: { q: null, count: 0, total: 0, inputHandler: null },
-            ch: { score: 0, time: 120, int: null },
+            ch: { score: 0, total: 0, time: 600, int: null, history: [], currentQ: null },
             spTimer: { int: null, left: 30 }
         };
         var $ = function(id) { return document.getElementById(id); };
@@ -538,9 +509,16 @@
             lvl: $('qset-level'), ok: $('qset-correct'), tot: $('qset-total'),
             card: $('qset-card'), front: $('qset-front'), back: $('qset-back'),
             inp: $('qset-input-area'), check: $('qset-check'), next: $('qset-next'),
-            chP: $('qset-ch-play'), chS: $('qset-ch-start'), chQ: $('qset-ch-qbox'),
-            chC: $('qset-ch-ctrl'), chF: $('qset-ch-fb'), chSc: $('qset-ch-score'),
-            chT: $('qset-ch-timer'), chBtn: $('qset-ch-start-btn'),
+            
+            // Challenge elements
+            chS: $('qset-ch-start'), chP: $('qset-ch-play'), chE: $('qset-ch-end'),
+            chQ: $('qset-ch-qbox'), chC: $('qset-ch-ctrl'), chF: $('qset-ch-fb'), 
+            chSc: $('qset-ch-score'), chT: $('qset-ch-timer'), chBtn: $('qset-ch-start-btn'),
+            chTimeInp: $('ch-time-input'), chFScore: $('qset-ch-final-score'), chFTotal: $('qset-ch-final-total'),
+            chShowBtn: $('qset-ch-show-btn'), chRestartBtn: $('qset-ch-restart-btn'),
+            chModal: $('qset-ch-modal'), chBd: $('qset-ch-bd'), chClose: $('qset-ch-close'), chTbody: $('qset-ch-results-body'),
+            
+            // Worksheet elements
             wsG: $('qset-ws-grid'), wsT: $('qset-ws-title'), wsGen: $('qset-ws-gen'),
             sp: $('qset-spotlight'), spC: $('qset-sp-card'), spF: $('qset-sp-front'),
             spB: $('qset-sp-back'), spT: $('qset-sp-timer'), bd: $('qset-backdrop')
@@ -586,17 +564,46 @@
 
         D.next.onclick = nextStudy;
 
+        /* ── CHALLENGE MODE LOGIC ── */
         function resetCh() {
-            state.ch.score = 0; state.ch.time = 120;
-            D.chSc.textContent = '0'; D.chT.textContent = '02:00';
-            D.chS.classList.remove('qset-hidden'); D.chP.classList.add('qset-hidden');
+            state.ch.score = 0; state.ch.total = 0; state.ch.history = []; state.ch.currentQ = null;
+            var tVal = parseInt(D.chTimeInp.value);
+            if (!tVal || tVal <= 0) tVal = 10;
+            state.ch.time = tVal * 60;
+            D.chSc.textContent = '0'; D.chT.textContent = fmt(state.ch.time);
+            D.chS.classList.remove('qset-hidden'); 
+            D.chP.classList.add('qset-hidden');
+            D.chE.classList.add('qset-hidden');
+            D.chF.textContent = '';
+        }
+
+        function endChallenge() {
+            D.chP.classList.add('qset-hidden');
+            D.chE.classList.remove('qset-hidden');
+            D.chFScore.textContent = state.ch.score;
+            D.chFTotal.textContent = state.ch.total;
         }
 
         D.chBtn.onclick = function() {
-            D.chS.classList.add('qset-hidden'); D.chP.classList.remove('qset-hidden');
+            var tVal = parseInt(D.chTimeInp.value);
+            if (!tVal || tVal <= 0) tVal = 10;
+            state.ch.time = tVal * 60;
+            D.chT.textContent = fmt(state.ch.time);
+
+            D.chS.classList.add('qset-hidden'); 
+            D.chE.classList.add('qset-hidden');
+            D.chP.classList.remove('qset-hidden');
+            
             state.ch.int = setInterval(function() {
                 state.ch.time--; D.chT.textContent = fmt(state.ch.time);
-                if (state.ch.time <= 0) { clearInterval(state.ch.int); D.chQ.innerHTML = "Time's Up!"; playBeep(); }
+                if (state.ch.time <= 0) { 
+                    clearInterval(state.ch.int); 
+                    D.chQ.innerHTML = "<div style='font-size:1.5rem; color:#dc2626; font-weight:bold; margin:20px 0;'>Time's Up!</div>"; 
+                    if($('ch-inp')) $('ch-inp').disabled = true;
+                    if($('ch-next-btn')) $('ch-next-btn').disabled = true;
+                    playBeep(); 
+                    setTimeout(endChallenge, 1500);
+                }
             }, 1000);
             nextCh();
         };
@@ -604,25 +611,85 @@
         function nextCh() {
             D.chF.textContent = '';
             var q = cfg.getQuestion(state.level, null);
+            state.ch.currentQ = q;
             renderNativeFront(q, D.chQ, 'challenge');
-            D.chC.innerHTML = '<input type="text" id="ch-inp" style="width:100%; padding:10px; border:2px solid #cbd5e1; border-radius:6px; text-align:center;">';
-            $('ch-inp').onkeypress = function(e) { if(e.key==='Enter') checkCh(q); };
+            
+            D.chC.innerHTML = 
+                '<span style="font-weight:bold; color:#475569; font-size:1.05rem;">Answer:</span> ' +
+                '<input type="text" id="ch-inp" style="width:120px; padding:8px; font-size:1.05rem; border:2px solid #cbd5e1; border-radius:6px; text-align:center; font-weight:bold;"> ' +
+                '<button id="ch-next-btn" style="background:#3b82f6; color:#fff; padding:8px 16px; font-size:0.95rem; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Next question</button>';
+            
+            var inp = $('ch-inp');
+            var nextBtn = $('ch-next-btn');
+            inp.focus();
+            inp.onkeypress = function(e) { if(e.key === 'Enter') checkCh(); };
+            nextBtn.onclick = function() { checkCh(); };
             mjax(D.chQ);
         }
 
-        function checkCh(q) {
+        function checkCh() {
+            var q = state.ch.currentQ;
+            if (!q) return;
+
             var raw = $('ch-inp').value;
             var ans = q.type === 'MCQ' ? q.options[q.correctOption] : (q.a || '');
-            if (raw.toLowerCase().trim() === ans.toLowerCase().trim()) {
-                state.ch.score++; D.chSc.textContent = state.ch.score;
+            var isCorrect = false;
+
+            if (q.type === 'NUMERIC' && q.tolerance && q.tolerance > 0 && raw.trim() !== '') {
+                var num = safeEval(raw);
+                if(isNaN(num)) num = parseFloat(raw);
+                isCorrect = !isNaN(num) && Math.abs(num - parseFloat(q.a)) <= q.tolerance;
+            } else {
+                isCorrect = raw.toLowerCase().trim() === String(ans).toLowerCase().trim() && raw.trim() !== '';
+            }
+
+            state.ch.total++;
+            if (isCorrect) {
+                state.ch.score++; 
                 D.chF.style.color = '#16a34a'; D.chF.textContent = '✓ Correct';
-                setTimeout(nextCh, 500);
             } else {
                 D.chF.style.color = '#dc2626'; D.chF.textContent = '✗ Answer: ' + ans;
-                setTimeout(nextCh, 2000);
             }
+            D.chSc.textContent = state.ch.score;
+
+            // Track for results table
+            state.ch.history.push({
+                qHTML: q.q,
+                userAns: raw.trim() === '' ? '(No answer)' : raw.trim(),
+                correctAns: ans,
+                isCorrect: isCorrect
+            });
+
+            $('ch-inp').disabled = true;
+            $('ch-next-btn').disabled = true;
+
+            setTimeout(function() {
+                if (state.ch.time > 0 && !D.chP.classList.contains('qset-hidden')) {
+                    nextCh();
+                }
+            }, isCorrect ? 400 : 800);
         }
 
+        D.chRestartBtn.onclick = resetCh;
+        D.chShowBtn.onclick = function() {
+            var tbody = '';
+            state.ch.history.forEach(function(item, i) {
+                var rowClass = item.isCorrect ? 'row-correct' : 'row-wrong';
+                tbody += '<tr class="' + rowClass + '">' +
+                    '<td style="text-align:center;">' + (i+1) + '</td>' +
+                    '<td><div style="pointer-events:none; font-size:0.85rem; max-height:120px; overflow:hidden;">' + item.qHTML + '</div></td>' +
+                    '<td style="font-weight:bold; text-align:center;">' + sanitize(item.userAns) + '</td>' +
+                    '<td style="font-weight:bold; color:#065f46; text-align:center;">' + sanitize(item.correctAns) + '</td>' +
+                    '</tr>';
+            });
+            D.chTbody.innerHTML = tbody;
+            D.chModal.classList.add('visible');
+            mjax(D.chTbody);
+        };
+        D.chClose.onclick = function() { D.chModal.classList.remove('visible'); };
+        D.chBd.onclick = function() { D.chModal.classList.remove('visible'); };
+
+        /* ── WORKSHEET MODE LOGIC ── */
         function genWs() {
             D.wsG.innerHTML = ''; D.wsT.textContent = cfg.levelNames[state.level - 1];
             for (var i = 0; i < 12; i++) {
@@ -662,11 +729,16 @@
         D.spC.onclick = function() { D.spC.classList.toggle('flipped'); };
         D.tabs.forEach(function(t) { t.onclick = function() { setMode(t.dataset.mode); }; });
         D.lvl.onchange = function(e) { state.level = parseInt(e.target.value); setMode(state.mode); };
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') D.bd.click(); });
+        
+        document.addEventListener('keydown', function(e) { 
+            if (e.key === 'Escape') {
+                if (D.sp.classList.contains('visible')) D.bd.click();
+                if (D.chModal.classList.contains('visible')) D.chBd.click();
+            } 
+        });
 
         setMode('study');
     }
 
     global.QsetFW = { init };
 })(window);
-

@@ -1,34 +1,37 @@
-// ── 1. HEADER COMMENT ─────────────────────────────────────────────────
-// Topic:        Pythagoras' Theorem
+i// ── 1. HEADER COMMENT ─────────────────────────────────────────────────
+// Topic:        Pythagoras' Theorem — Trainer
 // NCEA Level:   N/A   Standard: N/A
-// Year Group:   Year 10
-// Generated:    2026-04-27
-// Type Mix:     35% NUMERIC, 20% MCQ, 10% MATCH, 20% SPOT_ERROR, 15% EXPLANATION
-// Levels 1–2:   MCQ + MATCH only (per Topic Analysis recommendation)
-// Levels 3:     MCQ + MATCH only
-// Levels 4–5:   NUMERIC + SPOT_ERROR/STEP
-// Level 6:      NUMERIC + EXPLANATION
-// Level 7:      NUMERIC + SPOT_ERROR/VALUE + EXPLANATION
-// Level 8:      NUMERIC + EXPLANATION
+// Year Group:   Year 9–10
+// Generated:    2026-05-01
+// Type Mix:     NUMERIC, MCQ, TRI_ID, SPOT_ERROR/VALUE, EXPLANATION
+// Level a:      TEXT recall + NUMERIC (vocabulary & prerequisites)
+// Level b:      TRI_ID (SVG) + MCQ (identify hypotenuse) + TRI_LABEL
+// Levels c1/c2: NUMERIC find hypotenuse (on-diagram / offset)
+// Levels d1/d2: NUMERIC find shorter side (on-diagram / offset)
+// Level e:      Mixed c + d
+// Level f:      NUMERIC other triangles (equilateral, isosceles, scalene, kite) — SVG
+// Level g:      NUMERIC word problems with diagram
+// Level h:      NUMERIC context problems (draw your own diagram)
+// Level spot:   SPOT_ERROR/VALUE (click the wrong token)
+// Level explain:EXPLANATION (open-ended, marking checklist)
 
 // ── 2. UTILITY FUNCTIONS ──────────────────────────────────────────────
 
-// rand(min, max) — random integer in [min, max] inclusive
 const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// randF(min, max, dp) — random float rounded to dp decimal places
 const randF = (min, max, dp) => {
   const factor = Math.pow(10, dp);
   return Math.round((Math.random() * (max - min) + min) * factor) / factor;
 };
 
-// pickAndRemove(arr) — removes and returns a random element from arr
+const r1 = v => Math.round(v * 10) / 10;
+const r2 = v => Math.round(v * 100) / 100;
+
 const pickAndRemove = (arr) => {
   const idx = Math.floor(Math.random() * arr.length);
   return arr.splice(idx, 1)[0];
 };
 
-// shuffle(arr) — Fisher-Yates shuffle, returns new array
 const shuffle = (arr) => {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -38,1525 +41,963 @@ const shuffle = (arr) => {
   return a;
 };
 
-// Global UID counter
 let _uidCounter = 0;
-
-// makeUID(type, level, diff) — returns uid string in standard format
 const makeUID = (type, level, diff) => {
   _uidCounter++;
-  const abbr = { NUMERIC: "num", MCQ: "mcq", MATCH: "mat", "SPOT_ERROR/STEP": "sep", "SPOT_ERROR/VALUE": "sev", EXPLANATION: "exp" };
+  const abbr = {
+    NUMERIC: "num", MCQ: "mcq", TEXT: "txt", TRI_ID: "tri",
+    TRI_LABEL: "lbl", SPOT_ERROR: "sev", EXPLANATION: "exp", WP: "wp", CTX: "ctx"
+  };
   const n = String(_uidCounter).padStart(3, "0");
   return `${abbr[type] || "unk"}-${n}-lev${level}-d${diff}`;
 };
 
-// makeSVG — generate an inline SVG data URI for a right-angled triangle
-// orientation: "standard" (right angle bottom-left), "rotated" (right angle top), "isosceles"
-// labels: { a, b, c } side label strings; sides: { a, b, c } dimension strings
-const makeSVG = (opts) => {
-  const {
-    orientation = "standard",
-    sides = { a: "", b: "", c: "" },
-    labels = { A: "A", B: "B", C: "C" },
-    showRightAngle = true,
-    extraLines = [],
-    title = ""
-  } = opts;
+// ── 3. SVG HELPERS ────────────────────────────────────────────────────
 
-  const W = 220, H = 160;
-  let pts, raCorner, sidePositions;
+const _NS = "http://www.w3.org/2000/svg";
+const _FILLS = ["#e3f2fd","#e8f5e9","#fff8e1","#fce4ec","#ede7f6","#e0f7fa"];
+const _pickFill = () => _FILLS[rand(0, _FILLS.length - 1)];
 
-  if (orientation === "standard") {
-    // Right angle at bottom-left: A(top-left), B(bottom-left, right angle), C(bottom-right)
-    pts = { A: [30, 20], B: [30, 130], C: [180, 130] };
-    raCorner = pts.B;
-    sidePositions = {
-      a: [(pts.B[0] + pts.C[0]) / 2, pts.B[1] + 18],   // bottom (side a = BC)
-      b: [pts.A[0] - 22, (pts.A[1] + pts.B[1]) / 2],   // left   (side b = AB)
-      c: [(pts.A[0] + pts.C[0]) / 2 + 8, (pts.A[1] + pts.C[1]) / 2 - 12] // hyp
-    };
-  } else if (orientation === "rotated") {
-    // Right angle at bottom-right: A(top-right), B(bottom-left), C(bottom-right, right angle)
-    pts = { A: [190, 20], B: [30, 130], C: [190, 130] };
-    raCorner = pts.C;
-    sidePositions = {
-      a: [(pts.B[0] + pts.C[0]) / 2, pts.B[1] + 18],
-      b: [pts.A[0] + 10, (pts.A[1] + pts.C[1]) / 2],
-      c: [(pts.A[0] + pts.B[0]) / 2 - 20, (pts.A[1] + pts.B[1]) / 2 - 12]
-    };
-  } else if (orientation === "top") {
-    // Right angle at top: A(top, right angle), B(bottom-left), C(bottom-right)
-    pts = { A: [110, 20], B: [30, 130], C: [190, 130] };
-    raCorner = pts.A;
-    sidePositions = {
-      a: [(pts.A[0] + pts.B[0]) / 2 - 22, (pts.A[1] + pts.B[1]) / 2],
-      b: [(pts.A[0] + pts.C[0]) / 2 + 22, (pts.A[1] + pts.C[1]) / 2],
-      c: [(pts.B[0] + pts.C[0]) / 2, pts.B[1] + 18]
-    };
-  } else if (orientation === "isosceles") {
-    // Isosceles: apex A at top-centre, B bottom-left, C bottom-right, altitude shown
-    pts = { A: [110, 15], B: [30, 140], C: [190, 140] };
-    raCorner = null;
-    sidePositions = {
-      a: [(pts.A[0] + pts.B[0]) / 2 - 22, (pts.A[1] + pts.B[1]) / 2],
-      b: [(pts.A[0] + pts.C[0]) / 2 + 22, (pts.A[1] + pts.C[1]) / 2],
-      c: [(pts.B[0] + pts.C[0]) / 2, pts.B[1] + 18]
-    };
-  }
-
-  const polyPoints = `${pts.A[0]},${pts.A[1]} ${pts.B[0]},${pts.B[1]} ${pts.C[0]},${pts.C[1]}`;
-
-  // Right-angle marker (10px square)
-  let raMarker = "";
-  if (showRightAngle && raCorner) {
-    const [rx, ry] = raCorner;
-    const s = 10;
-    if (orientation === "standard") {
-      raMarker = `<polyline points="${rx},${ry - s} ${rx + s},${ry - s} ${rx + s},${ry}" fill="none" stroke="#333" stroke-width="1.5"/>`;
-    } else if (orientation === "rotated") {
-      raMarker = `<polyline points="${rx - s},${ry} ${rx - s},${ry - s} ${rx},${ry - s}" fill="none" stroke="#333" stroke-width="1.5"/>`;
-    } else if (orientation === "top") {
-      raMarker = `<polyline points="${rx - s},${ry} ${rx - s},${ry + s} ${rx + s},${ry + s} ${rx + s},${ry}" fill="none" stroke="#333" stroke-width="1.5"/>`;
-    }
-  }
-
-  // Vertex labels
-  const vertexOffset = {
-    A: orientation === "standard" ? [-14, 0] : orientation === "rotated" ? [8, 0] : orientation === "top" ? [0, -10] : [0, -12],
-    B: [-14, 10],
-    C: orientation === "rotated" ? [8, 10] : [6, 10]
-  };
-
-  const vertexLabels = Object.entries(pts).map(([k, [x, y]]) => {
-    const [dx, dy] = (vertexOffset[k] || [0, 0]);
-    return `<text x="${x + dx}" y="${y + dy}" font-size="13" font-family="sans-serif" fill="#222" font-style="italic">${labels[k] || k}</text>`;
-  }).join("\n    ");
-
-  // Side dimension labels
-  const sideLabelsSVG = [
-    sides.a ? `<text x="${sidePositions.a[0]}" y="${sidePositions.a[1]}" font-size="12" font-family="sans-serif" fill="#1a56db" text-anchor="middle">${sides.a}</text>` : "",
-    sides.b ? `<text x="${sidePositions.b[0]}" y="${sidePositions.b[1]}" font-size="12" font-family="sans-serif" fill="#1a56db" text-anchor="middle">${sides.b}</text>` : "",
-    sides.c ? `<text x="${sidePositions.c[0]}" y="${sidePositions.c[1]}" font-size="12" font-family="sans-serif" fill="#c0392b" text-anchor="middle">${sides.c}</text>` : ""
-  ].join("\n    ");
-
-  // Extra lines (e.g. altitude for isosceles)
-  const extraSVG = extraLines.map(l =>
-    `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" stroke="#888" stroke-width="1" stroke-dasharray="4,3"/>`
-  ).join("\n    ");
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${title}">
-  <polygon points="${polyPoints}" fill="#eef4ff" stroke="#333" stroke-width="2"/>
-  ${raMarker}
-  ${vertexLabels}
-  ${sideLabelsSVG}
-  ${extraSVG}
-</svg>`;
-
-  return "data:image/svg+xml," + encodeURIComponent(svg);
+/**
+ * _textSVG — return an SVG <text> string with white stroke halo
+ */
+const _textSVG = (x, y, txt, fill, sz, W, H) => {
+  x = Math.min(W - (sz * txt.length * 0.4), Math.max(sz * 0.5, x));
+  y = Math.min(H - sz * 0.5, Math.max(sz * 0.6, y));
+  return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" ` +
+    `font-size="${sz}" font-weight="700" font-family="Segoe UI,Arial,sans-serif" ` +
+    `stroke="white" stroke-width="3" paint-order="stroke" fill="${fill}">${txt}</text>`;
 };
 
-// ── 3. QUESTION GENERATORS ────────────────────────────────────────────
-
-// Known Pythagorean triples (scaled) for clean-integer questions
-const TRIPLES = [
-  [3,4,5],[5,12,13],[8,15,17],[7,24,25],[6,8,10],[9,12,15],[12,16,20],[5,12,13],
-  [8,6,10],[9,40,41],[11,60,61],[12,35,37],[20,21,29],[28,45,53],[33,56,65]
-];
-
-// Context pools (NZ-relevant, for Level 8)
-const _contextPool8Master = [
-  { name: "ladder", template: "construction" },
-  { name: "rugby field", template: "sports" },
-  { name: "paddock fence", template: "farming" },
-  { name: "TV screen", template: "technology" },
-  { name: "rowing course", template: "sports" },
-  { name: "roof rafter", template: "construction" },
-  { name: "wharenui floor", template: "maori" },
-  { name: "tukutuku panel", template: "maori" },
-  { name: "navigation", template: "navigation" },
-  { name: "baking tin", template: "cooking" }
-];
-
-// Level pools for context variety (reset when exhausted)
-const _pools = {};
-const getPool = (key, master) => {
-  if (!_pools[key] || _pools[key].length === 0) {
-    _pools[key] = master.slice();
-  }
-  return _pools[key];
+/**
+ * _boxSVG — return an SVG right-angle box at vertex vi of pts[]
+ */
+const _boxSVG = (pts, vi, style = {}) => {
+  const a = pts[vi], b = pts[(vi + 1) % 3], c = pts[(vi + 2) % 3];
+  const lab = Math.hypot(b.x - a.x, b.y - a.y);
+  const lac = Math.hypot(c.x - a.x, c.y - a.y);
+  if (lab < 1 || lac < 1) return "";
+  const S = style.s || 10;
+  const ux = (b.x - a.x) / lab * S, uy = (b.y - a.y) / lab * S;
+  const vx = (c.x - a.x) / lac * S, vy = (c.y - a.y) / lac * S;
+  const p1 = { x: a.x + ux, y: a.y + uy };
+  const p2 = { x: a.x + ux + vx, y: a.y + uy + vy };
+  const p3 = { x: a.x + vx, y: a.y + vy };
+  return `<path d="M${a.x} ${a.y}L${p1.x} ${p1.y}L${p2.x} ${p2.y}L${p3.x} ${p3.y}Z" ` +
+    `fill="${style.fill || "none"}" stroke="${style.stroke || "#1a237e"}" ` +
+    `stroke-width="${style.sw || 1.5}" stroke-linejoin="miter"/>`;
 };
 
-// ─── LEVEL 1: Squares and Square Roots ────────────────────────────────
-// Types: NUMERIC, MCQ
-// Diff 1: integer perfect square; Diff 2: decimal; Diff 3: fraction; Diff 4: surd
+/**
+ * _computeAngles — return angles (degrees) at each vertex of a 3-point polygon
+ */
+const _computeAngles = (pts) => pts.map((_, i) => {
+  const a = pts[i], b = pts[(i + 1) % 3], c = pts[(i + 2) % 3];
+  const bax = b.x - a.x, bay = b.y - a.y, cax = c.x - a.x, cay = c.y - a.y;
+  const dot = bax * cax + bay * cay;
+  const mag = Math.hypot(bax, bay) * Math.hypot(cax, cay);
+  return Math.acos(Math.min(1, Math.max(-1, dot / (mag || 1)))) * 180 / Math.PI;
+});
 
-const _genLevel1 = (diff) => {
-  // Randomly choose square or square-root operation
-  const op = Math.random() < 0.5 ? "square" : "sqrt";
-
-  if (diff === 1) {
-    const base = rand(2, 12);
-    const answer = base * base;
-    if (op === "square") {
-      return { q: `Calculate the value of \\(${base}^2\\).`, a: String(answer), working: `\\(${base}^2 = ${base} \\times ${base} = ${answer}\\)` };
-    } else {
-      return { q: `Calculate \\(\\sqrt{${answer}}\\).`, a: String(base), working: `\\(\\sqrt{${answer}} = ${base}\\) (since \\(${base}^2 = ${answer}\\))` };
-    }
-  } else if (diff === 2) {
-    const bases = [1.5, 2.5, 3.5, 4.5, 1.2, 2.4, 0.5, 1.1, 2.2, 3.5];
-    const base = bases[rand(0, bases.length - 1)];
-    const answer = Math.round(base * base * 100) / 100;
-    if (op === "square") {
-      return { q: `Calculate \\(${base}^2\\).`, a: String(answer), working: `\\(${base}^2 = ${base} \\times ${base} = ${answer}\\)` };
-    } else {
-      return { q: `Calculate \\(\\sqrt{${answer}}\\).`, a: String(base), working: `\\(\\sqrt{${answer}} = ${base}\\)` };
-    }
-  } else if (diff === 3) {
-    const fracs = [
-      { n: 1, d: 2, sq: "\\frac{1}{4}", sqrtOf: "\\frac{1}{4}", sqrtAns: "\\frac{1}{2}" },
-      { n: 2, d: 3, sq: "\\frac{4}{9}", sqrtOf: "\\frac{4}{9}", sqrtAns: "\\frac{2}{3}" },
-      { n: 3, d: 4, sq: "\\frac{9}{16}", sqrtOf: "\\frac{9}{16}", sqrtAns: "\\frac{3}{4}" },
-      { n: 3, d: 5, sq: "\\frac{9}{25}", sqrtOf: "\\frac{9}{25}", sqrtAns: "\\frac{3}{5}" }
-    ];
-    const f = fracs[rand(0, fracs.length - 1)];
-    if (op === "square") {
-      return {
-        q: `Calculate \\(\\left(\\frac{${f.n}}{${f.d}}\\right)^2\\).`,
-        a: `${f.n * f.n}/${f.d * f.d}`,
-        working: `\\(\\left(\\frac{${f.n}}{${f.d}}\\right)^2 = \\frac{${f.n}^2}{${f.d}^2} = \\frac{${f.n * f.n}}{${f.d * f.d}}\\)`
-      };
-    } else {
-      return {
-        q: `Calculate \\(\\sqrt{${f.sq}}\\).`,
-        a: `${f.n}/${f.d}`,
-        working: `\\(\\sqrt{${f.sqrtOf}} = \\frac{\\sqrt{${f.n * f.n}}}{\\sqrt{${f.d * f.d}}} = \\frac{${f.n}}{${f.d}}\\)`
-      };
-    }
-  } else {
-    // diff 4: surd
-    const vals = [
-      { n: 2, simp: "\\sqrt{2} \\approx 1.41" },
-      { n: 3, simp: "\\sqrt{3} \\approx 1.73" },
-      { n: 5, simp: "\\sqrt{5} \\approx 2.24" },
-      { n: 6, simp: "\\sqrt{6} \\approx 2.45" },
-      { n: 7, simp: "\\sqrt{7} \\approx 2.65" },
-      { n: 8, simp: "2\\sqrt{2} \\approx 2.83" },
-      { n: 10, simp: "\\sqrt{10} \\approx 3.16" },
-      { n: 11, simp: "\\sqrt{11} \\approx 3.32" }
-    ];
-    const v = vals[rand(0, vals.length - 1)];
-    const approx = Math.round(Math.sqrt(v.n) * 100) / 100;
-    return {
-      q: `Calculate \\(\\sqrt{${v.n}}\\). Leave your answer as a surd or give a decimal rounded to 2 decimal places.`,
-      a: String(approx),
-      working: `\\(\\sqrt{${v.n}} = ${v.simp}\\)`
-    };
-  }
-};
-
-const _genNumericL1 = (diff) => {
-  const core = _genLevel1(diff);
-  const uid = makeUID("NUMERIC", 1, diff);
-  return {
-    uid, level: 1, diff, type: "NUMERIC",
-    q: core.q,
-    a: core.a,
-    units: [],
-    tolerance: 0.05,
-    working: `<p><strong>Answer: \\(${core.a}\\)</strong></p><p>${core.working}</p>`,
-    img: "", imgAlt: "", hint: "",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-const _genMCQL1 = (diff) => {
-  const uid = makeUID("MCQ", 1, diff);
-  const core = _genLevel1(diff);
-
-  // Build 3 distractors based on misconceptions
-  const correct = parseFloat(core.a) || core.a;
-  let options, correctOption;
-
-  if (diff <= 2) {
-    const cv = parseFloat(core.a);
-    // Misconceptions: doubling instead of squaring; halving instead of sqrt; off-by-one
-    const d1 = String(Math.round(cv * 2 * 100) / 100);      // doubles the value (× 2 not ²)
-    const d2 = String(Math.round((cv + 1) * 100) / 100);    // off-by-one
-    const d3 = String(Math.round(cv / 2 * 100) / 100);      // halves instead of sqrt
-    const rawOpts = [core.a, d1, d2, d3];
-    // Deduplicate in case any distractors collide with the correct answer
-    const seen = new Set();
-    const dedup = [];
-    for (const o of rawOpts) {
-      if (!seen.has(o)) { seen.add(o); dedup.push(o); }
-    }
-    while (dedup.length < 4) dedup.push(String(Math.round((cv + dedup.length) * 100) / 100));
-    const opts = shuffle(dedup);
-    correctOption = opts.indexOf(core.a);
-    options = opts;
-
-  } else if (diff === 3) {
-    // Fractions — distractors based on common fraction misconceptions
-    // core.a is e.g. "1/4" (squaring) or "1/2" (square root)
-    // We need to reconstruct the fraction components from core.a
-    const isSquareOp = core.q.includes("^2");  // squaring question
-    // Extract numerator and denominator from core.a
-    const parts = core.a.split("/");
-    const n = parseInt(parts[0]), d = parseInt(parts[1]);
-
-    let d1, d2, d3;
-    if (isSquareOp) {
-      // Correct: (n/d)² = n²/d²
-      // Misconception 1: student adds instead of squaring → 2n/2d = n/d (same fraction, wrong operation)
-      d1 = `${2 * n}/${2 * d}`;           // doubles numerator and denominator (adds instead of squaring)
-      d2 = `${n * n}/${d}`;               // squares numerator only, forgets to square denominator
-      d3 = `${n}/${d * d}`;               // squares denominator only, forgets numerator
-    } else {
-      // Square root question: correct = n/d
-      // Misconception 1: takes sqrt of numerator only
-      d1 = `${n}/${d * d}`;               // applies sqrt to numerator only, leaves denominator squared
-      d2 = `${n * n}/${d}`;               // leaves numerator squared, forgets denominator
-      d3 = `${d}/${n}`;                   // inverts the fraction (common slip)
-    }
-    const opts = shuffle([core.a, d1, d2, d3]);
-    correctOption = opts.indexOf(core.a);
-    options = opts;
-
-  } else {
-    // diff 4 — surds: distractors represent typical surd misconceptions
-    // core.a is the decimal approximation e.g. "1.41" for √2
-    const cv = parseFloat(core.a);
-    // Extract the radicand from the question text (the number inside √)
-    const match = core.q.match(/\\sqrt\{(\d+)\}/);
-    const radicand = match ? parseInt(match[1]) : 2;
-
-    // Misconception 1: student halves the radicand instead of taking sqrt (√n = n/2)
-    const d1 = String(Math.round(radicand / 2 * 100) / 100);
-    // Misconception 2: student subtracts 1 from radicand (√n ≈ n − 1 for small n)
-    const d2 = String(radicand - 1);
-    // Misconception 3: student squares instead of square-rooting (gives n²)
-    const d3 = String(radicand * radicand);
-
-    // Deduplicate against correct answer
-    const rawOpts = [core.a, d1, d2, d3];
-    const seen = new Set();
-    const dedup = [];
-    for (const o of rawOpts) {
-      if (!seen.has(o)) { seen.add(o); dedup.push(o); }
-    }
-    while (dedup.length < 4) dedup.push(String(Math.round((cv + dedup.length * 0.5) * 100) / 100));
-    const opts = shuffle(dedup.slice(0, 4));
-    correctOption = opts.indexOf(core.a);
-    options = opts;
-  }
-
-  return {
-    uid, level: 1, diff, type: "MCQ",
-    q: core.q,
-    options,
-    correctOption,
-    working: `<p><strong>Correct answer: ${core.a}</strong></p><p>${core.working}</p>`,
-    img: "", imgAlt: "", hint: "",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-// ─── LEVEL 2: Identify the Hypotenuse ─────────────────────────────────
-// Types: MCQ, MATCH only
-
-const _triLabels2 = [
-  { verts: ["P","Q","R"], raAt: "R" },
-  { verts: ["A","B","C"], raAt: "C" },
-  { verts: ["X","Y","Z"], raAt: "Y" },
-  { verts: ["D","E","F"], raAt: "F" },
-  { verts: ["M","N","O"], raAt: "N" }
-];
-
-const _genMCQL2 = (diff) => {
-  const uid = makeUID("MCQ", 2, diff);
-  const pool = getPool("l2mcq", _triLabels2);
-  const tri = pickAndRemove(pool);
-  const [v0, v1, v2] = tri.verts;
-  const ra = tri.raAt;
-
-  // The hypotenuse is opposite the right angle
-  // Find the two vertices that are NOT the right angle vertex → those two endpoints make the hyp
-  const hypVerts = tri.verts.filter(v => v !== ra);
-  const hyp = hypVerts[0] + hypVerts[1];
-
-  // Other sides
-  const allSides = [v0 + v1, v1 + v2, v0 + v2];
-  const wrongSides = allSides.filter(s => s !== hyp && s !== hyp[1] + hyp[0]);
-
-  // Distractors: the two non-hypotenuse sides + one reversed hyp label
-  const d1 = allSides.find(s => s !== hyp);
-  const d2 = allSides.find(s => s !== hyp && s !== d1) || (hyp[1] + hyp[0]);
-  const d3 = ra + hypVerts[0];
-
-  const rawOpts = [hyp, d1 || d3, d2 || d3, d3];
-  // Deduplicate
-  const seen = new Set();
-  const dedupOpts = [];
-  for (const o of rawOpts) {
-    const key = [o, o[1] + o[0]].sort().join("");
-    if (!seen.has(key)) { seen.add(key); dedupOpts.push(o); }
-    if (dedupOpts.length === 4) break;
-  }
-  while (dedupOpts.length < 4) dedupOpts.push("None of these");
-
-  const shuffled = shuffle(dedupOpts);
-  const correctOption = shuffled.indexOf(hyp);
-
-  let qText, orient;
-  if (diff === 1) {
-    orient = "standard";
-    qText = `In triangle ${v0}${v1}${v2}, the right angle is at ${ra}. Which side is the hypotenuse?`;
-  } else if (diff === 2) {
-    orient = "rotated";
-    qText = `Triangle ${v0}${v1}${v2} has its right angle at ${ra}. The triangle is drawn in a non-standard orientation. Which side is the hypotenuse?`;
-  } else if (diff === 3) {
-    qText = `In the formula \\(a^2 + b^2 = c^2\\), which variable represents the hypotenuse?`;
-    const opts = shuffle(["c", "a", "b", "a or b"]);
-    const co = opts.indexOf("c");
-    return {
-      uid, level: 2, diff, type: "MCQ",
-      q: qText,
-      options: opts, correctOption: co,
-      working: `<p><strong>Answer: c</strong></p><p>In Pythagoras' Theorem \\(a^2 + b^2 = c^2\\), <em>c</em> is always the hypotenuse — the side opposite the right angle.</p>`,
-      img: "", imgAlt: "", hint: "The hypotenuse is opposite the right angle.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else {
-    qText = `A right-angled triangle has vertices ${v0}, ${v1}, and ${v2}, with a right angle at ${ra}. Another triangle shares vertex ${ra} but has sides ${ra + hypVerts[0]} and ${ra + hypVerts[1]} as its legs. What is the hypotenuse of the <strong>first</strong> triangle?`;
-    orient = "standard";
-  }
-
-  // Map the triangle's three vertices to the SVG slot positions correctly.
-  // "standard" orientation: slot B = bottom-left = right-angle corner.
-  // "rotated" orientation:  slot C = bottom-right = right-angle corner.
-  // We always place the right-angle vertex in the slot that carries the RA marker,
-  // and spread the other two vertices across the remaining slots.
-  const nonRaVerts = tri.verts.filter(v => v !== ra);  // exactly 2 vertices
-  let svgLabels;
-  if ((orient || "standard") === "standard") {
-    // slot A = top-left, slot B = bottom-left (RA), slot C = bottom-right
-    svgLabels = { A: nonRaVerts[0], B: ra, C: nonRaVerts[1] };
-  } else {
-    // "rotated": slot A = top-right, slot B = bottom-left, slot C = bottom-right (RA)
-    svgLabels = { A: nonRaVerts[0], B: nonRaVerts[1], C: ra };
-  }
-
-  const img = makeSVG({
-    orientation: orient || "standard",
-    sides: { a: "", b: "", c: "" },
-    labels: svgLabels,
-    showRightAngle: true,
-    title: `Triangle ${v0}${v1}${v2} with right angle at ${ra}`
+const _rotatePts = (pts, ang) => {
+  const cx = pts.reduce((s, p) => s + p.x, 0) / 3;
+  const cy = pts.reduce((s, p) => s + p.y, 0) / 3;
+  return pts.map(({ x, y }) => {
+    const dx = x - cx, dy = y - cy;
+    return { x: cx + dx * Math.cos(ang) - dy * Math.sin(ang), y: cy + dx * Math.sin(ang) + dy * Math.cos(ang) };
   });
-
-  return {
-    uid, level: 2, diff, type: "MCQ",
-    q: qText,
-    options: shuffled, correctOption,
-    working: `<p><strong>Answer: ${hyp}</strong></p><p>The hypotenuse is always opposite the right angle. Since the right angle is at ${ra}, the hypotenuse is the side connecting the other two vertices: <strong>${hyp}</strong>.</p>`,
-    img, imgAlt: `Triangle ${v0}${v1}${v2} with right angle at ${ra}`,
-    hint: "The hypotenuse is always opposite the right angle marker.",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
 };
 
-const _matchPairsL2 = [
-  { left: "Hypotenuse", right: "Side opposite the right angle" },
-  { left: "Right angle", right: "The 90° angle in a right-angled triangle" },
-  { left: "Legs (shorter sides)", right: "The two sides that form the right angle" },
-  { left: "Longest side", right: "Always the hypotenuse in a right-angled triangle" },
-  { left: "Side adjacent to right angle", right: "One of the two shorter sides" },
-  { left: "c in a² + b² = c²", right: "Hypotenuse" },
-  { left: "a and b in a² + b² = c²", right: "The two shorter sides" }
-];
-
-const _genMatchL2 = (diff) => {
-  const uid = makeUID("MATCH", 2, diff);
-  const pool = getPool("l2match", _matchPairsL2);
-  const numPairs = Math.min(4, pool.length);
-  const chosen = [];
-  for (let i = 0; i < numPairs; i++) chosen.push(pickAndRemove(pool));
-
-  const rights = shuffle(chosen.map(p => p.right));
-  const pairs = chosen.map(p => ({ left: p.left, right: p.right }));
-  // Re-shuffle the pairs array itself
-  const shuffledPairs = shuffle(pairs);
-
-  return {
-    uid, level: 2, diff, type: "MATCH",
-    q: "Match each term on the left with its correct description on the right.",
-    pairs: shuffledPairs,
-    working: `<p>${shuffledPairs.map(p => `<strong>${p.left}</strong> → ${p.right}`).join("<br>")}</p>`,
-    img: "", imgAlt: "", hint: "",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
+const _centrePts = (pts, W, H, m = 0.76) => {
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const sc = Math.min((W * m) / (x1 - x0 || 1), (H * m) / (y1 - y0 || 1));
+  const ox = (W - (x1 - x0) * sc) / 2 - x0 * sc;
+  const oy = (H - (y1 - y0) * sc) / 2 - y0 * sc;
+  return pts.map(p => ({ x: p.x * sc + ox, y: p.y * sc + oy }));
 };
 
-// ─── LEVEL 3: Recall and State the Theorem ────────────────────────────
-// Types: MCQ, MATCH only
-
-const _genMCQL3 = (diff) => {
-  const uid = makeUID("MCQ", 3, diff);
-
-  if (diff === 1) {
-    const opts = shuffle(["c", "a", "b", "any side"]);
-    const co = opts.indexOf("c");
-    return {
-      uid, level: 3, diff, type: "MCQ",
-      q: "In the formula \\(a^2 + b^2 = c^2\\), which variable always represents the hypotenuse?",
-      options: opts, correctOption: co,
-      working: `<p><strong>Answer: c</strong></p><p>By convention, <em>c</em> is always the hypotenuse in Pythagoras' Theorem. <em>a</em> and <em>b</em> are the two shorter sides.</p>`,
-      img: "", imgAlt: "", hint: "Look at which variable is on its own on the right-hand side.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else if (diff === 2) {
-    const correct = "a² + b² = c²";
-    const opts = shuffle([correct, "a + b = c", "a² − b² = c²", "a² × b² = c²"]);
-    const co = opts.indexOf(correct);
-    return {
-      uid, level: 3, diff, type: "MCQ",
-      q: "Which of the following is the correct statement of Pythagoras' Theorem?",
-      options: opts, correctOption: co,
-      working: `<p><strong>Answer: a² + b² = c²</strong></p><p>\\(a + b = c\\) is incorrect — you must <em>square</em> each side before adding.<br>\\(a^2 - b^2 = c^2\\) is a rearrangement used only when <em>c</em> and <em>a</em> are known.<br>\\(a^2 \\times b^2 = c^2\\) is entirely incorrect — the operation is addition, not multiplication.</p>`,
-      img: "", imgAlt: "", hint: "The theorem involves squaring and adding — not multiplying or subtracting.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else if (diff === 3) {
-    const correct = "Right-angled triangles only";
-    const opts = shuffle([correct, "All triangles", "Isosceles triangles only", "Equilateral triangles only"]);
-    const co = opts.indexOf(correct);
-    return {
-      uid, level: 3, diff, type: "MCQ",
-      q: "For which type of triangle does Pythagoras' Theorem apply?",
-      options: opts, correctOption: co,
-      working: `<p><strong>Answer: Right-angled triangles only</strong></p><p>Pythagoras' Theorem applies <em>only</em> to right-angled triangles. The right angle must be confirmed before applying the formula. Applying it to non-right-angled triangles gives an incorrect result.</p>`,
-      img: "", imgAlt: "", hint: "The theorem requires a specific type of angle in the triangle.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else {
-    // diff 4: spelling
-    const correctSpelling = "Pythagoras";
-    const opts = shuffle([correctSpelling, "Pythagoraus", "Pythagoris", "Pythagorean"]);
-    const co = opts.indexOf(correctSpelling);
-    return {
-      uid, level: 3, diff, type: "MCQ",
-      q: "Which of the following is the correct spelling of the mathematician's name?",
-      options: opts, correctOption: co,
-      working: `<p><strong>Answer: Pythagoras</strong></p><p>The correct spelling is <strong>Pythagoras</strong>. Common errors include adding extra letters (Pythagoraus) or changing the vowels (Pythagoris). "Pythagorean" is an adjective, not the name itself.</p>`,
-      img: "", imgAlt: "", hint: "Sound it out: Pyth-ag-or-as.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  }
+/**
+ * _makeRightTri — generate a random right triangle, centred and rotated
+ * Returns { pts, isRight, rightIdx, angles }
+ */
+const _makeRightTri = (W = 220, H = 150) => {
+  const ri = rand(0, 2);
+  const a = 30 + Math.random() * 50, b = 30 + Math.random() * 50;
+  let raw;
+  if (ri === 0)      raw = [{ x: 0, y: 0 }, { x: a, y: 0 }, { x: 0, y: b }];
+  else if (ri === 1) raw = [{ x: a, y: 0 }, { x: 0, y: 0 }, { x: 0, y: b }];
+  else               raw = [{ x: 0, y: b }, { x: a, y: b }, { x: a, y: 0 }];
+  const pts = _centrePts(_rotatePts(raw, Math.random() * 2 * Math.PI), W, H);
+  const ra = _computeAngles(pts);
+  const tri = ra.reduce((b, v, i) => Math.abs(v - 90) < Math.abs(ra[b] - 90) ? i : b, 0);
+  const i1 = (tri + 1) % 3, i2 = (tri + 2) % 3, sum = ra[i1] + ra[i2];
+  const ang = [0, 0, 0];
+  ang[tri] = 90; ang[i1] = Math.round(ra[i1] / sum * 90); ang[i2] = 90 - ang[i1];
+  return { pts, isRight: true, rightIdx: tri, angles: ang };
 };
 
-const _matchPairsL3 = [
-  { left: "a² + b² = c²", right: "Pythagoras' Theorem" },
-  { left: "c", right: "Hypotenuse in a² + b² = c²" },
-  { left: "Right-angled triangle", right: "Required for Pythagoras' Theorem to apply" },
-  { left: "b² = c² − a²", right: "Rearrangement to find a shorter side" },
-  { left: "If a² + b² = c², the triangle is…", right: "Right-angled" },
-  { left: "Hypotenuse", right: "Always the longest side" },
-  { left: "Converse of Pythagoras", right: "Tests whether a triangle is right-angled" }
-];
-
-const _genMatchL3 = (diff) => {
-  const uid = makeUID("MATCH", 3, diff);
-  const pool = getPool("l3match", _matchPairsL3);
-  const numPairs = Math.min(4, pool.length);
-  const chosen = [];
-  for (let i = 0; i < numPairs; i++) chosen.push(pickAndRemove(pool));
-  const pairs = shuffle(chosen.map(p => ({ left: p.left, right: p.right })));
-  return {
-    uid, level: 3, diff, type: "MATCH",
-    q: "Match each expression or term on the left with its correct meaning on the right.",
-    pairs,
-    working: `<p>${pairs.map(p => `<strong>${p.left}</strong> → ${p.right}`).join("<br>")}</p>`,
-    img: "", imgAlt: "", hint: "",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-// ─── LEVEL 4: Find the Hypotenuse ─────────────────────────────────────
-// Types: NUMERIC, SPOT_ERROR/STEP
-
-const _genNumericL4 = (diff) => {
-  const uid = makeUID("NUMERIC", 4, diff);
-  let a, b, c, qText, aStr, workStr, imgData, imgAlt, units;
-
-  if (diff === 1) {
-    // Pythagorean triple → clean integer hyp
-    const triple = TRIPLES[rand(0, TRIPLES.length - 1)];
-    const scale = rand(1, 3);
-    a = triple[0] * scale; b = triple[1] * scale; c = triple[2] * scale;
-    aStr = String(c);
-    units = ["cm"];
-    qText = `A right-angled triangle has shorter sides of ${a} cm and ${b} cm. Find the length of the hypotenuse.`;
-    workStr = `<p><strong>Answer: \\(c = ${c}\\) cm</strong></p>
-<p>\\(c^2 = a^2 + b^2\\)<br>
-\\(c^2 = ${a}^2 + ${b}^2\\)<br>
-\\(c^2 = ${a*a} + ${b*b}\\)<br>
-\\(c^2 = ${a*a + b*b}\\)<br>
-\\(c = \\sqrt{${a*a + b*b}} = ${c}\\) cm</p>`;
-    // SVG "standard" orientation: slot b = left vertical leg (AB), slot a = bottom horizontal leg (BC)
-    // Assign the larger value to the horizontal (longer-looking) leg for visual clarity
-    const hLeg = Math.max(a, b), vLeg = Math.min(a, b);
-    imgData = makeSVG({ orientation: "standard", sides: { b: `${vLeg} cm`, a: `${hLeg} cm`, c: "?" }, labels: { A: "A", B: "B", C: "C" }, title: `Right triangle with legs ${a} and ${b}` });
-    imgAlt = `Right-angled triangle with legs ${a} cm and ${b} cm, hypotenuse unknown`;
-  } else if (diff === 2) {
-    // Integer inputs, decimal hyp, 1 d.p.
-    a = rand(3, 12); b = rand(3, 12);
-    c = Math.sqrt(a*a + b*b);
-    aStr = c.toFixed(1);
-    units = ["cm"];
-    qText = `A right-angled triangle has shorter sides of ${a} cm and ${b} cm. Find the hypotenuse, giving your answer to 1 decimal place.`;
-    workStr = `<p><strong>Answer: \\(c \\approx ${aStr}\\) cm</strong></p>
-<p>\\(c^2 = ${a}^2 + ${b}^2\\)<br>
-\\(c^2 = ${a*a} + ${b*b}\\)<br>
-\\(c^2 = ${a*a + b*b}\\)<br>
-\\(c = \\sqrt{${a*a + b*b}} \\approx ${aStr}\\) cm</p>`;
-    const hLeg2 = Math.max(a, b), vLeg2 = Math.min(a, b);
-    imgData = makeSVG({ orientation: "standard", sides: { b: `${vLeg2} cm`, a: `${hLeg2} cm`, c: "?" }, labels: { A: "A", B: "B", C: "C" }, title: `Right triangle legs ${a} ${b}` });
-    imgAlt = `Right-angled triangle with legs ${a} cm and ${b} cm`;
-  } else if (diff === 3) {
-    // Decimal inputs, 2 d.p.
-    a = randF(2, 8, 1); b = randF(2, 8, 1);
-    c = Math.sqrt(a*a + b*b);
-    aStr = c.toFixed(2);
-    units = ["m"];
-    qText = `A right-angled triangle has shorter sides of ${a} m and ${b} m. Calculate the length of the hypotenuse, giving your answer to 2 decimal places.`;
-    workStr = `<p><strong>Answer: \\(c \\approx ${aStr}\\) m</strong></p>
-<p>\\(c^2 = ${a}^2 + ${b}^2\\)<br>
-\\(c^2 = ${a*a} + ${b*b}\\)<br>
-\\(c^2 = ${Math.round((a*a + b*b)*100)/100}\\)<br>
-\\(c = \\sqrt{${Math.round((a*a + b*b)*100)/100}} \\approx ${aStr}\\) m</p>`;
-    const hLeg3 = Math.max(a, b), vLeg3 = Math.min(a, b);
-    imgData = makeSVG({ orientation: "standard", sides: { b: `${vLeg3} m`, a: `${hLeg3} m`, c: "?" }, labels: { A: "A", B: "B", C: "C" }, title: `Right triangle decimal legs` });
-    imgAlt = `Right-angled triangle with legs ${a} m and ${b} m`;
-  } else {
-    // diff 4: one input is a simple surd
-    const surdPairs = [
-      { sa: "\\sqrt{3}", sv: 3, sb: "\\sqrt{5}", bv: 5, c2: 8, cStr: "2\\sqrt{2}", cApprox: (2*Math.SQRT2).toFixed(2) },
-      { sa: "\\sqrt{2}", sv: 2, sb: "\\sqrt{7}", bv: 7, c2: 9, cStr: "3", cApprox: "3" },
-      { sa: "\\sqrt{5}", sv: 5, sb: "\\sqrt{11}", bv: 11, c2: 16, cStr: "4", cApprox: "4" },
-      { sa: "\\sqrt{3}", sv: 3, sb: "\\sqrt{13}", bv: 13, c2: 16, cStr: "4", cApprox: "4" }
+const _makeNonRightTri = (W = 220, H = 150) => {
+  for (let t = 0; t < 300; t++) {
+    const raw = [
+      { x: 10 + Math.random() * 70, y: 10 + Math.random() * 60 },
+      { x: 90 + Math.random() * 90, y: 10 + Math.random() * 60 },
+      { x: 30 + Math.random() * 130, y: 75 + Math.random() * 65 }
     ];
-    const sp = surdPairs[rand(0, surdPairs.length - 1)];
-    aStr = sp.cApprox;
-    units = [];
-    qText = `A right-angled triangle has shorter sides \\(${sp.sa}\\) and \\(${sp.sb}\\). Find the exact length of the hypotenuse in simplified surd form.`;
-    workStr = `<p><strong>Answer: \\(${sp.cStr}\\)</strong></p>
-<p>\\(c^2 = (${sp.sa})^2 + (${sp.sb})^2\\)<br>
-\\(c^2 = ${sp.sv} + ${sp.bv}\\)<br>
-\\(c^2 = ${sp.c2}\\)<br>
-\\(c = \\sqrt{${sp.c2}} = ${sp.cStr}\\)</p>`;
-    imgData = "";
-    imgAlt = "";
+    const a = _computeAngles(raw);
+    if (a.every(v => Math.abs(v - 90) > 12)) {
+      const pts = _centrePts(raw, W, H);
+      const ra = _computeAngles(pts).map(v => Math.round(v));
+      ra[0] += 180 - ra.reduce((s, v) => s + v, 0);
+      return { pts, isRight: false, rightIdx: -1, angles: ra };
+    }
+  }
+  const pts = _centrePts([{ x: 30, y: 30 }, { x: 170, y: 30 }, { x: 55, y: 125 }], W, H);
+  return { pts, isRight: false, rightIdx: -1, angles: [60, 80, 40] };
+};
+
+/**
+ * _triSVG — render triangle data to an SVG string (not a data URI)
+ * data: { pts, isRight, angles, showMode, labelSides, sideVals, highlight }
+ */
+const _triSVG = (data, W, H) => {
+  const { pts, isRight, angles, showMode, labelSides, sideVals, highlight } = data;
+  const fill = highlight ? "#fff9c4" : _pickFill();
+  const stroke = highlight ? "#c62828" : "#1a237e";
+  const poly = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  let inner = `<polygon points="${poly}" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>`;
+
+  if (showMode === "box" && isRight) {
+    const ang = _computeAngles(pts);
+    const bi = ang.reduce((b, v, i) => Math.abs(v - 90) < Math.abs(ang[b] - 90) ? i : b, 0);
+    inner += _boxSVG(pts, bi, highlight ? { stroke: "#c62828", fill: "#ef9a9a" } : {});
   }
 
-  return {
-    uid, level: 4, diff, type: "NUMERIC",
-    q: qText, a: aStr, units: units || [], tolerance: 0.05,
-    working: workStr,
-    img: imgData || "", imgAlt: imgAlt || "", hint: "Use \\(c^2 = a^2 + b^2\\), then take the square root.",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-const _genSpotStepL4 = (diff) => {
-  const uid = makeUID("SPOT_ERROR/STEP", 4, diff);
-  // Generate a triangle and introduce exactly one error in the working
-  const triple = TRIPLES[rand(0, TRIPLES.length - 1)];
-  const a = triple[0], b = triple[1], c = triple[2];
-  const a2 = a * a, b2 = b * b, c2 = a2 + b2;
-
-  // Misconception 1: adds without squaring (a + b instead of a²+b²)
-  // Misconception 2: squares and adds but forgets sqrt
-  // Misconception 3: wrong arithmetic in squaring step
-  const errType = rand(1, 3);
-  let steps, errorExplanation;
-
-  if (errType === 1) {
-    // Error: adds sides without squaring
-    const wrongC2 = a + b;
-    steps = [
-      { id: 1, text: `\\(c^2 = a^2 + b^2\\)`, isError: false },
-      { id: 2, text: `\\(c^2 = ${a} + ${b}\\)`, isError: true },
-      { id: 3, text: `\\(c^2 = ${wrongC2}\\)`, isError: false },
-      { id: 4, text: `\\(c = \\sqrt{${wrongC2}} \\approx ${Math.sqrt(wrongC2).toFixed(1)}\\)`, isError: false }
-    ];
-    errorExplanation = `Step 2 is wrong. The theorem requires <em>squaring</em> each side: \\(${a}^2 = ${a2}\\) and \\(${b}^2 = ${b2}\\), not simply \\(${a} + ${b}\\).`;
-  } else if (errType === 2) {
-    // Error: omits square root at end
-    steps = [
-      { id: 1, text: `\\(c^2 = a^2 + b^2\\)`, isError: false },
-      { id: 2, text: `\\(c^2 = ${a}^2 + ${b}^2\\)`, isError: false },
-      { id: 3, text: `\\(c^2 = ${a2} + ${b2}\\)`, isError: false },
-      { id: 4, text: `\\(c^2 = ${c2}\\)`, isError: false },
-      { id: 5, text: `\\(c = ${c2}\\)`, isError: true }
-    ];
-    errorExplanation = `Step 5 is wrong. After finding \\(c^2 = ${c2}\\), the student must take the square root: \\(c = \\sqrt{${c2}} = ${c}\\).`;
-  } else {
-    // Error: wrong arithmetic in squaring step
-    const wrongA2 = a * 2; // doubles instead of squares
-    steps = [
-      { id: 1, text: `\\(c^2 = a^2 + b^2\\)`, isError: false },
-      { id: 2, text: `\\(c^2 = ${a}^2 + ${b}^2\\)`, isError: false },
-      { id: 3, text: `\\(c^2 = ${wrongA2} + ${b2}\\)`, isError: true },
-      { id: 4, text: `\\(c^2 = ${wrongA2 + b2}\\)`, isError: false },
-      { id: 5, text: `\\(c = \\sqrt{${wrongA2 + b2}} \\approx ${Math.sqrt(wrongA2 + b2).toFixed(1)}\\)`, isError: false }
-    ];
-    errorExplanation = `Step 3 is wrong. \\(${a}^2 = ${a2}\\), not \\(${wrongA2}\\). The student has doubled ${a} instead of squaring it.`;
-  }
-
-  return {
-    uid, level: 4, diff, type: "SPOT_ERROR", subtype: "STEP",
-    q: `A student is finding the hypotenuse of a right-angled triangle with shorter sides ${a} cm and ${b} cm. Spot the error in their working.`,
-    steps,
-    working: `<p><strong>Error identified:</strong> ${errorExplanation}</p>
-<p><strong>Correct working:</strong><br>
-\\(c^2 = ${a}^2 + ${b}^2 = ${a2} + ${b2} = ${c2}\\)<br>
-\\(c = \\sqrt{${c2}} = ${c}\\) cm</p>`,
-    img: "", imgAlt: "", hint: "Check each step carefully — is the squaring correct? Is the final square root taken?",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-// ─── LEVEL 5: Find a Shorter Side ─────────────────────────────────────
-// Types: NUMERIC, SPOT_ERROR/STEP
-
-const _genNumericL5 = (diff) => {
-  const uid = makeUID("NUMERIC", 5, diff);
-  let a, b, c, aStr, qText, workStr, imgData, imgAlt;
-
-  if (diff === 1) {
-    // Pythagorean triple → clean integer shorter side
-    const triple = TRIPLES[rand(0, TRIPLES.length - 1)];
-    const scale = rand(1, 2);
-    a = triple[0] * scale; b = triple[1] * scale; c = triple[2] * scale;
-    aStr = String(b);
-    qText = `A right-angled triangle has a hypotenuse of ${c} cm and one shorter side of ${a} cm. Find the length of the missing shorter side.`;
-    workStr = `<p><strong>Answer: \\(b = ${b}\\) cm</strong></p>
-<p>\\(b^2 = c^2 - a^2\\)<br>
-\\(b^2 = ${c}^2 - ${a}^2\\)<br>
-\\(b^2 = ${c*c} - ${a*a}\\)<br>
-\\(b^2 = ${b*b}\\)<br>
-\\(b = \\sqrt{${b*b}} = ${b}\\) cm</p>`;
-    // SVG: slot b = left vertical, slot a = bottom horizontal, slot c = hypotenuse
-    // Place known leg on vertical (b slot), unknown on horizontal (a slot), hyp on c slot
-    imgData = makeSVG({ orientation: "standard", sides: { b: `${a} cm`, a: "?", c: `${c} cm` }, labels: { A: "A", B: "B", C: "C" }, title: `Right triangle hyp ${c} leg ${a}` });
-    imgAlt = `Right-angled triangle with hypotenuse ${c} cm, one leg ${a} cm, other leg unknown`;
-  } else if (diff === 2) {
-    // Integer inputs, decimal answer 1 d.p.
-    c = rand(8, 20); a = rand(3, c - 2);
-    b = Math.sqrt(c*c - a*a);
-    aStr = b.toFixed(1);
-    qText = `A right-angled triangle has a hypotenuse of ${c} cm and one shorter side of ${a} cm. Find the missing shorter side, to 1 decimal place.`;
-    workStr = `<p><strong>Answer: \\(b \\approx ${aStr}\\) cm</strong></p>
-<p>\\(b^2 = ${c}^2 - ${a}^2\\)<br>
-\\(b^2 = ${c*c} - ${a*a}\\)<br>
-\\(b^2 = ${c*c - a*a}\\)<br>
-\\(b = \\sqrt{${c*c - a*a}} \\approx ${aStr}\\) cm</p>`;
-    // "standard" orientation: slot b = left vertical (known leg), slot a = bottom horizontal (unknown), slot c = hyp
-    imgData = makeSVG({ orientation: "standard", sides: { b: `${a} cm`, a: "?", c: `${c} cm` }, labels: { A: "A", B: "B", C: "C" }, title: `Right triangle hyp ${c}` });
-    imgAlt = `Right-angled triangle with hypotenuse ${c} cm and one leg ${a} cm`;
-  } else if (diff === 3) {
-    // Decimal inputs, 2 d.p.
-    c = randF(6, 15, 1); a = randF(2, c * 0.8, 1);
-    b = Math.sqrt(c*c - a*a);
-    aStr = b.toFixed(2);
-    qText = `A right-angled triangle has a hypotenuse of ${c} m and one shorter side of ${a} m. Calculate the missing shorter side, to 2 decimal places.`;
-    workStr = `<p><strong>Answer: \\(b \\approx ${aStr}\\) m</strong></p>
-<p>\\(b^2 = ${c}^2 - ${a}^2\\)<br>
-\\(b^2 = ${Math.round(c*c*100)/100} - ${Math.round(a*a*100)/100}\\)<br>
-\\(b^2 = ${Math.round((c*c - a*a)*100)/100}\\)<br>
-\\(b = \\sqrt{${Math.round((c*c - a*a)*100)/100}} \\approx ${aStr}\\) m</p>`;
-    // slot b = left vertical (known leg), slot a = bottom horizontal (unknown), slot c = hyp
-    imgData = makeSVG({ orientation: "standard", sides: { b: `${a} m`, a: "?", c: `${c} m` }, labels: { A: "A", B: "B", C: "C" }, title: `Right triangle decimal` });
-    imgAlt = `Right-angled triangle with hypotenuse ${c} m and leg ${a} m`;
-  } else {
-    // diff 4: surd input
-    const surdCases = [
-      { cSurd: "\\sqrt{20}", cVal: Math.sqrt(20), aSurd: "2", aVal: 2, b2: 16, bStr: "4", bApprox: "4" },
-      { cSurd: "\\sqrt{50}", cVal: Math.sqrt(50), aSurd: "5", aVal: 5, b2: 25, bStr: "5", bApprox: "5" },
-      { cSurd: "\\sqrt{13}", cVal: Math.sqrt(13), aSurd: "2", aVal: 2, b2: 9, bStr: "3", bApprox: "3" },
-      { cSurd: "\\sqrt{29}", cVal: Math.sqrt(29), aSurd: "\\sqrt{5}", aVal: Math.sqrt(5), b2: 24, bStr: "2\\sqrt{6}", bApprox: (2*Math.sqrt(6)).toFixed(2) }
-    ];
-    const sc = surdCases[rand(0, surdCases.length - 1)];
-    aStr = sc.bApprox;
-    qText = `A right-angled triangle has hypotenuse \\(${sc.cSurd}\\) and one shorter side \\(${sc.aSurd}\\). Find the exact length of the missing shorter side.`;
-    workStr = `<p><strong>Answer: \\(b = ${sc.bStr}\\)</strong></p>
-<p>\\(b^2 = c^2 - a^2\\)<br>
-\\(b^2 = (${sc.cSurd})^2 - (${sc.aSurd})^2\\)<br>
-\\(b^2 = ${sc.cVal * sc.cVal} - ${sc.aVal * sc.aVal}\\)<br>
-\\(b^2 = ${sc.b2}\\)<br>
-\\(b = \\sqrt{${sc.b2}} = ${sc.bStr}\\)</p>`;
-    imgData = "";
-    imgAlt = "";
-  }
-
-  return {
-    uid, level: 5, diff, type: "NUMERIC",
-    q: qText, a: aStr, units: diff <= 3 ? ["cm", "m"] : [], tolerance: 0.05,
-    working: workStr,
-    img: imgData || "", imgAlt: imgAlt || "",
-    hint: "Use \\(b^2 = c^2 - a^2\\). Remember to subtract, not add.",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-const _genSpotStepL5 = (diff) => {
-  const uid = makeUID("SPOT_ERROR/STEP", 5, diff);
-  const triple = TRIPLES[rand(0, TRIPLES.length - 1)];
-  const c = triple[2], a = triple[0], b = triple[1];
-  const c2 = c * c, a2 = a * a, b2 = b * b;
-
-  // Misconceptions for Level 5:
-  // 1. Adds instead of subtracts (b² = c² + a²)
-  // 2. Subtracts correctly but forgets sqrt
-  // 3. Misidentifies hypotenuse (uses a as hyp)
-  const errType = rand(1, 3);
-  let steps, errorExplanation;
-
-  if (errType === 1) {
-    const wrongB2 = c2 + a2;
-    steps = [
-      { id: 1, text: `\\(b^2 = c^2 - a^2\\)`, isError: false },
-      { id: 2, text: `\\(b^2 = ${c}^2 - ${a}^2\\)`, isError: false },
-      { id: 3, text: `\\(b^2 = ${c2} + ${a2}\\)`, isError: true },
-      { id: 4, text: `\\(b^2 = ${wrongB2}\\)`, isError: false },
-      { id: 5, text: `\\(b = \\sqrt{${wrongB2}} \\approx ${Math.sqrt(wrongB2).toFixed(1)}\\)`, isError: false }
-    ];
-    errorExplanation = `Step 3 is wrong. To find a shorter side, you must <em>subtract</em>: \\(b^2 = ${c2} - ${a2} = ${b2}\\), not add.`;
-  } else if (errType === 2) {
-    steps = [
-      { id: 1, text: `\\(b^2 = c^2 - a^2\\)`, isError: false },
-      { id: 2, text: `\\(b^2 = ${c}^2 - ${a}^2\\)`, isError: false },
-      { id: 3, text: `\\(b^2 = ${c2} - ${a2}\\)`, isError: false },
-      { id: 4, text: `\\(b^2 = ${b2}\\)`, isError: false },
-      { id: 5, text: `\\(b = ${b2}\\)`, isError: true }
-    ];
-    errorExplanation = `Step 5 is wrong. Having found \\(b^2 = ${b2}\\), the student must take the square root: \\(b = \\sqrt{${b2}} = ${b}\\).`;
-  } else {
-    // Treats a shorter side as hypotenuse
-    const wrongB2 = a2 - c2; // This will be negative, showing the error clearly
-    steps = [
-      { id: 1, text: `\\(b^2 = a^2 - c^2\\)`, isError: true },
-      { id: 2, text: `\\(b^2 = ${a}^2 - ${c}^2\\)`, isError: false },
-      { id: 3, text: `\\(b^2 = ${a2} - ${c2}\\)`, isError: false },
-      { id: 4, text: `\\(b^2 = ${a2 - c2}\\)`, isError: false }
-    ];
-    errorExplanation = `Step 1 is wrong. The hypotenuse is ${c} cm (the longest side), so the formula should be \\(b^2 = c^2 - a^2 = ${c2} - ${a2} = ${b2}\\). The student has incorrectly used ${a} as the hypotenuse.`;
-  }
-
-  return {
-    uid, level: 5, diff, type: "SPOT_ERROR", subtype: "STEP",
-    q: `A student finds the missing shorter side of a right-angled triangle with hypotenuse ${c} cm and one side ${a} cm. Spot the error.`,
-    steps,
-    working: `<p><strong>Error:</strong> ${errorExplanation}</p>
-<p><strong>Correct answer:</strong> \\(b = \\sqrt{${c2} - ${a2}} = \\sqrt{${b2}} = ${b}\\) cm</p>`,
-    img: "", imgAlt: "", hint: "When finding a shorter side, remember to subtract — and check which side is the hypotenuse.",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-// ─── LEVEL 6: Pythagoras in Non-Right Triangles ───────────────────────
-// Types: NUMERIC, EXPLANATION
-
-const _genNumericL6 = (diff) => {
-  const uid = makeUID("NUMERIC", 6, diff);
-
-  if (diff === 1) {
-    // Equilateral triangle, integer side — find perpendicular height
-    const s = [6, 8, 10, 12, 14][rand(0, 4)];
-    const halfBase = s / 2;
-    const h = Math.sqrt(s * s - halfBase * halfBase);
-    const hStr = h.toFixed(2);
-    const imgData = makeSVG({
-      orientation: "isosceles",
-      sides: { a: `${s} cm`, b: `${s} cm`, c: `${s} cm` },
-      labels: { A: "A", B: "B", C: "C" },
-      extraLines: [{ x1: 110, y1: 15, x2: 110, y2: 140 }],
-      title: `Equilateral triangle side ${s}`
+  if (showMode === "angles" && angles) {
+    const cx = pts.reduce((s, p) => s + p.x, 0) / 3;
+    const cy = pts.reduce((s, p) => s + p.y, 0) / 3;
+    pts.forEach((v, i) => {
+      const dx = v.x - cx, dy = v.y - cy, len = Math.hypot(dx, dy) || 1;
+      const tx = v.x + (dx / len) * 15, ty = v.y + (dy / len) * 15;
+      inner += _textSVG(tx, ty, `${angles[i]}°`, "#1a237e", 10, W, H);
     });
+  }
+
+  if (labelSides || sideVals) {
+    const cx = pts.reduce((s, p) => s + p.x, 0) / 3;
+    const cy = pts.reduce((s, p) => s + p.y, 0) / 3;
+    for (let i = 0; i < 3; i++) {
+      const p1 = pts[i], p2 = pts[(i + 1) % 3];
+      const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+      const dx = mx - cx, dy = my - cy, len = Math.hypot(dx, dy) || 1;
+      const off = sideVals ? 13 : 12;
+      const tx = mx + (dx / len) * off, ty = my + (dy / len) * off;
+      const lbl = sideVals ? (sideVals[i] || "") : (labelSides[i] || "");
+      if (lbl) inner += _textSVG(tx, ty, lbl, "#880000", 9, W, H);
+    }
+  }
+
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">${inner}</svg>`;
+};
+
+/**
+ * _svgDataURI — wrap an SVG string in a data URI (matches makeSVG() output format)
+ */
+const _svgDataURI = (svg) => "data:image/svg+xml," + encodeURIComponent(svg);
+
+// ── 4. PYTHAGOREAN TRIPLES ────────────────────────────────────────────
+
+const TRIPLES = [
+  [3,4,5],[5,12,13],[8,15,17],[7,24,25],[6,8,10],
+  [9,12,15],[20,21,29],[8,6,10],[5,12,13],[9,40,41]
+];
+
+// ── 5. WORKING-STEP HELPERS ───────────────────────────────────────────
+
+const _wHyp = (a, b, c) => {
+  const cStr = Number.isInteger(c) ? `${c}` : `\\approx ${c}`;
+  return `<p>\\(c^2 = a^2 + b^2\\)<br>` +
+    `\\(c^2 = ${a}^2 + ${b}^2 = ${a*a} + ${b*b} = ${a*a+b*b}\\)<br>` +
+    `\\(c = \\sqrt{${a*a+b*b}} ${cStr}\\)</p>`;
+};
+
+const _wLeg = (c, known, unknown, lbl, klbl) => {
+  const u2 = r2(c*c - known*known);
+  const uStr = Number.isInteger(unknown) ? `${unknown}` : `\\approx ${unknown}`;
+  return `<p>\\(c^2 = a^2 + b^2\\)<br>` +
+    `\\(${lbl}^2 = c^2 - ${klbl}^2\\)<br>` +
+    `\\(${lbl}^2 = ${c}^2 - ${known}^2 = ${r2(c*c)} - ${r2(known*known)} = ${u2}\\)<br>` +
+    `\\(${lbl} = \\sqrt{${u2}} ${uStr}\\)</p>`;
+};
+
+// ── 6. DIAGRAM SVG GENERATORS ────────────────────────────────────────
+// Each returns a raw SVG string for embedding in img (via _svgDataURI) or innerHTML
+
+const _diagEquilateral = (W, H, side) => {
+  const h = r2(Math.sqrt(3) / 2 * side);
+  const bx1 = W*0.1, bx2 = W*0.9, by = H*0.88, apexX = W*0.5, apexY = H*0.1;
+  const footX = W*0.5;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<polygon points="${bx1},${by} ${bx2},${by} ${apexX},${apexY}" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>` +
+    `<line x1="${footX}" y1="${by}" x2="${apexX}" y2="${apexY}" stroke="#e65100" stroke-width="1.8" stroke-dasharray="5,3"/>` +
+    `<path d="M${footX} ${by} l7 0 0 -7" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG((bx1+bx2)/2, by+13, `${side} cm`, "#2e7d32", 9, W, H) +
+    _textSVG(footX+20, (by+apexY)/2, "h=?", "#e65100", 10, W, H) +
+    `</svg>`;
+};
+
+const _diagIsosceles = (W, H, eqSide, base) => {
+  const halfBase = r2(base / 2);
+  const bx1 = W*0.1, bx2 = W*0.9, by = H*0.88, apexX = W*0.5, apexY = H*0.1;
+  const footX = W*0.5;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<polygon points="${bx1},${by} ${bx2},${by} ${apexX},${apexY}" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>` +
+    `<line x1="${footX}" y1="${by}" x2="${apexX}" y2="${apexY}" stroke="#e65100" stroke-width="1.8" stroke-dasharray="5,3"/>` +
+    `<path d="M${footX} ${by} l7 0 0 -7" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG((bx1+footX)/2, by+13, `${halfBase} cm`, "#1565c0", 8, W, H) +
+    _textSVG((footX+bx2)/2, by+13, `${halfBase} cm`, "#1565c0", 8, W, H) +
+    _textSVG(bx1-16, (by+apexY)/2, `${eqSide} cm`, "#1565c0", 8, W, H) +
+    _textSVG(footX+20, (by+apexY)/2, "h=?", "#e65100", 10, W, H) +
+    `</svg>`;
+};
+
+const _diagScaleneAlt = (W, H, h, seg1, seg2, slant1) => {
+  const bx1 = W*0.07, bx2 = W*0.93, by = H*0.85;
+  const footX = bx1 + (bx2 - bx1) * (seg1 / (seg1 + seg2));
+  const apexX = footX, apexY = H*0.1;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<polygon points="${bx1},${by} ${bx2},${by} ${apexX},${apexY}" fill="#fff8e1" stroke="#e65100" stroke-width="2"/>` +
+    `<line x1="${footX}" y1="${by}" x2="${apexX}" y2="${apexY}" stroke="#7b1fa2" stroke-width="1.8" stroke-dasharray="5,3"/>` +
+    `<path d="M${footX} ${by} l7 0 0 -7" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG((bx1+footX)/2, by+12, `${seg1} cm`, "#888", 8, W, H) +
+    _textSVG((footX+bx2)/2, by+12, `${seg2} cm`, "#888", 8, W, H) +
+    _textSVG(footX+18, (by+apexY)/2, `${h} cm`, "#7b1fa2", 8, W, H) +
+    _textSVG((bx1+apexX)/2-14, (by+apexY)/2, `${slant1} cm`, "#555", 8, W, H) +
+    _textSVG((bx2+apexX)/2+14, (by+apexY)/2, "s=?", "#e65100", 10, W, H) +
+    `</svg>`;
+};
+
+const _diagKite = (W, H, d1half, d2half) => {
+  const cx = W/2, cy = H/2;
+  const top = { x: cx, y: cy - H*0.4 }, bot = { x: cx, y: cy + H*0.4 };
+  const left = { x: cx - W*0.38, y: cy }, right = { x: cx + W*0.38, y: cy };
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<polygon points="${top.x},${top.y} ${right.x},${right.y} ${bot.x},${bot.y} ${left.x},${left.y}" fill="#ede7f6" stroke="#7b1fa2" stroke-width="2"/>` +
+    `<line x1="${top.x}" y1="${top.y}" x2="${bot.x}" y2="${bot.y}" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4,3"/>` +
+    `<line x1="${left.x}" y1="${left.y}" x2="${right.x}" y2="${right.y}" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4,3"/>` +
+    `<path d="M${cx} ${cy} l8 0 0 -8" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG(cx+16, (top.y+cy)/2, `${d1half} cm`, "#1565c0", 8, W, H) +
+    _textSVG((cx+right.x)/2, cy-12, `${d2half} cm`, "#1565c0", 8, W, H) +
+    _textSVG((cx+right.x)/2+4, (top.y+cy)/2+14, "side=?", "#e65100", 9, W, H) +
+    `</svg>`;
+};
+
+const _diagLadder = (W, H, hyp, base) => {
+  const wx = W*0.22, by_ = H*0.83, lx = W*0.72, wy = H*0.15;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<line x1="${wx}" y1="${by_}" x2="${wx}" y2="${H*0.05}" stroke="#555" stroke-width="3"/>` +
+    `<line x1="${wx}" y1="${by_}" x2="${W*0.82}" y2="${by_}" stroke="#555" stroke-width="3"/>` +
+    `<line x1="${lx}" y1="${by_}" x2="${wx}" y2="${wy}" stroke="#e65100" stroke-width="2.5"/>` +
+    `<path d="M${wx} ${by_} l8 0 0 -8" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG((wx+lx)/2+6, (by_+wy)/2-5, `${hyp} m`, "#e65100", 9, W, H) +
+    _textSVG((wx+lx)/2, by_+11, `${base} m`, "#444", 9, W, H) +
+    _textSVG(wx-20, (by_+wy)/2, "h=?", "#2e7d32", 9, W, H) +
+    `</svg>`;
+};
+
+const _diagShip = (W, H, north, east) => {
+  const sx = W*0.2, sy = H*0.8, ny = H*0.15, ex = W*0.78, ey = H*0.8;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<line x1="${sx}" y1="${sy}" x2="${sx}" y2="${ny}" stroke="#1565c0" stroke-width="2.5"/>` +
+    `<line x1="${sx}" y1="${ny}" x2="${ex}" y2="${ey}" stroke="#1565c0" stroke-width="2.5"/>` +
+    `<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" stroke="#e65100" stroke-width="2" stroke-dasharray="5,3"/>` +
+    `<path d="M${sx} ${ny} l9 0 0 9" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG(sx-20, (sy+ny)/2, `${north} km N`, "#1565c0", 8, W, H) +
+    _textSVG((sx+ex)/2, ey+11, `${east} km E`, "#1565c0", 8, W, H) +
+    _textSVG((sx+ex)/2+10, (sy+ny)/2-8, "d=?", "#e65100", 9, W, H) +
+    `</svg>`;
+};
+
+const _diagRect = (W, H, w, h) => {
+  const x1 = W*0.1, y1 = H*0.1, x2 = W*0.88, y2 = H*0.88;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>` +
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#e65100" stroke-width="2" stroke-dasharray="5,3"/>` +
+    _textSVG((x1+x2)/2, y2+11, `${w} m`, "#1565c0", 8, W, H) +
+    _textSVG(x1-15, (y1+y2)/2, `${h} m`, "#1565c0", 8, W, H) +
+    _textSVG((x1+x2)/2+12, (y1+y2)/2-8, "diag=?", "#e65100", 8, W, H) +
+    `</svg>`;
+};
+
+const _diagLighthouse = (W, H, dist, height) => {
+  const tx = W*0.68, ty = H*0.13, by_ = H*0.82, boat = W*0.14;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<line x1="${tx}" y1="${by_}" x2="${tx}" y2="${ty}" stroke="#555" stroke-width="3"/>` +
+    `<line x1="${boat}" y1="${by_}" x2="${tx}" y2="${by_}" stroke="#888" stroke-width="2"/>` +
+    `<line x1="${boat}" y1="${by_}" x2="${tx}" y2="${ty}" stroke="#e65100" stroke-width="2" stroke-dasharray="4,3"/>` +
+    `<path d="M${tx} ${by_} l-9 0 0 -9" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG(tx+16, (ty+by_)/2, `${height} m`, "#444", 8, W, H) +
+    _textSVG((boat+tx)/2, by_+11, `${dist} m`, "#444", 8, W, H) +
+    _textSVG((boat+tx)/2-12, (by_+ty)/2, "d=?", "#e65100", 9, W, H) +
+    `</svg>`;
+};
+
+const _diagRamp = (W, H, run, rise) => {
+  const x1 = W*0.1, y1 = H*0.82, x2 = W*0.88, y2 = H*0.82, x3 = W*0.1, y3 = H*0.18;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<polygon points="${x1},${y1} ${x2},${y2} ${x3},${y3}" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>` +
+    `<path d="M${x1} ${y1} l9 0 0 -9" fill="none" stroke="#1a237e" stroke-width="1.5"/>` +
+    _textSVG((x1+x2)/2, y2+11, `${run} m`, "#444", 8, W, H) +
+    _textSVG(x3-18, (y1+y3)/2, `${rise} m`, "#444", 8, W, H) +
+    _textSVG((x1+x2)/2+8, (y1+y3)/2-8, "ramp=?", "#e65100", 8, W, H) +
+    `</svg>`;
+};
+
+const _diagTV = (W, H, w, h) => {
+  const x1 = W*0.07, y1 = H*0.1, x2 = W*0.93, y2 = H*0.84;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="${_NS}">` +
+    `<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="#212121" stroke="#555" stroke-width="3" rx="4"/>` +
+    `<rect x="${x1+4}" y="${y1+4}" width="${x2-x1-8}" height="${y2-y1-8}" fill="#1a237e"/>` +
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ffeb3b" stroke-width="2" stroke-dasharray="4,3"/>` +
+    _textSVG((x1+x2)/2, y2+11, `${w} cm`, "#444", 8, W, H) +
+    _textSVG(x2+14, (y1+y2)/2, `${h} cm`, "#444", 8, W, H) +
+    _textSVG((x1+x2)/2+10, (y1+y2)/2-8, "diag=?", "#ffb300", 8, W, H) +
+    `</svg>`;
+};
+
+// ── 7. QUESTION GENERATORS ────────────────────────────────────────────
+
+// ─── LEVEL a: Vocabulary & Prerequisites ──────────────────────────────
+
+const _VOCAB = [
+  { q: "What is the Pythagorean Theorem?", a: "c² = a² + b² (hypotenuse² = sum of squares of the two legs)" },
+  { q: "What is the hypotenuse?", a: "The longest side of a right-angle triangle — always opposite the right angle." },
+  { q: "What do a and b stand for in c² = a² + b²?", a: "The two shorter sides (legs) that form the right angle." },
+  { q: "What does c stand for in c² = a² + b²?", a: "The hypotenuse — the longest side, opposite the right angle." },
+  { q: "What is a right angle?", a: "An angle of exactly 90°. Shown by a small square at the vertex." },
+  { q: "What are the legs of a right triangle?", a: "The two shorter sides (a and b) that meet at the right angle." },
+  { q: "What shape does a right-angle marker make in a diagram?", a: "A small square drawn at the 90° vertex." },
+  { q: "How do you spell HYPOTENUSE?", a: "H – Y – P – O – T – E – N – U – S – E (10 letters)" },
+  { q: "How do you spell PYTHAGORAS?", a: "P – Y – T – H – A – G – O – R – A – S (10 letters)" },
+  { q: "How do you say 'hypotenuse'?", a: "Hy-POT-en-yoos" },
+  { q: "\\(\\sqrt{9} = ?\\)", a: "3", working: "<p>\\(3 \\times 3 = 9\\)</p>" },
+  { q: "\\(\\sqrt{16} = ?\\)", a: "4", working: "<p>\\(4 \\times 4 = 16\\)</p>" },
+  { q: "\\(\\sqrt{25} = ?\\)", a: "5", working: "<p>\\(5 \\times 5 = 25\\)</p>" },
+  { q: "\\(\\sqrt{49} = ?\\)", a: "7", working: "<p>\\(7 \\times 7 = 49\\)</p>" },
+  { q: "\\(\\sqrt{100} = ?\\)", a: "10", working: "<p>\\(10 \\times 10 = 100\\)</p>" },
+  { q: "\\(\\sqrt{144} = ?\\)", a: "12", working: "<p>\\(12 \\times 12 = 144\\)</p>" },
+  { q: "\\(\\sqrt{169} = ?\\)", a: "13", working: "<p>\\(13 \\times 13 = 169\\)</p>" },
+  { q: "\\(7^2 = ?\\)", a: "49", working: "<p>\\(7 \\times 7 = 49\\)</p>" },
+  { q: "\\(12^2 = ?\\)", a: "144", working: "<p>\\(12 \\times 12 = 144\\)</p>" },
+  { q: "\\(13^2 = ?\\)", a: "169", working: "<p>\\(13 \\times 13 = 169\\)</p>" },
+  { q: "What is a Pythagorean triple?", a: "Three whole numbers a, b, c where a² + b² = c². E.g. 3, 4, 5 → 9 + 16 = 25." },
+  { q: "Is 3, 4, 5 a Pythagorean triple?", a: "YES — \\(3^2 + 4^2 = 9 + 16 = 25 = 5^2\\)" },
+  { q: "Is 5, 12, 13 a Pythagorean triple?", a: "YES — \\(5^2 + 12^2 = 25 + 144 = 169 = 13^2\\)" },
+];
+
+const _genVocabA = (diff) => {
+  const uid = makeUID("TEXT", "a", diff);
+  const v = _VOCAB[rand(0, _VOCAB.length - 1)];
+  return {
+    uid, level: "a", diff, type: "TEXT",
+    q: v.q, a: v.a,
+    working: v.working || `<p><strong>${v.a}</strong></p>`,
+    img: "", imgAlt: "",
+    hint: "Think, then flip ▶",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: [], tolerance: 0
+  };
+};
+
+// ─── LEVEL b: Pythagoras Basics ───────────────────────────────────────
+
+const _genTriIdB = (diff) => {
+  const uid = makeUID("TRI_ID", "b", diff);
+  const W = 220, H = 150;
+  const useRight = Math.random() < 0.5;
+  const showAngles = diff >= 2;
+  const tri = useRight ? _makeRightTri(W, H) : _makeNonRightTri(W, H);
+  const showMode = showAngles ? "angles" : "box";
+  const svg = _triSVG({ ...tri, showMode }, W, H);
+  const ans = useRight ? "YES — Right-angle triangle" : "NO — Not a right-angle triangle";
+  const expl = useRight
+    ? (showMode === "box" ? "The small square marks the 90° angle." : "One angle is exactly 90°.")
+    : (showMode === "angles" ? `Angles: ${tri.angles.join("°, ")}° — none equal 90°.` : "No right-angle square is shown.");
+  return {
+    uid, level: "b", diff, type: "TRI_ID",
+    q: "Is this a right-angle triangle?",
+    a: ans,
+    working: `<p>${expl}</p>`,
+    img: _svgDataURI(svg), imgAlt: "Triangle diagram",
+    hint: "",
+    triData: { ...tri, showMode },
+    triDataAns: { ...tri, showMode, highlight: true },
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: [], tolerance: 0
+  };
+};
+
+const _genHypMCQB = (diff) => {
+  const uid = makeUID("MCQ", "b", diff);
+  const W = 220, H = 150;
+  const tri = _makeRightTri(W, H);
+  const ri = tri.rightIdx, hs = (ri + 1) % 3;
+  const labels = ["A", "B", "C"];
+  const correctLabel = labels[hs];
+  const options = shuffle(labels);
+  const correctOption = options.indexOf(correctLabel);
+  const labelSides = ["A", "B", "C"];
+  const svg = _triSVG({ ...tri, showMode: "box", labelSides }, W, H);
+  return {
+    uid, level: "b", diff, type: "MCQ",
+    q: "Which side is the hypotenuse?",
+    a: `Side ${correctLabel}`,
+    options, correctOption,
+    working: `<p><strong>Answer: Side ${correctLabel}</strong></p><p>Side ${correctLabel} is opposite the right angle — it is the longest side, which is the hypotenuse.</p>`,
+    img: _svgDataURI(svg), imgAlt: "Triangle with labelled sides",
+    hint: "The hypotenuse is always opposite the right angle.",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: [], tolerance: 0
+  };
+};
+
+const _genLabelB = (diff) => {
+  const uid = makeUID("TRI_LABEL", "b", diff);
+  const W = 220, H = 150;
+  const tri = _makeRightTri(W, H);
+  const ri = tri.rightIdx, hs = (ri + 1) % 3;
+  const ls = [(hs + 1) % 3, (hs + 2) % 3];
+  const lbl = ["", "", ""]; lbl[hs] = "c"; lbl[ls[0]] = "a"; lbl[ls[1]] = "b";
+  const svgFront = _triSVG({ ...tri, showMode: "box" }, W, H);
+  const svgAns = _triSVG({ ...tri, showMode: "box", labelSides: lbl }, W, H);
+  return {
+    uid, level: "b", diff, type: "TRI_LABEL",
+    q: "Label the sides: which is c (hypotenuse)? Which are a and b?",
+    a: "c = hypotenuse (opposite the right angle); a & b = the two legs",
+    working: `<p><strong>c</strong> = hypotenuse — always the longest side, always opposite the right-angle vertex.<br><strong>a</strong> and <strong>b</strong> = the two shorter legs that meet at the right angle.</p>`,
+    img: _svgDataURI(svgFront), imgAlt: "Unlabelled right triangle",
+    imgAns: _svgDataURI(svgAns), imgAnsAlt: "Labelled right triangle",
+    hint: "c is always opposite the right angle.",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: [], tolerance: 0
+  };
+};
+
+// ─── LEVELS c1/c2: Find Hypotenuse ───────────────────────────────────
+
+const _genHypC = (diff, offset) => {
+  const uid = makeUID("NUMERIC", offset ? "c2" : "c1", diff);
+  const W = 220, H = 150;
+  let a, b, c;
+  if (diff <= 2) {
+    const t = TRIPLES[rand(0, TRIPLES.length - 1)];
+    const sc = rand(1, 3); a = t[0]*sc; b = t[1]*sc; c = t[2]*sc;
+  } else {
+    a = randF(2, 15, 1); b = randF(2, 15, 1); c = r2(Math.sqrt(a*a + b*b));
+  }
+  const tri = _makeRightTri(W, H);
+  const ri = tri.rightIdx, hs = (ri + 1) % 3, ls = [(hs+1)%3, (hs+2)%3];
+  const sv = ["", "", ""];
+  sv[ls[0]] = `${a}`; sv[ls[1]] = `${b}`;
+  if (!offset) sv[hs] = "c=?";
+  const triData = { ...tri, showMode: "box", sideVals: offset ? null : sv };
+  const svg = _triSVG(triData, W, H);
+  const isInt = Number.isInteger(c);
+  return {
+    uid, level: offset ? "c2" : "c1", diff, type: "NUMERIC",
+    q: offset ? `\\(a = ${a}\\), \\(b = ${b}\\) — Find \\(c\\) (the hypotenuse).` : "Find \\(c\\) (the hypotenuse).",
+    a: isInt ? `c = ${c}` : `c \\approx ${c}`,
+    working: _wHyp(a, b, c),
+    img: _svgDataURI(svg), imgAlt: `Right triangle with legs ${a} and ${b}`,
+    hint: offset ? `Values: \\(a = ${a}\\), \\(b = ${b}\\)` : "Values are labelled on the triangle.",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: ["cm"], tolerance: 0.05
+  };
+};
+
+// ─── LEVELS d1/d2: Find Shorter Side ─────────────────────────────────
+
+const _genLegD = (diff, offset) => {
+  const uid = makeUID("NUMERIC", offset ? "d2" : "d1", diff);
+  const W = 220, H = 150;
+  let a, b, c;
+  if (diff <= 2) {
+    const t = TRIPLES[rand(0, TRIPLES.length - 1)];
+    const sc = rand(1, 3); a = t[0]*sc; b = t[1]*sc; c = t[2]*sc;
+  } else {
+    do { a = randF(2, 14, 1); c = randF(a+1, 20, 1); b = r2(Math.sqrt(c*c - a*a)); }
+    while (isNaN(b) || b <= 0);
+  }
+  const findA = Math.random() < 0.5;
+  const unknown = findA ? a : b, known = findA ? b : a;
+  const lbl = findA ? "a" : "b", klbl = findA ? "b" : "a";
+  const tri = _makeRightTri(W, H);
+  const ri = tri.rightIdx, hs = (ri+1)%3, ls = [(hs+1)%3, (hs+2)%3];
+  const sv = ["", "", ""];
+  sv[hs] = `${c}`; sv[ls[0]] = findA ? "a=?" : `${known}`; sv[ls[1]] = findA ? `${known}` : "b=?";
+  const triData = { ...tri, showMode: "box", sideVals: offset ? null : sv };
+  const svg = _triSVG(triData, W, H);
+  const isInt = Number.isInteger(unknown);
+  return {
+    uid, level: offset ? "d2" : "d1", diff, type: "NUMERIC",
+    q: offset ? `\\(c = ${c}\\), \\(${klbl} = ${known}\\) — Find \\(${lbl}\\).` : `Find the missing leg (\\(${lbl}\\)).`,
+    a: isInt ? `${lbl} = ${unknown}` : `${lbl} \\approx ${unknown}`,
+    working: _wLeg(c, known, unknown, lbl, klbl),
+    img: _svgDataURI(svg), imgAlt: `Right triangle, find leg ${lbl}`,
+    hint: offset ? `\\(c = ${c}\\), \\(${klbl} = ${known}\\)` : "Values are labelled on the triangle.",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: ["cm"], tolerance: 0.05
+  };
+};
+
+// ─── LEVEL f: Other Triangles (with SVG) ─────────────────────────────
+
+const _genOtherF = (diff) => {
+  const uid = makeUID("NUMERIC", "f", diff);
+  const W = 220, H = 150;
+
+  if (diff === 1) {
+    // Equilateral — find height
+    const side = rand(6, 16);
+    const half = r2(side / 2);
+    const h = r2(Math.sqrt(3) / 2 * side);
+    const svg = _diagEquilateral(W, H, side);
     return {
-      uid, level: 6, diff, type: "NUMERIC",
-      q: `An equilateral triangle has side length ${s} cm. Calculate its perpendicular height. Give your answer to 2 decimal places.`,
-      a: hStr, units: ["cm"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(h \\approx ${hStr}\\) cm</strong></p>
-<p>Draw the perpendicular height from the apex to the midpoint of the base. This creates two right-angled triangles.<br>
-The base of each right triangle = \\(\\frac{${s}}{2} = ${halfBase}\\) cm<br>
-Using Pythagoras: \\(h^2 = ${s}^2 - ${halfBase}^2\\)<br>
-\\(h^2 = ${s*s} - ${halfBase*halfBase}\\)<br>
-\\(h^2 = ${s*s - halfBase*halfBase}\\)<br>
-\\(h = \\sqrt{${s*s - halfBase*halfBase}} \\approx ${hStr}\\) cm</p>`,
-      img: imgData,
-      imgAlt: `Equilateral triangle with side ${s} cm and altitude drawn`,
-      hint: "Draw the altitude — it bisects the base and creates two right-angled triangles.",
+      uid, level: "f", diff, type: "NUMERIC",
+      q: `An equilateral triangle has sides of ${side} cm. Find the perpendicular height to 2 decimal places.`,
+      a: `h \\approx ${h}`, units: ["cm"], tolerance: 0.05,
+      working: `<p><strong>Answer: \\(h \\approx ${h}\\) cm</strong></p>` +
+        `<p>Altitude bisects the base: half-side \\(= \\frac{${side}}{2} = ${half}\\) cm<br>` +
+        `\\(h^2 = ${side}^2 - ${half}^2 = ${side*side} - ${r2(half*half)} = ${r2(side*side - half*half)}\\)<br>` +
+        `\\(h = \\sqrt{${r2(side*side - half*half)}} \\approx ${h}\\) cm</p>`,
+      img: _svgDataURI(svg), imgAlt: `Equilateral triangle, side ${side} cm, height unknown`,
+      hint: "The altitude of an equilateral triangle bisects the base, creating two right-angled triangles.",
       ncea: { standard: "N/A", ao: "NZC-L5-GM" }
     };
+
   } else if (diff === 2) {
-    // Isosceles triangle, decimal sides — find altitude
-    const eqSide = randF(6, 12, 1);
-    const base = randF(4, eqSide * 1.5, 1);
-    const halfBase = Math.round(base / 2 * 10) / 10;
-    const h = Math.sqrt(eqSide * eqSide - halfBase * halfBase);
-    const hStr = h.toFixed(2);
+    // Isosceles — find height
+    const eqSide = rand(6, 14);
+    const base = rand(4, Math.floor(eqSide * 1.4));
+    const halfBase = r2(base / 2);
+    const h = r2(Math.sqrt(eqSide*eqSide - halfBase*halfBase));
+    if (isNaN(h) || h <= 0) return _genOtherF(diff);
+    const svg = _diagIsosceles(W, H, eqSide, base);
     return {
-      uid, level: 6, diff, type: "NUMERIC",
-      q: `An isosceles triangle has equal sides of ${eqSide} cm and a base of ${base} cm. Calculate the perpendicular height of the triangle. Give your answer to 2 decimal places.`,
-      a: hStr, units: ["cm"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(h \\approx ${hStr}\\) cm</strong></p>
-<p>The altitude bisects the base: half-base = \\(\\frac{${base}}{2} = ${halfBase}\\) cm<br>
-\\(h^2 = ${eqSide}^2 - ${halfBase}^2\\)<br>
-\\(h^2 = ${Math.round(eqSide*eqSide*100)/100} - ${Math.round(halfBase*halfBase*100)/100}\\)<br>
-\\(h^2 = ${Math.round((eqSide*eqSide - halfBase*halfBase)*100)/100}\\)<br>
-\\(h \\approx ${hStr}\\) cm</p>`,
-      img: "", imgAlt: "",
-      hint: "The altitude of an isosceles triangle bisects the base. Use that half-base as one leg.",
+      uid, level: "f", diff, type: "NUMERIC",
+      q: `An isosceles triangle has equal sides of ${eqSide} cm and a base of ${base} cm. Find the perpendicular height to 2 decimal places.`,
+      a: `h \\approx ${h}`, units: ["cm"], tolerance: 0.05,
+      working: `<p><strong>Answer: \\(h \\approx ${h}\\) cm</strong></p>` +
+        `<p>Altitude bisects the base: half-base \\(= \\frac{${base}}{2} = ${halfBase}\\) cm<br>` +
+        `\\(h^2 = ${eqSide}^2 - ${halfBase}^2 = ${eqSide*eqSide} - ${r2(halfBase*halfBase)} = ${r2(eqSide*eqSide - halfBase*halfBase)}\\)<br>` +
+        `\\(h \\approx ${h}\\) cm</p>`,
+      img: _svgDataURI(svg), imgAlt: `Isosceles triangle, equal sides ${eqSide} cm, base ${base} cm`,
+      hint: "The altitude of an isosceles triangle bisects the base.",
       ncea: { standard: "N/A", ao: "NZC-L5-GM" }
     };
+
   } else if (diff === 3) {
-    // Scalene: altitude splits base into known + unknown segments; find slant side
-    const h = rand(6, 12);
-    const seg1 = rand(3, 8);
-    const slant1 = Math.round(Math.sqrt(h*h + seg1*seg1) * 10) / 10;
-    const seg2 = rand(3, 8);
-    const slant2 = Math.sqrt(h*h + seg2*seg2);
-    const slant2Str = slant2.toFixed(1);
+    // Scalene with altitude — find one slant side
+    const h = rand(5, 12), seg1 = rand(3, 8), seg2 = rand(3, 8);
+    const slant1 = r2(Math.sqrt(h*h + seg1*seg1));
+    const slant2 = r2(Math.sqrt(h*h + seg2*seg2));
+    const svg = _diagScaleneAlt(W, H, h, seg1, seg2, slant1);
     return {
-      uid, level: 6, diff, type: "NUMERIC",
-      q: `A triangle has a perpendicular height of ${h} cm. The altitude divides the base into two segments of ${seg1} cm and ${seg2} cm. One slant side is ${slant1} cm. Find the length of the other slant side, to 1 decimal place.`,
-      a: slant2Str, units: ["cm"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${slant2Str}\\) cm</strong></p>
-<p>The altitude creates two right-angled triangles.<br>
-For the second right triangle: base = ${seg2} cm, height = ${h} cm<br>
-\\(\\text{slant}^2 = ${h}^2 + ${seg2}^2 = ${h*h} + ${seg2*seg2} = ${h*h + seg2*seg2}\\)<br>
-\\(\\text{slant} = \\sqrt{${h*h + seg2*seg2}} \\approx ${slant2Str}\\) cm</p>`,
-      img: "", imgAlt: "",
+      uid, level: "f", diff, type: "NUMERIC",
+      q: `A triangle has a perpendicular height of ${h} cm. The altitude divides the base into ${seg1} cm and ${seg2} cm. One slant side is ${slant1} cm. Find the other slant side to 2 decimal places.`,
+      a: `s \\approx ${slant2}`, units: ["cm"], tolerance: 0.05,
+      working: `<p><strong>Answer: \\(s \\approx ${slant2}\\) cm</strong></p>` +
+        `<p>The altitude creates two right-angled triangles.<br>` +
+        `Second right triangle: base \\(= ${seg2}\\) cm, height \\(= ${h}\\) cm<br>` +
+        `\\(s^2 = ${h}^2 + ${seg2}^2 = ${h*h} + ${seg2*seg2} = ${h*h+seg2*seg2}\\)<br>` +
+        `\\(s = \\sqrt{${h*h+seg2*seg2}} \\approx ${slant2}\\) cm</p>`,
+      img: _svgDataURI(svg), imgAlt: `Scalene triangle with altitude ${h} cm`,
       hint: "The altitude creates two separate right-angled triangles. Use Pythagoras in the second one.",
       ncea: { standard: "N/A", ao: "NZC-L5-GM" }
     };
+
   } else {
-    // diff 4: kite — use diagonals to find side
+    // Kite — find one side
     const d1half = rand(3, 8), d2half = rand(3, 8);
-    const side = Math.sqrt(d1half*d1half + d2half*d2half);
-    const sideStr = side.toFixed(2);
+    const side = r2(Math.sqrt(d1half*d1half + d2half*d2half));
+    const svg = _diagKite(W, H, d1half, d2half);
     return {
-      uid, level: 6, diff, type: "NUMERIC",
-      q: `A kite has diagonals of length ${d1half * 2} cm and ${d2half * 2} cm. The diagonals bisect each other at right angles. Find the length of one side of the kite, to 2 decimal places.`,
-      a: sideStr, units: ["cm"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${sideStr}\\) cm</strong></p>
-<p>The diagonals bisect at right angles, creating right-angled triangles with legs ${d1half} cm and ${d2half} cm.<br>
-\\(\\text{side}^2 = ${d1half}^2 + ${d2half}^2 = ${d1half*d1half} + ${d2half*d2half} = ${d1half*d1half + d2half*d2half}\\)<br>
-\\(\\text{side} = \\sqrt{${d1half*d1half + d2half*d2half}} \\approx ${sideStr}\\) cm</p>`,
-      img: "", imgAlt: "",
-      hint: "The diagonals of a kite cross at right angles — look for the right-angled triangles formed.",
+      uid, level: "f", diff, type: "NUMERIC",
+      q: `A kite has diagonals of ${d1half*2} cm and ${d2half*2} cm. The diagonals cross at right angles and bisect each other. Find the length of one side to 2 decimal places.`,
+      a: `\\text{side} \\approx ${side}`, units: ["cm"], tolerance: 0.05,
+      working: `<p><strong>Answer: \\(${side}\\) cm</strong></p>` +
+        `<p>Half-diagonals \\(${d1half}\\) cm and \\(${d2half}\\) cm are the legs.<br>` +
+        `\\(\\text{side}^2 = ${d1half}^2 + ${d2half}^2 = ${d1half*d1half} + ${d2half*d2half} = ${d1half*d1half+d2half*d2half}\\)<br>` +
+        `\\(\\text{side} = \\sqrt{${d1half*d1half+d2half*d2half}} \\approx ${side}\\) cm</p>`,
+      img: _svgDataURI(svg), imgAlt: `Kite with diagonals ${d1half*2} cm and ${d2half*2} cm`,
+      hint: "The diagonals cross at right angles — look for the right-angled triangles formed.",
       ncea: { standard: "N/A", ao: "NZC-L5-GM" }
     };
   }
 };
 
-const _genExplanationL6 = (diff) => {
-  const uid = makeUID("EXPLANATION", 6, diff);
-  const questions = [
-    {
-      diff: 1,
-      q: "Explain why you need to draw a perpendicular height before you can use Pythagoras' Theorem in an equilateral triangle.",
-      modelAnswer: "Pythagoras' Theorem only applies to right-angled triangles. An equilateral triangle does not contain a right angle. By drawing the perpendicular height from one vertex to the opposite side, we create two right-angled triangles. We can then apply Pythagoras' Theorem to either of these right-angled triangles to find the height.",
-      markingChecklist: [
-        "States that Pythagoras' Theorem only applies to right-angled triangles",
-        "Explains that the altitude creates two right-angled triangles",
-        "Identifies the height as the unknown side to be found"
-      ]
-    },
-    {
-      diff: 2,
-      q: "An isosceles triangle has equal sides of 10 cm and a base of 12 cm. Explain the steps you would use to find its perpendicular height, without performing the calculation.",
-      modelAnswer: "First, draw the perpendicular height from the apex to the midpoint of the base. Because the triangle is isosceles, the altitude bisects the base into two equal halves of 6 cm each. This creates a right-angled triangle with hypotenuse 10 cm and one shorter side 6 cm. We can then use the rearrangement b² = c² − a² to find the height: h² = 10² − 6² = 100 − 36 = 64, so h = 8 cm.",
-      markingChecklist: [
-        "States that the altitude bisects the base (giving half-base = 6 cm)",
-        "Identifies that a right-angled triangle is formed",
-        "Correctly applies b² = c² − a² with the right values"
-      ]
-    },
-    {
-      diff: 3,
-      q: "Explain why the converse of Pythagoras' Theorem can be used to check whether a triangle is right-angled. Give an example.",
-      modelAnswer: "The converse of Pythagoras' Theorem states that if the square of the longest side equals the sum of the squares of the other two sides (i.e. a² + b² = c²), then the triangle must be right-angled. For example, for a triangle with sides 5, 12, and 13: 5² + 12² = 25 + 144 = 169 = 13². Since the equation holds, the triangle is right-angled.",
-      markingChecklist: [
-        "Correctly states the converse: if a² + b² = c² then the triangle is right-angled",
-        "Identifies c as the longest side",
-        "Provides a correct numerical example"
-      ]
-    }
-  ];
-  const q = questions.find(x => x.diff === diff) || questions[0];
+// ─── LEVELS g/h: Word Problems ────────────────────────────────────────
+
+const _WP_GENS = [
+  () => {
+    const hyp = rand(5, 13), base = rand(2, hyp - 2);
+    const ht = r2(Math.sqrt(hyp*hyp - base*base));
+    if (isNaN(ht) || ht <= 0) return null;
+    const W = 220, H = 150;
+    return {
+      q: `A ladder ${hyp} m long leans against a wall. The foot is ${base} m from the wall. How high up the wall does it reach?`,
+      a: `Height \\approx ${ht}`, units: ["m"], tolerance: 0.05,
+      working: `<p>\\(h^2 = c^2 - d^2 = ${hyp}^2 - ${base}^2 = ${hyp*hyp} - ${base*base} = ${r2(hyp*hyp-base*base)}\\)<br>\\(h = \\sqrt{${r2(hyp*hyp-base*base)}} \\approx ${ht}\\) m</p>`,
+      img: _svgDataURI(_diagLadder(W, H, hyp, base)),
+      imgAlt: `Ladder diagram, length ${hyp} m, base ${base} m`
+    };
+  },
+  () => {
+    const a = rand(3, 10), b = rand(3, 10), c = r2(Math.sqrt(a*a + b*b));
+    const W = 220, H = 150;
+    return {
+      q: `A ship sails ${a} km north, then ${b} km east. How far is it from the starting point?`,
+      a: `Distance \\approx ${c}`, units: ["km"], tolerance: 0.05,
+      working: `<p>\\(c^2 = ${a}^2 + ${b}^2 = ${a*a+b*b}\\)<br>\\(c = \\sqrt{${a*a+b*b}} \\approx ${c}\\) km</p>`,
+      img: _svgDataURI(_diagShip(W, H, a, b)),
+      imgAlt: `Ship route diagram, ${a} km N then ${b} km E`
+    };
+  },
+  () => {
+    const w = rand(4, 14), h = rand(4, 12), d = r2(Math.sqrt(w*w + h*h));
+    const W = 220, H = 150;
+    return {
+      q: `A field is ${w} m wide and ${h} m long. How long is the diagonal path across it?`,
+      a: `Diagonal \\approx ${d}`, units: ["m"], tolerance: 0.05,
+      working: `<p>\\(c^2 = ${w}^2 + ${h}^2 = ${w*w+h*h}\\)<br>\\(c = \\sqrt{${w*w+h*h}} \\approx ${d}\\) m</p>`,
+      img: _svgDataURI(_diagRect(W, H, w, h)),
+      imgAlt: `Rectangle field ${w} m × ${h} m`
+    };
+  },
+  () => {
+    const dist = rand(4, 12), ht = rand(3, 10), hyp = r2(Math.sqrt(dist*dist + ht*ht));
+    const W = 220, H = 150;
+    return {
+      q: `A lighthouse is ${ht} m tall. A boat is ${dist} m from the base. How far is the boat from the top of the lighthouse?`,
+      a: `Distance \\approx ${hyp}`, units: ["m"], tolerance: 0.05,
+      working: `<p>\\(c^2 = ${dist}^2 + ${ht}^2 = ${dist*dist+ht*ht}\\)<br>\\(c = \\sqrt{${dist*dist+ht*ht}} \\approx ${hyp}\\) m</p>`,
+      img: _svgDataURI(_diagLighthouse(W, H, dist, ht)),
+      imgAlt: `Lighthouse ${ht} m tall, boat ${dist} m away`
+    };
+  },
+  () => {
+    const run = rand(3, 10), rise = rand(2, 8), sl = r2(Math.sqrt(run*run + rise*rise));
+    const W = 220, H = 150;
+    return {
+      q: `A ramp rises ${rise} m over a horizontal distance of ${run} m. What is the length of the ramp surface?`,
+      a: `Ramp \\approx ${sl}`, units: ["m"], tolerance: 0.05,
+      working: `<p>\\(c^2 = ${run}^2 + ${rise}^2 = ${run*run+rise*rise}\\)<br>\\(c = \\sqrt{${run*run+rise*rise}} \\approx ${sl}\\) m</p>`,
+      img: _svgDataURI(_diagRamp(W, H, run, rise)),
+      imgAlt: `Ramp diagram, run ${run} m, rise ${rise} m`
+    };
+  },
+  () => {
+    const w = rand(10, 26), h = rand(8, 20), d = r2(Math.sqrt(w*w + h*h));
+    const W = 220, H = 150;
+    return {
+      q: `A TV screen is ${w} cm wide and ${h} cm tall. What is the diagonal screen size?`,
+      a: `Diagonal \\approx ${d}`, units: ["cm"], tolerance: 0.05,
+      working: `<p>\\(c^2 = ${w}^2 + ${h}^2 = ${w*w+h*h}\\)<br>\\(c = \\sqrt{${w*w+h*h}} \\approx ${d}\\) cm</p>`,
+      img: _svgDataURI(_diagTV(W, H, w, h)),
+      imgAlt: `TV screen ${w} cm × ${h} cm`
+    };
+  },
+];
+
+const _genWP = () => {
+  let p = null;
+  while (!p) { p = _WP_GENS[rand(0, _WP_GENS.length - 1)](); }
+  return p;
+};
+
+const _genWordProblemG = (diff) => {
+  const uid = makeUID("WP", "g", diff);
+  const p = _genWP();
   return {
-    uid, level: 6, diff, type: "EXPLANATION",
-    q: q.q,
-    modelAnswer: q.modelAnswer,
-    markingChecklist: q.markingChecklist,
-    working: "",
-    img: "", imgAlt: "", hint: "",
+    uid, level: "g", diff, type: "NUMERIC",
+    q: p.q, a: p.a, units: p.units, tolerance: p.tolerance,
+    working: p.working,
+    img: p.img, imgAlt: p.imgAlt,
+    hint: "A diagram is shown — identify which sides are a, b, c, then apply \\(c^2 = a^2 + b^2\\).",
     ncea: { standard: "N/A", ao: "NZC-L5-GM" }
   };
 };
 
-// ─── LEVEL 7: Multi-Step and Algebraic Problems ───────────────────────
-// Types: NUMERIC, SPOT_ERROR/VALUE, EXPLANATION
-
-const _genNumericL7 = (diff) => {
-  const uid = makeUID("NUMERIC", 7, diff);
-
-  if (diff === 1) {
-    // Two-step: diagonal of rectangle, then use as side
-    const w = rand(3, 8), h = rand(3, 8);
-    const diag = Math.sqrt(w*w + h*h);
-    const extra = rand(2, 6);
-    const final = Math.sqrt(diag*diag + extra*extra);
-    const finalStr = final.toFixed(2);
-    return {
-      uid, level: 7, diff, type: "NUMERIC",
-      q: `A rectangle is ${w} m wide and ${h} m tall. A diagonal of the rectangle forms one leg of a second right-angled triangle whose other leg is ${extra} m. Find the hypotenuse of the second triangle, to 2 decimal places.`,
-      a: finalStr, units: ["m"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${finalStr}\\) m</strong></p>
-<p><strong>Step 1:</strong> Find the diagonal of the rectangle.<br>
-\\(d^2 = ${w}^2 + ${h}^2 = ${w*w} + ${h*h} = ${w*w + h*h}\\)<br>
-\\(d = \\sqrt{${w*w + h*h}} \\approx ${diag.toFixed(4)}\\) m<br>
-<strong>Step 2:</strong> Use \\(d\\) as a leg in the second triangle.<br>
-\\(c^2 = d^2 + ${extra}^2 = ${w*w + h*h} + ${extra*extra} = ${w*w + h*h + extra*extra}\\)<br>
-\\(c = \\sqrt{${w*w + h*h + extra*extra}} \\approx ${finalStr}\\) m</p>`,
-      img: "", imgAlt: "",
-      hint: "Find the diagonal of the rectangle first, then use it as a side in the second triangle.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else if (diff === 2) {
-    // Algebraic: sides x and x+k, hypotenuse given → solve quadratic
-    // Use cases where the quadratic works out neatly
-    const cases = [
-      { k: 2, hyp: 10, x: 6 },   // x² + (x+2)² = 100 → 2x²+4x+4=100 → x²+2x-48=0 → (x+8)(x-6)=0 → x=6
-      { k: 4, hyp: 20, x: 12 },  // x² + (x+4)² = 400 → approx: picks clean solution
-      { k: 7, hyp: 13, x: 5 }    // 5² + 12² = 169 = 13²
-    ];
-    const c = cases[rand(0, cases.length - 1)];
-    return {
-      uid, level: 7, diff, type: "NUMERIC",
-      q: `The two shorter sides of a right-angled triangle are \\(x\\) cm and \\((x + ${c.k})\\) cm. The hypotenuse is ${c.hyp} cm. Find the value of \\(x\\).`,
-      a: String(c.x), units: [], tolerance: 0,
-      working: `<p><strong>Answer: \\(x = ${c.x}\\)</strong></p>
-<p>Using Pythagoras' Theorem:<br>
-\\(x^2 + (x + ${c.k})^2 = ${c.hyp}^2\\)<br>
-\\(x^2 + x^2 + ${2*c.k}x + ${c.k*c.k} = ${c.hyp*c.hyp}\\)<br>
-\\(2x^2 + ${2*c.k}x + ${c.k*c.k - c.hyp*c.hyp} = 0\\)<br>
-Solve: \\(x = ${c.x}\\) (reject the negative root — length must be positive)</p>`,
-      img: "", imgAlt: "",
-      hint: "Form a quadratic equation, expand, and solve. Reject any negative solution.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else if (diff === 3) {
-    // Coordinate geometry: distance between two points
-    const x1 = rand(1, 6), y1 = rand(1, 6), x2 = rand(7, 12), y2 = rand(7, 12);
-    const dx = x2 - x1, dy = y2 - y1;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    const distStr = dist.toFixed(2);
-    return {
-      uid, level: 7, diff, type: "NUMERIC",
-      q: `Calculate the distance between points \\(A(${x1}, ${y1})\\) and \\(B(${x2}, ${y2})\\). Give your answer to 2 decimal places.`,
-      a: distStr, units: ["units"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${distStr}\\) units</strong></p>
-<p>\\(\\text{horizontal distance} = ${x2} - ${x1} = ${dx}\\)<br>
-\\(\\text{vertical distance} = ${y2} - ${y1} = ${dy}\\)<br>
-\\(AB^2 = ${dx}^2 + ${dy}^2 = ${dx*dx} + ${dy*dy} = ${dx*dx + dy*dy}\\)<br>
-\\(AB = \\sqrt{${dx*dx + dy*dy}} \\approx ${distStr}\\) units</p>`,
-      img: "", imgAlt: "",
-      hint: "Find the horizontal and vertical distances between the two points, then apply Pythagoras.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else {
-    // diff 4: two connected triangles sharing a common side
-    const triple1 = TRIPLES[rand(0, TRIPLES.length - 1)];
-    const shared = triple1[2]; // hyp of first = leg of second
-    const extra = TRIPLES.find(t => t[0] === shared || t[1] === shared) || [shared, rand(3,8), 0];
-    const legB = extra[extra[0] === shared ? 1 : 0];
-    const finalHyp = Math.sqrt(shared*shared + legB*legB);
-    const finalStr = finalHyp.toFixed(2);
-    return {
-      uid, level: 7, diff, type: "NUMERIC",
-      q: `Two right-angled triangles share a common side. The first triangle has shorter sides ${triple1[0]} cm and ${triple1[1]} cm. Its hypotenuse is the shorter leg of the second triangle, which also has a leg of ${legB} cm. Find the hypotenuse of the second triangle, to 2 decimal places.`,
-      a: finalStr, units: ["cm"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${finalStr}\\) cm</strong></p>
-<p><strong>Step 1:</strong> Find the shared side (hypotenuse of triangle 1).<br>
-\\(c_1^2 = ${triple1[0]}^2 + ${triple1[1]}^2 = ${triple1[0]*triple1[0]} + ${triple1[1]*triple1[1]} = ${triple1[0]*triple1[0]+triple1[1]*triple1[1]}\\)<br>
-\\(c_1 = \\sqrt{${triple1[0]*triple1[0]+triple1[1]*triple1[1]}} = ${shared}\\) cm<br>
-<strong>Step 2:</strong> Find the hypotenuse of triangle 2.<br>
-\\(c_2^2 = ${shared}^2 + ${legB}^2 = ${shared*shared} + ${legB*legB} = ${shared*shared + legB*legB}\\)<br>
-\\(c_2 = \\sqrt{${shared*shared + legB*legB}} \\approx ${finalStr}\\) cm</p>`,
-      img: "", imgAlt: "",
-      hint: "Find the first hypotenuse, then use it as a leg in the second triangle.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  }
+const _genContextH = (diff) => {
+  const uid = makeUID("CTX", "h", diff);
+  const p = _genWP();
+  return {
+    uid, level: "h", diff, type: "NUMERIC",
+    q: p.q, a: p.a, units: p.units, tolerance: p.tolerance,
+    working: p.working,
+    img: "",          // no image on front — student draws their own
+    imgAlt: "",
+    imgAns: p.img,    // diagram revealed on solution flip
+    imgAnsAlt: p.imgAlt,
+    hint: "Draw a diagram, label the sides, then apply \\(c^2 = a^2 + b^2\\).",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
+  };
 };
 
-const _genSpotValueL7 = (diff) => {
-  const uid = makeUID("SPOT_ERROR/VALUE", 7, diff);
-  const triple = TRIPLES[rand(0, TRIPLES.length - 1)];
-  const a = triple[0], b = triple[1], c = triple[2];
+// ─── SPOT_ERROR / VALUE ───────────────────────────────────────────────
 
-  // Error types for VALUE: wrong squaring, wrong arithmetic, wrong final sqrt
+const _genSpotError = (diff) => {
+  const uid = makeUID("SPOT_ERROR", "spot", diff);
+  const triple = TRIPLES[rand(0, TRIPLES.length - 1)];
+  const [a, b, c] = triple;
   const errType = rand(1, 3);
-  let expression, correctErrorId, errorExplanation;
+  let tokens, correctErrorId, errorExplanation;
 
   if (errType === 1) {
-    // Error in squaring a (shows a×2 instead of a²)
+    // Wrong squaring: a×2 instead of a²
     const wrongA2 = a * 2;
-    expression = `c^2 = [${a}^2|1] + [${b}^2|2] = [${wrongA2}|3] + [${b*b}|4] = [${wrongA2 + b*b}|5]`;
-    correctErrorId = 3;
-    errorExplanation = `Token 3 is wrong: \\(${a}^2 = ${a*a}\\), not \\(${wrongA2}\\). The student has doubled ${a} instead of squaring it. The correct value is ${a*a}.`;
+    tokens = [`\\(${a}^2\\)`, `\\(${b}^2\\)`, `\\(${wrongA2}\\)`, `\\(${b*b}\\)`, `\\(${wrongA2+b*b}\\)`, `\\(c=${Math.round(Math.sqrt(wrongA2+b*b)*100)/100}\\)`];
+    correctErrorId = 2; // 0-indexed: token index 2
+    errorExplanation = `Token 3 is wrong: \\(${a}^2 = ${a*a}\\), not \\(${wrongA2}\\). The student doubled instead of squaring.`;
   } else if (errType === 2) {
-    // Error in addition
+    // Arithmetic error in addition
     const wrongSum = a*a + b*b + rand(1, 5);
-    expression = `c^2 = [${a}^2|1] + [${b}^2|2] = [${a*a}|3] + [${b*b}|4] = [${wrongSum}|5]`;
+    tokens = [`\\(${a}^2\\)`, `\\(${b}^2\\)`, `\\(${a*a}\\)`, `\\(${b*b}\\)`, `\\(${wrongSum}\\)`, `\\(c=${c}\\)`];
+    correctErrorId = 4;
+    errorExplanation = `Token 5 is wrong: \\(${a*a} + ${b*b} = ${a*a+b*b}\\), not \\(${wrongSum}\\). Arithmetic error in the addition.`;
+  } else {
+    // Forgot to take square root
+    tokens = [`\\(${a}^2\\)`, `\\(${b}^2\\)`, `\\(${a*a}\\)`, `\\(${b*b}\\)`, `\\(${a*a+b*b}\\)`, `\\(c=${a*a+b*b}\\)`];
     correctErrorId = 5;
-    errorExplanation = `Token 5 is wrong: \\(${a*a} + ${b*b} = ${a*a + b*b}\\), not \\(${wrongSum}\\). The student has made an arithmetic error in the addition.`;
-  } else {
-    // Error in final square root (shows c² value instead of c)
-    expression = `c^2 = [${a}^2|1] + [${b}^2|2] = [${a*a}|3] + [${b*b}|4] = [${a*a + b*b}|5], so [c = ${a*a + b*b}|6]`;
-    correctErrorId = 6;
-    errorExplanation = `Token 6 is wrong: after finding \\(c^2 = ${a*a + b*b}\\), you must take the square root. The correct answer is \\(c = \\sqrt{${a*a + b*b}} = ${c}\\), not \\(${a*a + b*b}\\).`;
+    errorExplanation = `Token 6 is wrong: after finding \\(c^2 = ${a*a+b*b}\\), the student forgot to take the square root. \\(c = \\sqrt{${a*a+b*b}} = ${c}\\), not \\(${a*a+b*b}\\).`;
   }
 
   return {
-    uid, level: 7, diff, type: "SPOT_ERROR", subtype: "VALUE",
-    q: `A student writes the following working to find the hypotenuse of a right-angled triangle with sides ${a} cm and ${b} cm. Click on the token that contains the error.`,
-    expression,
-    correctErrorId,
-    errorExplanation,
-    working: `<p><strong>Error:</strong> ${errorExplanation}</p>
-<p><strong>Correct answer:</strong> \\(c = \\sqrt{${a*a} + ${b*b}} = \\sqrt{${a*a + b*b}} = ${c}\\) cm</p>`,
-    img: "", imgAlt: "", hint: "Check each value carefully — is each squaring correct? Is the addition right? Is the final square root taken?",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
+    uid, level: "spot", diff, type: "SPOT_ERROR", subtype: "VALUE",
+    q: `A student finds the hypotenuse of a triangle with legs ${a} cm and ${b} cm. Click the token that contains the error:`,
+    tokens, correctErrorId, errorExplanation,
+    a: `Error at token ${correctErrorId + 1}. Correct answer: \\(c = ${c}\\) cm`,
+    working: `<p><strong>Error:</strong> ${errorExplanation}</p>` +
+      `<p><strong>Correct working:</strong><br>\\(c^2 = ${a}^2 + ${b}^2 = ${a*a} + ${b*b} = ${a*a+b*b}\\)<br>` +
+      `\\(c = \\sqrt{${a*a+b*b}} = ${c}\\) cm</p>`,
+    img: "", imgAlt: "",
+    hint: "Check each value: is the squaring correct? Is the addition right? Was the square root taken?",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: [], tolerance: 0
   };
 };
 
-const _genExplanationL7 = (diff) => {
-  const uid = makeUID("EXPLANATION", 7, diff);
-  const questions = [
-    {
-      diff: 1,
-      q: "A quadratic formed by Pythagoras' Theorem gives two solutions: x = 6 and x = −10. Explain why only one solution is valid and state which one.",
-      modelAnswer: "Only x = 6 is valid. The variable x represents a length, and lengths cannot be negative. The solution x = −10 must be rejected because a negative side length has no meaning in this geometric context. Whenever a quadratic arises from Pythagoras' Theorem, any negative roots are rejected.",
-      markingChecklist: [
-        "States that x = 6 is the valid solution",
-        "Explains that lengths cannot be negative",
-        "States that x = −10 is rejected for this reason"
-      ]
-    },
-    {
-      diff: 2,
-      q: "Explain how you can find the distance between two points on a coordinate grid using Pythagoras' Theorem.",
-      modelAnswer: "To find the distance between two points A(x₁, y₁) and B(x₂, y₂), draw a right-angled triangle where AB is the hypotenuse. The horizontal leg has length |x₂ − x₁| and the vertical leg has length |y₂ − y₁|. Applying Pythagoras' Theorem: AB² = (x₂ − x₁)² + (y₂ − y₁)², so AB = √[(x₂ − x₁)² + (y₂ − y₁)²].",
-      markingChecklist: [
-        "Identifies the horizontal and vertical distances as the two shorter sides",
-        "Correctly states the distance formula using Pythagoras' Theorem",
-        "Explains that the straight-line distance is the hypotenuse"
-      ]
-    },
-    {
-      diff: 3,
-      q: "Describe the strategy you would use to solve a problem where Pythagoras' Theorem must be applied twice in sequence.",
-      modelAnswer: "In a two-step Pythagoras problem, first identify which right-angled triangle gives you an intermediate unknown length. Apply Pythagoras' Theorem to that triangle to find the intermediate value — keeping it exact (not rounded) if possible. Then use that intermediate value as a known side in the second right-angled triangle, and apply Pythagoras' Theorem again to find the final answer. Rounding too early introduces accumulated error, so it is best to carry forward the full decimal or surd value.",
-      markingChecklist: [
-        "Identifies two separate right-angled triangles in the problem",
-        "States the importance of finding the intermediate length first",
-        "Warns against rounding intermediate values before the final step"
-      ]
-    }
-  ];
-  const q = questions.find(x => x.diff === diff) || questions[0];
+// ─── EXPLANATION ──────────────────────────────────────────────────────
+
+const _EXPLANATIONS = [
+  {
+    diff: 1,
+    q: "Explain why you need to draw a perpendicular height before you can use Pythagoras' Theorem in an equilateral triangle.",
+    modelAnswer: "Pythagoras' Theorem only applies to right-angled triangles. An equilateral triangle has no right angle. By drawing the perpendicular height from one vertex to the opposite side, we create two right-angled triangles. We can then apply Pythagoras' Theorem to find the height.",
+    markingChecklist: [
+      "States that Pythagoras' Theorem only applies to right-angled triangles",
+      "Explains that the altitude creates two right-angled triangles",
+      "Identifies the height as the unknown side"
+    ]
+  },
+  {
+    diff: 2,
+    q: "Explain how you use Pythagoras' Theorem to find the distance between two points on a coordinate grid.",
+    modelAnswer: "Draw a right-angled triangle where the straight-line distance is the hypotenuse. The horizontal leg has length |x₂ − x₁| and the vertical leg has length |y₂ − y₁|. Apply: d = √[(x₂−x₁)² + (y₂−y₁)²].",
+    markingChecklist: [
+      "Identifies horizontal and vertical distances as the two shorter sides",
+      "States the distance formula using Pythagoras' Theorem",
+      "Explains the straight-line distance is the hypotenuse"
+    ]
+  },
+  {
+    diff: 3,
+    q: "Explain why the converse of Pythagoras' Theorem can be used to check if a triangle is right-angled. Give an example.",
+    modelAnswer: "The converse states: if a² + b² = c² (where c is the longest side), then the triangle is right-angled. Example: for sides 5, 12, 13: 5² + 12² = 25 + 144 = 169 = 13². ✓ Right-angled.",
+    markingChecklist: [
+      "Correctly states the converse: if a²+b²=c² then right-angled",
+      "Identifies c as the longest side",
+      "Gives a correct numerical example"
+    ]
+  },
+  {
+    diff: 1,
+    q: "A quadratic gives solutions x = 6 and x = −10 when solving a Pythagoras problem. Explain which to use and why.",
+    modelAnswer: "Only x = 6 is valid. The variable x represents a length, and lengths cannot be negative. The solution x = −10 must be rejected.",
+    markingChecklist: [
+      "States that x = 6 is the valid solution",
+      "Explains that lengths cannot be negative",
+      "States that x = −10 is rejected"
+    ]
+  },
+  {
+    diff: 2,
+    q: "A builder says: 'I use the 3-4-5 rule to check that a corner is a right angle.' Explain how this works.",
+    modelAnswer: "Measure 3 units along one wall, 4 units along the adjacent wall. If the distance between those two marks is exactly 5, then 3² + 4² = 5², confirming a right angle by the converse of Pythagoras' Theorem.",
+    markingChecklist: [
+      "Describes measuring 3 and 4 units along the walls",
+      "States the diagonal should be 5 units",
+      "References Pythagoras' Theorem or its converse"
+    ]
+  },
+  {
+    diff: 3,
+    q: "Describe the strategy for solving a problem where Pythagoras must be applied twice in sequence.",
+    modelAnswer: "First identify which right-angled triangle gives an intermediate unknown. Solve that triangle exactly (keeping the full decimal). Then use that intermediate value as a known side in the second triangle and apply Pythagoras again. Avoid rounding early — it accumulates error.",
+    markingChecklist: [
+      "Identifies two separate right-angled triangles in the problem",
+      "States the importance of finding the intermediate length first",
+      "Warns against rounding intermediate values before the final step"
+    ]
+  },
+];
+
+const _genExplanation = (diff) => {
+  const uid = makeUID("EXPLANATION", "explain", diff);
+  const matching = _EXPLANATIONS.filter(e => e.diff === diff);
+  const e = matching.length ? matching[rand(0, matching.length - 1)] : _EXPLANATIONS[0];
   return {
-    uid, level: 7, diff, type: "EXPLANATION",
-    q: q.q, modelAnswer: q.modelAnswer, markingChecklist: q.markingChecklist,
-    working: "", img: "", imgAlt: "", hint: "",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
+    uid, level: "explain", diff, type: "EXPLANATION",
+    q: e.q,
+    modelAnswer: e.modelAnswer,
+    markingChecklist: e.markingChecklist,
+    a: e.modelAnswer,
+    working: `<p><strong>Model answer:</strong> ${e.modelAnswer}</p>`,
+    img: "", imgAlt: "",
+    hint: "Think it through carefully, then flip for the model answer and marking checklist.",
+    ncea: { standard: "N/A", ao: "NZC-L5-GM" },
+    units: [], tolerance: 0
   };
 };
 
-// ─── LEVEL 8: Context Problems ────────────────────────────────────────
-// Types: NUMERIC, EXPLANATION
-
-const _genNumericL8 = (diff) => {
-  const uid = makeUID("NUMERIC", 8, diff);
-  const pool = getPool("l8numeric", _contextPool8Master.slice());
-  const ctx = pickAndRemove(pool);
-
-  if (diff === 1) {
-    // Single-step integer, right angle explicit — ladder scenario
-    const height = rand(3, 8), base = rand(2, 5);
-    const ladder = Math.sqrt(height*height + base*base);
-    // Use a clean triple if possible
-    const tripleMatch = TRIPLES.find(t => t[0] === base && t[1] === height) ||
-                        TRIPLES.find(t => t[0] === height && t[1] === base);
-    const ladderLen = tripleMatch ? tripleMatch[2] : Math.round(ladder * 10) / 10;
-    const aStr = String(ladderLen);
-    return {
-      uid, level: 8, diff, type: "NUMERIC",
-      q: `A ladder leans against a vertical wall. The base of the ladder is ${base} m from the foot of the wall, and the ladder reaches ${height} m up the wall. The ground is horizontal and meets the wall at a right angle. Calculate the length of the ladder.`,
-      a: aStr, units: ["m", "metres"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${aStr}\\) m</strong></p>
-<p>The wall, ground, and ladder form a right-angled triangle.<br>
-The shorter sides are ${base} m and ${height} m; the ladder is the hypotenuse.<br>
-\\(c^2 = ${base}^2 + ${height}^2 = ${base*base} + ${height*height} = ${base*base + height*height}\\)<br>
-\\(c = \\sqrt{${base*base + height*height}} = ${aStr}\\) m</p>`,
-      img: "", imgAlt: "",
-      hint: "The wall and ground form a right angle. The ladder is the hypotenuse.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else if (diff === 2) {
-    // Single-step decimal — sports field diagonal
-    const length = randF(50, 100, 0), width = randF(30, 60, 0);
-    const diag = Math.sqrt(length*length + width*width);
-    const diagStr = diag.toFixed(1);
-    return {
-      uid, level: 8, diff, type: "NUMERIC",
-      q: `A rugby field is ${length} m long and ${width} m wide. Calculate the length of the diagonal of the field. Give your answer to 1 decimal place.`,
-      a: diagStr, units: ["m", "metres"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${diagStr}\\) m</strong></p>
-<p>The diagonal of a rectangle forms a right-angled triangle with the length and width.<br>
-\\(d^2 = ${length}^2 + ${width}^2 = ${length*length} + ${width*width} = ${length*length + width*width}\\)<br>
-\\(d = \\sqrt{${length*length + width*width}} \\approx ${diagStr}\\) m</p>`,
-      img: "", imgAlt: "",
-      hint: "The diagonal of a rectangle creates a right-angled triangle with the two sides.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else if (diff === 3) {
-    // Two-step with decimals — path across paddock
-    const north = randF(3, 9, 1), east = randF(3, 9, 1);
-    const dist = Math.sqrt(north*north + east*east);
-    const distStr = dist.toFixed(2);
-    return {
-      uid, level: 8, diff, type: "NUMERIC",
-      q: `Tāne walks ${north} km due north along a fence line, then ${east} km due east along another fence. The two fence lines meet at a right angle. How far is Tāne from his starting point in a straight line? Give your answer to 2 decimal places.`,
-      a: distStr, units: ["km"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${distStr}\\) km</strong></p>
-<p>The north and east paths form the two shorter sides of a right-angled triangle. The straight-line return is the hypotenuse.<br>
-\\(d^2 = ${north}^2 + ${east}^2 = ${Math.round(north*north*100)/100} + ${Math.round(east*east*100)/100} = ${Math.round((north*north + east*east)*100)/100}\\)<br>
-\\(d = \\sqrt{${Math.round((north*north + east*east)*100)/100}} \\approx ${distStr}\\) km</p>`,
-      img: "", imgAlt: "",
-      hint: "North and east directions are at right angles — draw a sketch to identify the triangle.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  } else {
-    // diff 4: multi-step, right angle implied — navigation return
-    const leg1 = rand(5, 15), leg2 = rand(5, 15);
-    const dist = Math.sqrt(leg1*leg1 + leg2*leg2);
-    const distStr = dist.toFixed(1);
-    return {
-      uid, level: 8, diff, type: "NUMERIC",
-      q: `A waka leaves the harbour and travels ${leg1} km north, then ${leg2} km east. The navigator needs to return directly to the harbour in a straight line. How long is the direct return journey? Give your answer to 1 decimal place. (Assume the harbour is at the origin and north and east are perpendicular.)`,
-      a: distStr, units: ["km"], tolerance: 0.05,
-      working: `<p><strong>Answer: \\(${distStr}\\) km</strong></p>
-<p>The waka has travelled ${leg1} km north and ${leg2} km east — these are the two legs of a right-angled triangle. The direct return is the hypotenuse.<br>
-\\(d^2 = ${leg1}^2 + ${leg2}^2 = ${leg1*leg1} + ${leg2*leg2} = ${leg1*leg1 + leg2*leg2}\\)<br>
-\\(d = \\sqrt{${leg1*leg1 + leg2*leg2}} \\approx ${distStr}\\) km</p>`,
-      img: "", imgAlt: "",
-      hint: "Sketch a compass diagram. North and east are perpendicular — identify which side is the hypotenuse.",
-      ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-    };
-  }
-};
-
-const _genExplanationL8 = (diff) => {
-  const uid = makeUID("EXPLANATION", 8, diff);
-  const questions = [
-    {
-      diff: 1,
-      q: "A builder says: 'I can use Pythagoras' Theorem to check that the corner of a building is a right angle.' Explain how the builder could do this using the 3-4-5 rule.",
-      modelAnswer: "The builder measures 3 units along one wall from the corner and 4 units along the adjacent wall. If the diagonal distance between those two marks is exactly 5 units, then the corner is a right angle, because 3² + 4² = 9 + 16 = 25 = 5². This is an application of the converse of Pythagoras' Theorem: if a² + b² = c², the triangle must be right-angled.",
-      markingChecklist: [
-        "Describes measuring 3 and 4 units along the two walls",
-        "States that the diagonal should be 5 units",
-        "Explains this works because 3² + 4² = 5² (references Pythagoras' Theorem or its converse)"
-      ]
-    },
-    {
-      diff: 2,
-      q: "A TV is advertised as '55 inches' — referring to its diagonal. The screen has a width-to-height ratio of 16:9. Describe how you would use Pythagoras' Theorem to find the actual width and height of the screen.",
-      modelAnswer: "Since the ratio is 16:9, the width is 16k and the height is 9k for some value k. The diagonal is the hypotenuse of the right-angled triangle formed by the width and height. Using Pythagoras' Theorem: (16k)² + (9k)² = 55². This gives 256k² + 81k² = 3025, so 337k² = 3025, and k² = 3025 ÷ 337 ≈ 8.98, giving k ≈ 2.997. Width ≈ 16 × 2.997 ≈ 47.9 inches and height ≈ 9 × 2.997 ≈ 27.0 inches.",
-      markingChecklist: [
-        "Sets up width = 16k, height = 9k",
-        "Applies Pythagoras: (16k)² + (9k)² = 55²",
-        "Solves for k and uses it to find width and height"
-      ]
-    },
-    {
-      diff: 3,
-      q: "Explain what information you need to correctly identify a right-angled triangle within a real-world problem, and describe one common mistake students make.",
-      modelAnswer: "To identify a right-angled triangle in a real-world problem, you need to confirm that two of the measurements are perpendicular — meeting at exactly 90°. Common real-world indicators include: a vertical wall meeting a horizontal floor, a north–south path meeting an east–west path, or a height drawn perpendicular to a base. A common mistake is assuming the largest number given in the problem is the hypotenuse when in fact it might be a measurement in different units, or it might not be a side of the triangle at all. Students should always draw a diagram and label which side is opposite the right angle before applying the formula.",
-      markingChecklist: [
-        "States that two sides must be perpendicular (meet at 90°)",
-        "Gives at least one valid real-world example of a right angle",
-        "Describes a specific, plausible student misconception"
-      ]
-    }
-  ];
-  const q = questions.find(x => x.diff === diff) || questions[0];
-  return {
-    uid, level: 8, diff, type: "EXPLANATION",
-    q: q.q, modelAnswer: q.modelAnswer, markingChecklist: q.markingChecklist,
-    working: "", img: "", imgAlt: "", hint: "",
-    ncea: { standard: "N/A", ao: "NZC-L5-GM" }
-  };
-};
-
-// ── 4. CONFIG OBJECT ──────────────────────────────────────────────────
+// ── 8. CONFIG OBJECT ──────────────────────────────────────────────────
 
 const config = {
-  id: "pythagoras",
-  title: "Pythagoras' Theorem",
+  id: "pythagoras-trainer",
+  title: "Pythagoras' Theorem — Trainer",
   levelNames: [
-    "Squares and Square Roots",        // Level 1
-    "Identify the Hypotenuse",         // Level 2
-    "Recall the Theorem",              // Level 3
-    "Find the Hypotenuse",             // Level 4
-    "Find a Shorter Side",             // Level 5
-    "Pythagoras in Other Triangles",   // Level 6
-    "Multi-Step and Algebraic",        // Level 7
-    "Real-World Problems"              // Level 8
+    "Vocabulary & Prerequisites",   // 1  (a)
+    "Pythagoras Basics",             // 2  (b)
+    "Find the Hypotenuse (on diagram)",   // 3  (c1)
+    "Find the Hypotenuse (offset)",       // 4  (c2)
+    "Find a Shorter Side (on diagram)",   // 5  (d1)
+    "Find a Shorter Side (offset)",       // 6  (d2)
+    "Mixed (c & d)",                 // 7  (e)
+    "Other Triangles",               // 8  (f)
+    "Word Problems (with diagram)",  // 9  (g)
+    "Context Problems (draw your own)", // 10 (h)
+    "Spot the Error",                // 11 (spot)
+    "Explain It",                    // 12 (explain)
   ],
 
-  // ── Question pools (per level, reset when exhausted) ─────────────────
+  // Maps qs_fwk numeric level integers to this module's string keys
+  _levelMap: {
+    1: "a", 2: "b", 3: "c1", 4: "c2", 5: "d1", 6: "d2", 
+    7: "e", 8: "f", 9: "g", 10: "h", 11: "spot", 12: "explain"
+  },
+
   _qPools: {},
 
   _buildPool(level) {
     const pool = [];
 
-    if (level === 1) {
-      // 10 questions: mix NUMERIC + MCQ across diffs 1-4
-      // ~6 NUMERIC, ~4 MCQ; diffs spread 1,1,2,2,3,3,4,4,1,2
-      const plan = [
-        { type: "NUMERIC", diff: 1 }, { type: "MCQ", diff: 1 },
-        { type: "NUMERIC", diff: 2 }, { type: "MCQ", diff: 2 },
-        { type: "NUMERIC", diff: 3 }, { type: "MCQ", diff: 3 },
-        { type: "NUMERIC", diff: 4 }, { type: "MCQ", diff: 4 },
-        { type: "NUMERIC", diff: 1 }, { type: "NUMERIC", diff: 2 }
-      ];
-      for (const p of plan) {
-        if (p.type === "NUMERIC") pool.push(_genNumericL1(p.diff));
-        else pool.push(_genMCQL1(p.diff));
-      }
-    } else if (level === 2) {
-      // 10 questions: MCQ + MATCH only; diffs 1-4
-      const plan = [
-        { type: "MCQ", diff: 1 }, { type: "MATCH", diff: 1 },
-        { type: "MCQ", diff: 2 }, { type: "MATCH", diff: 2 },
-        { type: "MCQ", diff: 3 }, { type: "MATCH", diff: 3 },
-        { type: "MCQ", diff: 4 }, { type: "MATCH", diff: 4 },
-        { type: "MCQ", diff: 1 }, { type: "MCQ", diff: 2 }
-      ];
-      for (const p of plan) {
-        if (p.type === "MCQ") pool.push(_genMCQL2(p.diff));
-        else pool.push(_genMatchL2(p.diff));
-      }
-    } else if (level === 3) {
-      // 10 questions: MCQ + MATCH only
-      const plan = [
-        { type: "MCQ", diff: 1 }, { type: "MATCH", diff: 1 },
-        { type: "MCQ", diff: 2 }, { type: "MATCH", diff: 2 },
-        { type: "MCQ", diff: 3 }, { type: "MATCH", diff: 3 },
-        { type: "MCQ", diff: 4 }, { type: "MATCH", diff: 4 },
-        { type: "MCQ", diff: 1 }, { type: "MCQ", diff: 2 }
-      ];
-      for (const p of plan) {
-        if (p.type === "MCQ") pool.push(_genMCQL3(p.diff));
-        else pool.push(_genMatchL3(p.diff));
-      }
-    } else if (level === 4) {
-      // 10 questions: ~7 NUMERIC, ~3 SPOT_ERROR/STEP; diffs spread
-      const plan = [
-        { type: "NUMERIC", diff: 1 }, { type: "NUMERIC", diff: 1 },
-        { type: "NUMERIC", diff: 2 }, { type: "NUMERIC", diff: 2 },
-        { type: "NUMERIC", diff: 3 }, { type: "NUMERIC", diff: 3 },
-        { type: "NUMERIC", diff: 4 },
-        { type: "SPOT", diff: 1 }, { type: "SPOT", diff: 2 }, { type: "SPOT", diff: 3 }
-      ];
-      for (const p of plan) {
-        if (p.type === "NUMERIC") pool.push(_genNumericL4(p.diff));
-        else pool.push(_genSpotStepL4(p.diff));
-      }
-    } else if (level === 5) {
-      // 10 questions: ~7 NUMERIC, ~3 SPOT_ERROR/STEP
-      const plan = [
-        { type: "NUMERIC", diff: 1 }, { type: "NUMERIC", diff: 1 },
-        { type: "NUMERIC", diff: 2 }, { type: "NUMERIC", diff: 2 },
-        { type: "NUMERIC", diff: 3 }, { type: "NUMERIC", diff: 3 },
-        { type: "NUMERIC", diff: 4 },
-        { type: "SPOT", diff: 1 }, { type: "SPOT", diff: 2 }, { type: "SPOT", diff: 3 }
-      ];
-      for (const p of plan) {
-        if (p.type === "NUMERIC") pool.push(_genNumericL5(p.diff));
-        else pool.push(_genSpotStepL5(p.diff));
-      }
-    } else if (level === 6) {
-      // 10 questions: ~7 NUMERIC, ~3 EXPLANATION
-      const plan = [
-        { type: "NUMERIC", diff: 1 }, { type: "NUMERIC", diff: 1 },
-        { type: "NUMERIC", diff: 2 }, { type: "NUMERIC", diff: 2 },
-        { type: "NUMERIC", diff: 3 }, { type: "NUMERIC", diff: 3 },
-        { type: "NUMERIC", diff: 4 },
-        { type: "EXP", diff: 1 }, { type: "EXP", diff: 2 }, { type: "EXP", diff: 3 }
-      ];
-      for (const p of plan) {
-        if (p.type === "NUMERIC") pool.push(_genNumericL6(p.diff));
-        else pool.push(_genExplanationL6(p.diff));
-      }
-    } else if (level === 7) {
-      // 10 questions: ~5 NUMERIC, ~3 SPOT_ERROR/VALUE, ~2 EXPLANATION
-      const plan = [
-        { type: "NUMERIC", diff: 1 }, { type: "NUMERIC", diff: 2 },
-        { type: "NUMERIC", diff: 3 }, { type: "NUMERIC", diff: 4 },
-        { type: "NUMERIC", diff: 1 },
-        { type: "SEV", diff: 1 }, { type: "SEV", diff: 2 }, { type: "SEV", diff: 3 },
-        { type: "EXP", diff: 1 }, { type: "EXP", diff: 2 }
-      ];
-      for (const p of plan) {
-        if (p.type === "NUMERIC") pool.push(_genNumericL7(p.diff));
-        else if (p.type === "SEV") pool.push(_genSpotValueL7(p.diff));
-        else pool.push(_genExplanationL7(p.diff));
-      }
-    } else if (level === 8) {
-      // 10 questions: ~7 NUMERIC, ~3 EXPLANATION
-      const plan = [
-        { type: "NUMERIC", diff: 1 }, { type: "NUMERIC", diff: 1 },
-        { type: "NUMERIC", diff: 2 }, { type: "NUMERIC", diff: 2 },
-        { type: "NUMERIC", diff: 3 }, { type: "NUMERIC", diff: 3 },
-        { type: "NUMERIC", diff: 4 },
-        { type: "EXP", diff: 1 }, { type: "EXP", diff: 2 }, { type: "EXP", diff: 3 }
-      ];
-      for (const p of plan) {
-        if (p.type === "NUMERIC") pool.push(_genNumericL8(p.diff));
-        else pool.push(_genExplanationL8(p.diff));
-      }
+    if (level === "a") {
+      // 12 vocab/prerequisite cards, diff spread 1–2
+      for (let i = 0; i < 12; i++) _genVocabA(i < 6 ? 1 : 2) && pool.push(_genVocabA(i < 6 ? 1 : 2));
+    } else if (level === "b") {
+      // Mix: 5 TRI_ID, 4 MCQ, 3 TRI_LABEL
+      for (let i = 0; i < 5; i++) pool.push(_genTriIdB(i < 3 ? 1 : 2));
+      for (let i = 0; i < 4; i++) pool.push(_genHypMCQB(i < 2 ? 1 : 2));
+      for (let i = 0; i < 3; i++) pool.push(_genLabelB(i < 2 ? 1 : 2));
+    } else if (level === "c1") {
+      // 12 cards: 6 integer triples (diff 1), 6 decimals (diff 2)
+      for (let i = 0; i < 6; i++) pool.push(_genHypC(1, false));
+      for (let i = 0; i < 6; i++) pool.push(_genHypC(2, false));
+    } else if (level === "c2") {
+      for (let i = 0; i < 6; i++) pool.push(_genHypC(1, true));
+      for (let i = 0; i < 6; i++) pool.push(_genHypC(2, true));
+    } else if (level === "d1") {
+      for (let i = 0; i < 6; i++) pool.push(_genLegD(1, false));
+      for (let i = 0; i < 6; i++) pool.push(_genLegD(2, false));
+    } else if (level === "d2") {
+      for (let i = 0; i < 6; i++) pool.push(_genLegD(1, true));
+      for (let i = 0; i < 6; i++) pool.push(_genLegD(2, true));
+    } else if (level === "e") {
+      // Mixed: 3 from each c/d variant
+      pool.push(...[false,true].flatMap(off => [
+        ...Array.from({length:3}, () => _genHypC(rand(1,2), off)),
+        ...Array.from({length:3}, () => _genLegD(rand(1,2), off)),
+      ]));
+    } else if (level === "f") {
+      // 3 of each shape type (diffs 1–4)
+      for (let d = 1; d <= 4; d++)
+        for (let i = 0; i < 3; i++) pool.push(_genOtherF(d));
+    } else if (level === "g") {
+      for (let i = 0; i < 12; i++) pool.push(_genWordProblemG(rand(1, 3)));
+    } else if (level === "h") {
+      for (let i = 0; i < 12; i++) pool.push(_genContextH(rand(1, 3)));
+    } else if (level === "spot") {
+      for (let i = 0; i < 12; i++) pool.push(_genSpotError(rand(1, 3)));
+    } else if (level === "explain") {
+      for (let d = 1; d <= 3; d++)
+        for (let i = 0; i < 4; i++) pool.push(_genExplanation(d));
     }
 
     return shuffle(pool);
   },
 
-  getQuestion(level, diff) {
-    // Initialise or refill pool for this level
+  getQuestion(levelNum, diff) {
+    const level = this._levelMap[levelNum] || levelNum; 
     if (!this._qPools[level] || this._qPools[level].length === 0) {
       this._qPools[level] = this._buildPool(level);
     }
-
-    // If diff is specified, try to find a matching question from the pool
     if (diff !== undefined && diff !== null) {
       const idx = this._qPools[level].findIndex(q => q.diff === diff);
-      if (idx !== -1) {
-        return this._qPools[level].splice(idx, 1)[0];
-      }
+      if (idx !== -1) return this._qPools[level].splice(idx, 1)[0];
     }
-
-    // Otherwise return next from pool
     return pickAndRemove(this._qPools[level]);
   },
 
-
-  renderFront(q, el) {
-    $(el).empty();
-
-    if (q.img) {
-      // Image + question text layout
-      $(el).addClass("yama-has-image");
-      const imgEl = $('<img>').attr('src', q.img).attr('alt', q.imgAlt || "").css({ display: "block", margin: "0 auto 12px auto", maxWidth: "100%" });
-      const qEl = $('<div class="yama-question-text">').html(q.q);
-      $(el).append(imgEl).append(qEl);
-    } else {
-      // Centred text layout
-      $(el).addClass("yama-text-only");
-      const qEl = $('<div class="yama-question-text yama-centered">').html(q.q);
-      $(el).append(qEl);
-    }
-
-    if (q.hint) {
-      const hintEl = $('<div class="yama-hint">').html("Hint: " + q.hint);
-      $(el).append(hintEl);
-    }
-  },
-
   generateSolution(q) {
-    if (q.type === "EXPLANATION") return "";
+    if (q.type === "EXPLANATION") {
+      let html = `<p><strong>Model answer:</strong> ${q.modelAnswer}</p>`;
+      if (q.markingChecklist && q.markingChecklist.length) {
+        html += `<ul class="yama-checklist">` +
+          q.markingChecklist.map(item => `<li>${item}</li>`).join("") +
+          `</ul>`;
+      }
+      return html;
+    }
 
-    if (q.type === "NUMERIC") {
-      return q.working || "<p><strong>Answer: " + q.a + (q.units && q.units[0] ? " " + q.units[0] : "") + "</strong></p>";
+    if (q.type === "SPOT_ERROR") {
+      return q.working || `<p><strong>Error:</strong> ${q.errorExplanation}</p>`;
     }
 
     if (q.type === "MCQ") {
       const correct = q.options[q.correctOption];
-      return "<p><strong>Correct answer: " + correct + "</strong></p>" + (q.working || "");
+      return `<p><strong>Correct answer: ${correct}</strong></p>` + (q.working || "");
     }
 
-    if (q.type === "MATCH") {
-      const rows = q.pairs.map(p => "<strong>" + p.left + "</strong> → " + p.right).join("<br>");
-      return "<p>" + rows + "</p>";
+    // NUMERIC / TEXT / TRI_ID / TRI_LABEL / WP / CTX
+    let html = "";
+    // For CTX (context problems) reveal the diagram on the solution side
+    if (q.imgAns) {
+      html += `<img src="${q.imgAns}" alt="${q.imgAnsAlt || ""}" style="display:block;margin:0 auto 12px auto;max-width:100%"/>`;
     }
-
-    if (q.type === "SPOT_ERROR" && q.subtype === "STEP") {
-      const stepsHTML = q.steps.map(s => {
-        if (s.isError) {
-          return "<span style=\"color:red;font-weight:bold\">Step " + s.id + ": " + s.text + " ← ERROR</span>";
-        }
-        return "Step " + s.id + ": " + s.text;
-      }).join("<br>");
-      return "<p>" + stepsHTML + "</p>" + (q.working || "");
-    }
-
-    if (q.type === "SPOT_ERROR" && q.subtype === "VALUE") {
-      return q.working || "<p><strong>Error: token " + q.correctErrorId + "</strong></p><p>" + q.errorExplanation + "</p>";
-    }
-
-    return q.working || "";
+    html += q.working || `<p><strong>Answer: ${q.a}${q.units && q.units[0] ? " " + q.units[0] : ""}</strong></p>`;
+    return html;
   },
 
   referenceItems: [
-    {
-      label: "Pyth",
-      title: "Pythagoras Theorem",
-      text: "For any right-angled triangle with hypotenuse c:",
-      math: "a^2 + b^2 = c^2"
-    },
-    {
-      label: "Hyp",
-      title: "Finding the Hypotenuse",
-      text: "Given the two shorter sides a and b:",
-      math: "c = \\sqrt{a^2 + b^2}"
-    },
-    {
-      label: "Leg",
-      title: "Finding a Shorter Side",
-      text: "Given hypotenuse c and one shorter side a:",
-      math: "b = \\sqrt{c^2 - a^2}"
-    },
-    {
-      label: "Conv",
-      title: "Converse of Pythagoras",
-      text: "If a squared + b squared = c squared, the triangle is right-angled:",
-      math: "a^2 + b^2 = c^2 \\Rightarrow \\text{right-angled}"
-    },
-    {
-      label: "Dist",
-      title: "Distance Between Two Points",
-      text: "Distance between points (x1,y1) and (x2,y2):",
-      math: "d = \\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}"
-    }
+    { label: "Pyth",  title: "Pythagoras' Theorem",   text: "For any right-angled triangle with hypotenuse c:", math: "a^2 + b^2 = c^2" },
+    { label: "Hyp",   title: "Finding the Hypotenuse", text: "Given the two shorter sides a and b:",             math: "c = \\sqrt{a^2 + b^2}" },
+    { label: "Leg",   title: "Finding a Shorter Side",  text: "Given hypotenuse c and one shorter side a:",      math: "b = \\sqrt{c^2 - a^2}" },
+    { label: "Conv",  title: "Converse of Pythagoras",  text: "If a²+b²=c², the triangle is right-angled:",      math: "a^2 + b^2 = c^2 \\Rightarrow \\text{right-angled}" },
+    { label: "Dist",  title: "Distance Between Two Points", text: "Distance between (x₁,y₁) and (x₂,y₂):",    math: "d = \\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}" },
   ],
 
   referenceLabel: "Formulae"
 };
 
-// -- 5. BOOT LINE --------------------------------------------------
-//QsetFW.init(config, document.getElementById("module-container"));
 export default config;
