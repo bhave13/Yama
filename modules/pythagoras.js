@@ -1,4 +1,4 @@
-i// ── 1. HEADER COMMENT ─────────────────────────────────────────────────
+// ── 1. HEADER COMMENT ─────────────────────────────────────────────────
 // Topic:        Pythagoras' Theorem — Trainer
 // NCEA Level:   N/A   Standard: N/A
 // Year Group:   Year 9–10
@@ -904,7 +904,7 @@ const config = {
 
     if (level === "a") {
       // 12 vocab/prerequisite cards, diff spread 1–2
-      for (let i = 0; i < 12; i++) _genVocabA(i < 6 ? 1 : 2) && pool.push(_genVocabA(i < 6 ? 1 : 2));
+      for (let i = 0; i < 12; i++) pool.push(_genVocabA(i < 6 ? 1 : 2));
     } else if (level === "b") {
       // Mix: 5 TRI_ID, 4 MCQ, 3 TRI_LABEL
       for (let i = 0; i < 5; i++) pool.push(_genTriIdB(i < 3 ? 1 : 2));
@@ -948,7 +948,7 @@ const config = {
   },
 
   getQuestion(levelNum, diff) {
-    const level = this._levelMap[levelNum] || levelNum; 
+    const level = this._levelMap[levelNum] || levelNum;
     if (!this._qPools[level] || this._qPools[level].length === 0) {
       this._qPools[level] = this._buildPool(level);
     }
@@ -956,6 +956,10 @@ const config = {
       const idx = this._qPools[level].findIndex(q => q.diff === diff);
       if (idx !== -1) return this._qPools[level].splice(idx, 1)[0];
     }
+    const q = pickAndRemove(this._qPools[level]);
+    if (q !== undefined) return q;
+    // Pool exhausted mid-call — rebuild and try once more
+    this._qPools[level] = this._buildPool(level);
     return pickAndRemove(this._qPools[level]);
   },
 
