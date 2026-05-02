@@ -328,7 +328,7 @@ function _genLevel2(diff) {
         working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = l \\times w\\)</p><p>\\(A = ${l} \\times ${w} = ${a}\\) ${unit}²</p>`,
         img, imgAlt: `Rectangle labelled ${l} ${unit} by ${w} ${unit}`, hint: `Use A = l × w`,
         ncea: { standard: "GM5-2", ao: "GM4-3" },
-        a: String(a), units: [`${unit}²`, `square ${unit}s`], tolerance: 0.01
+        a: String(a), units: [`${unit}²`, `square ${unit}s`], tolerance: 0.01, requireUnits: true
       };
     }
     // MCQ
@@ -355,7 +355,7 @@ function _genLevel2(diff) {
       working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = l \\times w = ${l} \\times ${w} = ${a}\\) ${unit}²</p>`,
       img, imgAlt: `Rectangle ${l} ${unit} × ${w} ${unit}`, hint: "Multiply the two decimal dimensions.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: [`${unit}²`], tolerance: 0.01
+      a: String(a), units: [`${unit}²`], tolerance: 0.01, requireUnits: true
     };
   }
 
@@ -377,7 +377,7 @@ function _genLevel2(diff) {
       working: `<p><strong>Answer: \\(\\frac{${aSimN}}{${aSimD}}\\) ${unit}²</strong></p><p>\\(A = \\frac{${n1}}{${d1}} \\times \\frac{${n2}}{${d2}} = \\frac{${aN}}{${aD}} = \\frac{${aSimN}}{${aSimD}}\\) ${unit}²</p>`,
       img: "", imgAlt: "", hint: "Multiply the numerators together and the denominators together, then simplify.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(aDecimal), units: [`${unit}²`], tolerance: 0.01
+      a: String(aDecimal), units: [`${unit}²`], tolerance: 0.01, requireUnits: true
     };
   }
 
@@ -391,7 +391,7 @@ function _genLevel2(diff) {
     working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>Perimeter = 2(l + w), so l + w = ${P}/2 = ${P/2}</p><p>l = ${P/2} − ${w} = ${l} ${unit}</p><p>\\(A = ${l} \\times ${w} = ${a}\\) ${unit}²</p>`,
     img: "", imgAlt: "", hint: "Use P = 2(l + w) to find l first.",
     ncea: { standard: "GM5-2", ao: "GM4-3" },
-    a: String(a), units: [`${unit}²`], tolerance: 0.01
+    a: String(a), units: [`${unit}²`], tolerance: 0.01, requireUnits: true
   };
 }
 
@@ -421,7 +421,7 @@ function _genLevel3(diff) {
         img, imgAlt: `Parallelogram: base ${b} ${unit}, height ${h} ${unit}, slant ${slant} ${unit}`,
         hint: "Use the perpendicular height — not the slant side.",
         ncea: { standard: "GM5-2", ao: "GM4-3" },
-        a: String(a), units: [`${unit}²`], tolerance: 0.01
+        a: String(a), units: [`${unit}²`], tolerance: 0.01, requireUnits: true
       };
     }
     if (typeRoll === 3) {
@@ -470,7 +470,7 @@ function _genLevel3(diff) {
       img, imgAlt: `Parallelogram: base ${b}, height ${h}, slant ${slant}, unit ${unit}`,
       hint: "Use only b and h (perpendicular height).",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: [`${unit}²`], tolerance: 0.05
+      a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
     };
   }
 
@@ -488,7 +488,7 @@ function _genLevel3(diff) {
       working: `<p><strong>Answer: \\(\\frac{${sN}}{${sD}}\\) m²</strong></p><p>\\(A = \\frac{${bn}}{${bd}} \\times \\frac{${hn}}{${hd}} = \\frac{${aN}}{${aD}} = \\frac{${sN}}{${sD}}\\) m²</p>`,
       img: "", imgAlt: "", hint: "Multiply numerators and denominators, then simplify.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(roundTo(aN/aD, 6)), units: ["m²"], tolerance: 0.01
+      a: String(roundTo(aN/aD, 6)), units: ["m²"], tolerance: 0.01, requireUnits: true
     };
   }
 
@@ -540,7 +540,7 @@ function _genLevel4(diff) {
         img, imgAlt: `Triangle base ${b} cm height ${h} cm`,
         hint: "Don't forget the ½ — the triangle is half a parallelogram.",
         ncea: { standard: "GM5-2", ao: "GM4-3" },
-        a: String(a), units: ["cm²"], tolerance: 0.01
+        a: String(a), units: ["cm²"], tolerance: 0.01, requireUnits: true
       };
     }
     // MCQ
@@ -567,7 +567,7 @@ function _genLevel4(diff) {
       img: makeSVGTriangle(b, h, "m", "acute"), imgAlt: `Triangle base ${b} m height ${h} m`,
       hint: "A = ½ × b × h — remember the half!",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: ["m²"], tolerance: 0.05
+      a: String(a), units: ["m²"], tolerance: 0.05, requireUnits: true
     };
   }
 
@@ -584,7 +584,7 @@ function _genLevel4(diff) {
       working: `<p><strong>Answer: \\(\\frac{${sN}}{${sD}}\\) m²</strong></p><p>\\(A = \\frac{1}{2} \\times \\frac{${bn}}{${bd}} \\times \\frac{${hn}}{${hd}} = \\frac{${bn * hn}}{${2 * bd * hd}} = \\frac{${sN}}{${sD}}\\) m²</p>`,
       img: "", imgAlt: "", hint: "Multiply all three numerators and all three denominators, then simplify.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(roundTo(aN/aD, 6)), units: ["m²"], tolerance: 0.01
+      a: String(roundTo(aN/aD, 6)), units: ["m²"], tolerance: 0.01, requireUnits: true
     };
   }
 
@@ -641,7 +641,7 @@ function _genLevel5(diff) {
         img, imgAlt: `Circle with radius ${r} ${unit}`,
         hint: `Use A = πr². Square the radius first, then multiply by π.`,
         ncea: { standard: "GM5-2", ao: "GM4-3" },
-        a: String(a), units: [`${unit}²`], tolerance: 0.05
+        a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
       };
     }
     // MCQ — distractors: using d instead of r, πr not squared, C formula
@@ -673,7 +673,7 @@ function _genLevel5(diff) {
       img, imgAlt: `Circle with diameter ${d} ${unit}`,
       hint: "Halve the diameter to get the radius, then use A = πr².",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: [`${unit}²`], tolerance: 0.05
+      a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
     };
   }
 
@@ -687,7 +687,7 @@ function _genLevel5(diff) {
       img: makeSVGCircle(r, unit, "radius"), imgAlt: `Circle radius ${r} ${unit}`,
       hint: "Square the decimal radius carefully before multiplying by π.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: [`${unit}²`], tolerance: 0.05
+      a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
     };
   }
 
@@ -701,7 +701,7 @@ function _genLevel5(diff) {
     working: `<p><strong>Answer: ${aCalc} ${unit}</strong></p><p>\\(A = \\pi r^2\\)</p><p>\\(r^2 = \\frac{A}{\\pi} = \\frac{${aGiven}}{\\pi} \\approx ${roundTo(aGiven/Math.PI,4)}\\)</p><p>\\(r = \\sqrt{${roundTo(aGiven/Math.PI,4)}} \\approx ${aCalc}\\) ${unit}</p>`,
     img: "", imgAlt: "", hint: "Rearrange: r² = A ÷ π, then square root.",
     ncea: { standard: "GM5-2", ao: "GM4-3" },
-    a: String(aCalc), units: [unit], tolerance: 0.1
+    a: String(aCalc), units: [unit], tolerance: 0.1, requireUnits: true
   };
 }
 
@@ -776,7 +776,7 @@ function _genLevel6(diff) {
         q: qText, working, img: imgSVG, imgAlt,
         hint: "Identify the shape first, then choose the matching formula.",
         ncea: { standard: "GM5-2", ao: "GM4-3" },
-        a: String(a), units: [`${unit}²`], tolerance: 0.05
+        a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
       };
     }
     const correctOption = opts.indexOf(opts.find(o => o.startsWith(String(a))));
@@ -801,7 +801,7 @@ function _genLevel6(diff) {
       img: makeSVGCircle(rDec, "cm", "radius"), imgAlt: `Circle radius ${rn}/${rd} cm`,
       hint: "Convert the fraction to a decimal first, then apply A = πr².",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: ["cm²"], tolerance: 0.05
+      a: String(a), units: ["cm²"], tolerance: 0.05, requireUnits: true
     };
   }
 
@@ -815,7 +815,7 @@ function _genLevel6(diff) {
     img: makeSVGTriangle(b, h, "cm", "acute"), imgAlt: `Non-standard triangle base ${b} height ${h}`,
     hint: "Identify which measurement is the perpendicular height — it is always at right angles to the base.",
     ncea: { standard: "GM5-2", ao: "GM4-3" },
-    a: String(a), units: ["cm²"], tolerance: 0.05
+    a: String(a), units: ["cm²"], tolerance: 0.05, requireUnits: true
   };
 }
 
@@ -862,7 +862,7 @@ function _genLevel7(diff) {
       img, imgAlt: `L-shaped figure total ${totalW} × ${totalH} ${unit}, notch ${cutW} × ${cutH} ${unit}`,
       hint: "Split the L into two rectangles. Calculate each area separately, then add.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(aFinal), units: [`${unit}²`], tolerance: 0.01
+      a: String(aFinal), units: [`${unit}²`], tolerance: 0.01, requireUnits: true
     };
   }
 
@@ -884,7 +884,7 @@ function _genLevel7(diff) {
       img: "", imgAlt: "",
       hint: "Find the area of the rectangle and the semicircle separately, then add. The semicircle's radius = half the width.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(aTotal), units: [`${unit}²`], tolerance: 0.1
+      a: String(aTotal), units: [`${unit}²`], tolerance: 0.1, requireUnits: true
     };
   }
 
@@ -908,7 +908,7 @@ function _genLevel7(diff) {
       img: "", imgAlt: "",
       hint: "Infer the full width first, then calculate rectangle and triangle areas separately.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(aTotal), units: [`${unit}²`], tolerance: 0.1
+      a: String(aTotal), units: [`${unit}²`], tolerance: 0.1, requireUnits: true
     };
   }
 
@@ -964,7 +964,7 @@ function _genLevel8(diff) {
       img, imgAlt: `Rectangle ${oL}×${oW} with rectangular hole ${hL}×${hW}`,
       hint: "Area remaining = outer area − cutout area.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(aFinal), units: [`${unit}²`], tolerance: 0.01
+      a: String(aFinal), units: [`${unit}²`], tolerance: 0.01, requireUnits: true
     };
   }
 
@@ -985,7 +985,7 @@ function _genLevel8(diff) {
       img: "", imgAlt: "",
       hint: "Calculate the full rectangle area, then subtract the circular hole area.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(aFinal), units: [`${unit}²`], tolerance: 0.1
+      a: String(aFinal), units: [`${unit}²`], tolerance: 0.1, requireUnits: true
     };
   }
 
@@ -1054,7 +1054,7 @@ function _genLevel9(diff) {
       img: "", imgAlt: "",
       hint: `Identify the shape and apply the correct formula.`,
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: [`${unit}²`], tolerance: 0.5
+      a: String(a), units: [`${unit}²`], tolerance: 0.5, requireUnits: true
     };
   }
 
@@ -1070,7 +1070,7 @@ function _genLevel9(diff) {
       img: "", imgAlt: "",
       hint: "Find the area first, then multiply by the cost per unit².",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(cost), units: ["$", "dollars"], tolerance: 1
+      a: String(cost), units: ["$", "dollars"], tolerance: 1, requireUnits: true
     };
   }
 
@@ -1092,7 +1092,7 @@ function _genLevel9(diff) {
     img: "", imgAlt: "",
     hint: "Convert all lengths to the same unit. Add 10%, then round up.",
     ncea: { standard: "GM5-2", ao: "GM4-3" },
-    a: String(tilesNeeded), units: ["tiles"], tolerance: 2
+    a: String(tilesNeeded), units: ["tiles"], tolerance: 2, requireUnits: true
   };
 }
 
@@ -1107,7 +1107,7 @@ const _l10Scenarios = [
       return {
         q: `A school logo is made of a rectangle ${rW} cm × ${rH} cm with a triangle on top (base ${rW} cm, height ${tH} cm). Find the total area.`,
         working: `<p><strong>Answer: ${aTotal} cm²</strong></p><p>Rectangle: \\(${rW} \\times ${rH} = ${aR}\\) cm²</p><p>Triangle: \\(\\frac{1}{2} \\times ${rW} \\times ${tH} = ${aT}\\) cm²</p><p>Total: \\(${aR} + ${aT} = ${aTotal}\\) cm²</p>`,
-        a: String(aTotal), units: ["cm²"], tolerance: 0.2
+        a: String(aTotal), units: ["cm²"], tolerance: 0.2, requireUnits: true
       };
     }
   },
@@ -1120,7 +1120,7 @@ const _l10Scenarios = [
       return {
         q: `A rectangular wall is ${wL} m × ${wH} m. A rectangular window ${winL} m × ${winH} m is cut into it. Find the area of wall to be painted.`,
         working: `<p><strong>Answer: ${aFinal} m²</strong></p><p>Wall: \\(${wL} \\times ${wH} = ${aWall}\\) m²</p><p>Window: \\(${winL} \\times ${winH} = ${aWin}\\) m²</p><p>To paint: \\(${aWall} - ${aWin} = ${aFinal}\\) m²</p>`,
-        a: String(aFinal), units: ["m²"], tolerance: 0.1
+        a: String(aFinal), units: ["m²"], tolerance: 0.1, requireUnits: true
       };
     }
   },
@@ -1134,7 +1134,7 @@ const _l10Scenarios = [
       return {
         q: `An L-shaped room has overall dimensions ${tW} m × ${tH} m with a rectangular section ${cW} m × ${cH} m removed from one corner. Carpet costs $${rate} per m². Find the total carpeting cost.`,
         working: `<p><strong>Answer: $${cost}</strong></p><p>Full area: \\(${tW} \\times ${tH} = ${aFull}\\) m²</p><p>Cut-out: \\(${cW} \\times ${cH} = ${aCut}\\) m²</p><p>Room area: \\(${aFull} - ${aCut} = ${aRoom}\\) m²</p><p>Cost: \\(${aRoom} \\times $${rate} = $${cost}\\)</p>`,
-        a: String(cost), units: ["$", "dollars"], tolerance: 10
+        a: String(cost), units: ["$", "dollars"], tolerance: 10, requireUnits: true
       };
     }
   },
@@ -1147,7 +1147,7 @@ const _l10Scenarios = [
       return {
         q: `A garden bed consists of a rectangle ${l} m × ${w} m with a semicircle on one end (diameter = ${w} m). Find the total area to 2 d.p.`,
         working: `<p><strong>Answer: ${aTotal} m²</strong></p><p>Rectangle: \\(${l} \\times ${w} = ${aR}\\) m²</p><p>Semicircle (r = ${r} m): \\(\\frac{1}{2} \\pi \\times ${r}^2 \\approx ${aSemi}\\) m²</p><p>Total: \\(${aR} + ${aSemi} = ${aTotal}\\) m²</p>`,
-        a: String(aTotal), units: ["m²"], tolerance: 0.2
+        a: String(aTotal), units: ["m²"], tolerance: 0.2, requireUnits: true
       };
     }
   }
@@ -1165,7 +1165,7 @@ function _genLevel10(diff) {
       q: data.q, working: data.working, img: "", imgAlt: "",
       hint: "Identify whether this is an addition (compound) or subtraction (cutout) problem first.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: data.a, units: data.units, tolerance: data.tolerance
+      a: data.a, units: data.units, tolerance: data.tolerance, requireUnits: true
     };
   }
 
@@ -1191,7 +1191,7 @@ function _genLevel10(diff) {
     img: "", imgAlt: "",
     hint: "Find wall area, subtract doors and windows, then divide by coverage per tin and round up.",
     ncea: { standard: "GM5-2", ao: "GM4-3" },
-    a: String(tinsNeeded), units: ["tins"], tolerance: 1
+    a: String(tinsNeeded), units: ["tins"], tolerance: 1, requireUnits: true
   };
 }
 
@@ -1227,7 +1227,7 @@ function _genLevel11(diff) {
         img, imgAlt: `Sector radius ${r} ${unit} angle ${theta}°`,
         hint: "A = (θ/360) × πr². Don't forget to include the fraction.",
         ncea: { standard: "GM5-2", ao: "GM4-3" },
-        a: String(a), units: [`${unit}²`], tolerance: 0.1
+        a: String(a), units: [`${unit}²`], tolerance: 0.1, requireUnits: true
       };
     }
     // MCQ
@@ -1258,7 +1258,7 @@ function _genLevel11(diff) {
       img: makeSVGSector(r, theta, unit), imgAlt: `Sector r=${r} θ=${theta}°`,
       hint: "A = (θ/360) × πr²",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: [`${unit}²`], tolerance: 0.1
+      a: String(a), units: [`${unit}²`], tolerance: 0.1, requireUnits: true
     };
   }
 
@@ -1273,7 +1273,7 @@ function _genLevel11(diff) {
       img: makeSVGSector(r, theta, unit), imgAlt: `Sector r=${r} θ=${theta}°`,
       hint: "A = (θ/360) × πr²",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
-      a: String(a), units: [`${unit}²`], tolerance: 0.1
+      a: String(a), units: [`${unit}²`], tolerance: 0.1, requireUnits: true
     };
   }
 
@@ -1289,7 +1289,7 @@ function _genLevel11(diff) {
     img: "", imgAlt: "",
     hint: "Rearrange: θ = (A × 360) ÷ (π × r²).",
     ncea: { standard: "GM5-2", ao: "GM4-3" },
-    a: String(thetaCalc), units: ["°", "degrees"], tolerance: 0.5
+    a: String(thetaCalc), units: ["°", "degrees"], tolerance: 0.5, requireUnits: true
   };
 }
 

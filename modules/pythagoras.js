@@ -512,7 +512,7 @@ const _genHypC = (diff, offset) => {
     img: _svgDataURI(svg), imgAlt: `Right triangle with legs ${a} and ${b}`,
     hint: offset ? `Values: \\(a = ${a}\\), \\(b = ${b}\\)` : "Values are labelled on the triangle.",
     ncea: { standard: "N/A", ao: "NZC-L5-GM" },
-    units: ["cm"], tolerance: 0.05
+    units: ["cm"], tolerance: 0.05, requireUnits: true
   };
 };
 
@@ -547,7 +547,7 @@ const _genLegD = (diff, offset) => {
     img: _svgDataURI(svg), imgAlt: `Right triangle, find leg ${lbl}`,
     hint: offset ? `\\(c = ${c}\\), \\(${klbl} = ${known}\\)` : "Values are labelled on the triangle.",
     ncea: { standard: "N/A", ao: "NZC-L5-GM" },
-    units: ["cm"], tolerance: 0.05
+    units: ["cm"], tolerance: 0.05, requireUnits: true
   };
 };
 
@@ -566,7 +566,7 @@ const _genOtherF = (diff) => {
     return {
       uid, level: "f", diff, type: "NUMERIC",
       q: `An equilateral triangle has sides of ${side} cm. Find the perpendicular height to 2 decimal places.`,
-      a: `h \\approx ${h}`, units: ["cm"], tolerance: 0.05,
+      a: `h \\approx ${h}`, units: ["cm"], tolerance: 0.05, requireUnits: true,
       working: `<p><strong>Answer: \\(h \\approx ${h}\\) cm</strong></p>` +
         `<p>Altitude bisects the base: half-side \\(= \\frac{${side}}{2} = ${half}\\) cm<br>` +
         `\\(h^2 = ${side}^2 - ${half}^2 = ${side*side} - ${r2(half*half)} = ${r2(side*side - half*half)}\\)<br>` +
@@ -587,7 +587,7 @@ const _genOtherF = (diff) => {
     return {
       uid, level: "f", diff, type: "NUMERIC",
       q: `An isosceles triangle has equal sides of ${eqSide} cm and a base of ${base} cm. Find the perpendicular height to 2 decimal places.`,
-      a: `h \\approx ${h}`, units: ["cm"], tolerance: 0.05,
+      a: `h \\approx ${h}`, units: ["cm"], tolerance: 0.05, requireUnits: true,
       working: `<p><strong>Answer: \\(h \\approx ${h}\\) cm</strong></p>` +
         `<p>Altitude bisects the base: half-base \\(= \\frac{${base}}{2} = ${halfBase}\\) cm<br>` +
         `\\(h^2 = ${eqSide}^2 - ${halfBase}^2 = ${eqSide*eqSide} - ${r2(halfBase*halfBase)} = ${r2(eqSide*eqSide - halfBase*halfBase)}\\)<br>` +
@@ -606,7 +606,7 @@ const _genOtherF = (diff) => {
     return {
       uid, level: "f", diff, type: "NUMERIC",
       q: `A triangle has a perpendicular height of ${h} cm. The altitude divides the base into ${seg1} cm and ${seg2} cm. One slant side is ${slant1} cm. Find the other slant side to 2 decimal places.`,
-      a: `s \\approx ${slant2}`, units: ["cm"], tolerance: 0.05,
+      a: `s \\approx ${slant2}`, units: ["cm"], tolerance: 0.05, requireUnits: true,
       working: `<p><strong>Answer: \\(s \\approx ${slant2}\\) cm</strong></p>` +
         `<p>The altitude creates two right-angled triangles.<br>` +
         `Second right triangle: base \\(= ${seg2}\\) cm, height \\(= ${h}\\) cm<br>` +
@@ -625,7 +625,7 @@ const _genOtherF = (diff) => {
     return {
       uid, level: "f", diff, type: "NUMERIC",
       q: `A kite has diagonals of ${d1half*2} cm and ${d2half*2} cm. The diagonals cross at right angles and bisect each other. Find the length of one side to 2 decimal places.`,
-      a: `\\text{side} \\approx ${side}`, units: ["cm"], tolerance: 0.05,
+      a: `\\text{side} \\approx ${side}`, units: ["cm"], tolerance: 0.05, requireUnits: true,
       working: `<p><strong>Answer: \\(${side}\\) cm</strong></p>` +
         `<p>Half-diagonals \\(${d1half}\\) cm and \\(${d2half}\\) cm are the legs.<br>` +
         `\\(\\text{side}^2 = ${d1half}^2 + ${d2half}^2 = ${d1half*d1half} + ${d2half*d2half} = ${d1half*d1half+d2half*d2half}\\)<br>` +
@@ -647,7 +647,7 @@ const _WP_GENS = [
     const W = 220, H = 150;
     return {
       q: `A ladder ${hyp} m long leans against a wall. The foot is ${base} m from the wall. How high up the wall does it reach?`,
-      a: `Height \\approx ${ht}`, units: ["m"], tolerance: 0.05,
+      a: `Height \\approx ${ht}`, units: ["m"], tolerance: 0.05, requireUnits: true,
       working: `<p>\\(h^2 = c^2 - d^2 = ${hyp}^2 - ${base}^2 = ${hyp*hyp} - ${base*base} = ${r2(hyp*hyp-base*base)}\\)<br>\\(h = \\sqrt{${r2(hyp*hyp-base*base)}} \\approx ${ht}\\) m</p>`,
       img: _svgDataURI(_diagLadder(W, H, hyp, base)),
       imgAlt: `Ladder diagram, length ${hyp} m, base ${base} m`
@@ -658,7 +658,7 @@ const _WP_GENS = [
     const W = 220, H = 150;
     return {
       q: `A ship sails ${a} km north, then ${b} km east. How far is it from the starting point?`,
-      a: `Distance \\approx ${c}`, units: ["km"], tolerance: 0.05,
+      a: `Distance \\approx ${c}`, units: ["km"], tolerance: 0.05, requireUnits: true,
       working: `<p>\\(c^2 = ${a}^2 + ${b}^2 = ${a*a+b*b}\\)<br>\\(c = \\sqrt{${a*a+b*b}} \\approx ${c}\\) km</p>`,
       img: _svgDataURI(_diagShip(W, H, a, b)),
       imgAlt: `Ship route diagram, ${a} km N then ${b} km E`
@@ -669,7 +669,7 @@ const _WP_GENS = [
     const W = 220, H = 150;
     return {
       q: `A field is ${w} m wide and ${h} m long. How long is the diagonal path across it?`,
-      a: `Diagonal \\approx ${d}`, units: ["m"], tolerance: 0.05,
+      a: `Diagonal \\approx ${d}`, units: ["m"], tolerance: 0.05, requireUnits: true,
       working: `<p>\\(c^2 = ${w}^2 + ${h}^2 = ${w*w+h*h}\\)<br>\\(c = \\sqrt{${w*w+h*h}} \\approx ${d}\\) m</p>`,
       img: _svgDataURI(_diagRect(W, H, w, h)),
       imgAlt: `Rectangle field ${w} m × ${h} m`
@@ -680,7 +680,7 @@ const _WP_GENS = [
     const W = 220, H = 150;
     return {
       q: `A lighthouse is ${ht} m tall. A boat is ${dist} m from the base. How far is the boat from the top of the lighthouse?`,
-      a: `Distance \\approx ${hyp}`, units: ["m"], tolerance: 0.05,
+      a: `Distance \\approx ${hyp}`, units: ["m"], tolerance: 0.05, requireUnits: true,
       working: `<p>\\(c^2 = ${dist}^2 + ${ht}^2 = ${dist*dist+ht*ht}\\)<br>\\(c = \\sqrt{${dist*dist+ht*ht}} \\approx ${hyp}\\) m</p>`,
       img: _svgDataURI(_diagLighthouse(W, H, dist, ht)),
       imgAlt: `Lighthouse ${ht} m tall, boat ${dist} m away`
@@ -691,7 +691,7 @@ const _WP_GENS = [
     const W = 220, H = 150;
     return {
       q: `A ramp rises ${rise} m over a horizontal distance of ${run} m. What is the length of the ramp surface?`,
-      a: `Ramp \\approx ${sl}`, units: ["m"], tolerance: 0.05,
+      a: `Ramp \\approx ${sl}`, units: ["m"], tolerance: 0.05, requireUnits: true,
       working: `<p>\\(c^2 = ${run}^2 + ${rise}^2 = ${run*run+rise*rise}\\)<br>\\(c = \\sqrt{${run*run+rise*rise}} \\approx ${sl}\\) m</p>`,
       img: _svgDataURI(_diagRamp(W, H, run, rise)),
       imgAlt: `Ramp diagram, run ${run} m, rise ${rise} m`
@@ -702,7 +702,7 @@ const _WP_GENS = [
     const W = 220, H = 150;
     return {
       q: `A TV screen is ${w} cm wide and ${h} cm tall. What is the diagonal screen size?`,
-      a: `Diagonal \\approx ${d}`, units: ["cm"], tolerance: 0.05,
+      a: `Diagonal \\approx ${d}`, units: ["cm"], tolerance: 0.05, requireUnits: true,
       working: `<p>\\(c^2 = ${w}^2 + ${h}^2 = ${w*w+h*h}\\)<br>\\(c = \\sqrt{${w*w+h*h}} \\approx ${d}\\) cm</p>`,
       img: _svgDataURI(_diagTV(W, H, w, h)),
       imgAlt: `TV screen ${w} cm × ${h} cm`
@@ -721,7 +721,7 @@ const _genWordProblemG = (diff) => {
   const p = _genWP();
   return {
     uid, level: "g", diff, type: "NUMERIC",
-    q: p.q, a: p.a, units: p.units, tolerance: p.tolerance,
+    q: p.q, a: p.a, units: p.units, tolerance: p.tolerance, requireUnits: true,
     working: p.working,
     img: p.img, imgAlt: p.imgAlt,
     hint: "A diagram is shown — identify which sides are a, b, c, then apply \\(c^2 = a^2 + b^2\\).",
@@ -734,7 +734,7 @@ const _genContextH = (diff) => {
   const p = _genWP();
   return {
     uid, level: "h", diff, type: "NUMERIC",
-    q: p.q, a: p.a, units: p.units, tolerance: p.tolerance,
+    q: p.q, a: p.a, units: p.units, tolerance: p.tolerance, requireUnits: true,
     working: p.working,
     img: "",          // no image on front — student draws their own
     imgAlt: "",

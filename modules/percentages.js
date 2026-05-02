@@ -387,6 +387,7 @@ const config = {
             a: ansStr,
             units: units,
             tolerance: 0.011,
+            requireUnits: true,
             img: imgSvg,
             imgAlt: "Double number line",
             working: `<div style="text-align:center; margin-bottom: 1rem;"><img src="${imgAnsSvg}" style="max-width:100%; height:auto;" alt="Solved number line" /></div>` + worked,

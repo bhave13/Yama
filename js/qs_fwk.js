@@ -2,6 +2,7 @@
  * qs_fwk.js — Updated Qset Framework
  * Flashcard-style Grid Mode with 50% larger answers and auto-scrolling overflow.
  * Self-Study mode handles all question types: NUMERIC, MCQ, MATCH, SPOT_ERROR, EXPLANATION.
+ * Challenge mode handles NUMERIC, MCQ, and SPOT_ERROR/STEP.
  * Challenge mode features an adjustable timer, skipped-question handling, and a color-coded details scoreboard.
  */
 (function (global) {
@@ -46,6 +47,48 @@
         if (!/^[-+*/().\deE]+$/.test(clean)) return NaN;
         try { return new Function('return ' + clean)(); } catch(e) { return NaN; }
     }
+    // Normalises a unit string to a canonical form for comparison.
+    // Handles common student variants: m^2, m sq, msq, m2 → m²  etc.
+    function normaliseUnit(u) {
+        if (typeof u !== 'string') return '';
+        var s = u.trim().toLowerCase();
+        if (s === '$' || s === 'dollars' || s === 'dollar') return '$';
+        if (s === 'tiles' || s === 'tile')   return 'tiles';
+        if (s === 'tins'  || s === 'tin')    return 'tins';
+        if (s === '°' || s === 'degrees' || s === 'degree') return '°';
+        var prefixes = ['km', 'cm', 'mm', 'm'];
+        var prefix = '';
+        for (var i = 0; i < prefixes.length; i++) {
+            if (s.startsWith(prefixes[i])) { prefix = prefixes[i]; s = s.slice(prefixes[i].length); break; }
+        }
+        if (prefix === '') return u.trim();
+        s = s.replace(/\s+/g, '');
+        if (s === '^2' || s === '2' || s === 'sq' || s === 'squared' || s === '²') return prefix + '²';
+        if (s === '^3' || s === '3' || s === 'cubed' || s === '³')                 return prefix + '³';
+        if (s === '')  return prefix;
+        return prefix + s;
+    }
+
+    // Splits a student's raw input into { num, unit }.
+    // E.g. "25 m^2" → { num: 25, unit: "m²" },  "25" → { num: 25, unit: "" }
+    function parseAnswer(raw) {
+        var s = raw.trim();
+        var m = s.match(/^(\$?)\s*([\d+\-*/().\seE]+?)\s*([a-zA-Z²³^\s]*)$/);
+        if (!m) return { num: NaN, unit: '' };
+        var numStr  = (m[1] + m[2]).trim();
+        var unitStr = (m[1] === '$' ? '$' : m[3]).trim();
+        var num = safeEval(numStr);
+        if (isNaN(num)) num = parseFloat(numStr);
+        return { num: num, unit: normaliseUnit(unitStr) };
+    }
+
+    // Returns true if the student's unit matches any of the question's accepted units.
+    function unitMatch(studentUnit, acceptedUnits) {
+        if (!acceptedUnits || acceptedUnits.length === 0) return true;
+        var su = normaliseUnit(studentUnit);
+        return acceptedUnits.some(function(u) { return normaliseUnit(u) === su; });
+    }
+
 
     function mjax(el) {
         if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
@@ -63,6 +106,21 @@
                 handler(e);
             }
         });
+    }
+
+    // Returns a random difficulty 1–4 for use when the framework picks diff itself.
+    function randDiff() {
+        return Math.ceil(Math.random() * 4);
+    }
+
+    // Returns true if the question type is permitted in Challenge mode.
+    // Allowed: NUMERIC, MCQ, SPOT_ERROR/STEP.
+    // Excluded: EXPLANATION, MATCH, SPOT_ERROR/VALUE.
+    function isChallengeType(q) {
+        if (q.type === 'NUMERIC') return true;
+        if (q.type === 'MCQ')     return true;
+        if (q.type === 'SPOT_ERROR' && q.subtype === 'STEP') return true;
+        return false;
     }
 
     function _injectCSS() {
@@ -149,6 +207,9 @@
         .qset-match-pair .arrow { color: #6b7280; }
         .qset-match-pair .right { color: #065f46; }
 
+        /* Challenge step-list used for SPOT_ERROR/STEP in challenge mode */
+        .qset-ch-step-list { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left; }
+
         /* Challenge Result Table Styles */
         .qset-ch-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
         .qset-ch-table th, .qset-ch-table td { padding: 10px 12px; border: 1px solid #cbd5e1; vertical-align: middle; }
@@ -219,6 +280,8 @@
                 return '\\) <span style="' + style + '">' + val + '</span> \\(';
             });
             rendered = rendered.replace(/\\\(\s*\\\)/g, '');
+            rendered = rendered.replace(/^\s*\\\)\s*/, '');   // strip leading \)
+            rendered = rendered.replace(/\s*\\\(\s*$/, '');   // strip trailing \(
             html += '<div style="font-size:0.95rem; line-height:2.2; margin-bottom:8px;">' + rendered + '</div>';
             html += '<div style="font-size:0.85rem; color:#374151; line-height:1.6;">' + q.errorExplanation + '</div>';
 
@@ -239,14 +302,20 @@
 
     function renderStudyInput(q, inpEl) {
         if (q.type === 'NUMERIC') {
-            inpEl.innerHTML = '<input type="text" id="study-inp" style="width:100%; padding:12px; font-size:1.1rem; text-align:center; border:2px solid #cbd5e1; border-radius:6px;" placeholder="Answer...">';
+            var placeholder = q.requireUnits ? 'Answer with units, e.g. 25 m²' : 'Answer...';
+            inpEl.innerHTML = '<input type="text" id="study-inp" style="width:100%; padding:12px; font-size:1.1rem; text-align:center; border:2px solid #cbd5e1; border-radius:6px;" placeholder="' + placeholder + '">';
             mjax(inpEl);
             return {
                 getResult: function() {
                     var inp = document.getElementById('study-inp');
                     var raw = inp ? inp.value.trim() : '';
                     var isCorrect;
-                    if (q.tolerance && q.tolerance > 0) {
+                    if (q.requireUnits) {
+                        var parsed = parseAnswer(raw);
+                        var numOk = !isNaN(parsed.num) && Math.abs(parsed.num - parseFloat(q.a)) <= (q.tolerance || 0);
+                        var unitOk = unitMatch(parsed.unit, q.units);
+                        isCorrect = numOk && unitOk;
+                    } else if (q.tolerance && q.tolerance > 0) {
                         var num = parseFloat(raw);
                         isCorrect = !isNaN(num) && Math.abs(num - parseFloat(q.a)) <= q.tolerance;
                     } else {
@@ -380,11 +449,13 @@
         }
 
         if (q.type === 'SPOT_ERROR' && q.subtype === 'VALUE') {
-            var valHtml = '<div style="font-size:0.95rem; line-height:2.2; margin-bottom:4px;">';
-            valHtml += q.expression.replace(/\[([^\|]+)\|(\d+)\]/g, function(_, val, id) {
+            var valExpr = q.expression.replace(/\[([^\|]+)\|(\d+)\]/g, function(_, val, id) {
                 return '\\) <span class="qset-val-token" data-id="' + id + '" style="display:inline-block;">' + val + '</span> \\(';
             });
-            valHtml = valHtml.replace(/\\\(\s*\\\)/g, '');
+            valExpr = valExpr.replace(/\\\(\s*\\\)/g, '');  // remove adjacent \( \) pairs between tokens
+            valExpr = valExpr.replace(/^\s*\\\)\s*/, '');   // strip orphaned \) at start
+            valExpr = valExpr.replace(/\s*\\\(\s*$/, '');   // strip orphaned \( at end
+            var valHtml = '<div style="font-size:0.95rem; line-height:2.2; margin-bottom:4px;">' + valExpr;
             valHtml += '</div><div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Click the value you think is wrong.</div>';
             inpEl.innerHTML = valHtml;
             mjax(inpEl);
@@ -459,7 +530,7 @@
               '</div>' +
               '<div id="qset-ch-play" class="qset-hidden">' +
                   '<div id="qset-ch-qbox" style="background:#fff; border:2px solid #e2e8f0; padding:20px; border-radius:8px; text-align:center; margin-bottom:15px; min-height:100px;"></div>' +
-                  '<div id="qset-ch-ctrl" style="display:flex; justify-content:center; align-items:center; gap:10px;"></div>' +
+                  '<div id="qset-ch-ctrl" style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;"></div>' +
                   '<div id="qset-ch-fb" style="text-align:center; font-weight:bold; margin-top:10px; height:24px;"></div>' +
               '</div>' +
               '<div id="qset-ch-end" class="qset-hidden" style="text-align:center; padding:2rem;">' +
@@ -478,7 +549,7 @@
           '<div class="qset-backdrop" id="qset-backdrop"></div>' +
           '<div class="qset-spotlight-wrap"><div class="qset-sp-timer-box" id="qset-sp-timer">00:30</div><div class="qset-card-wrap"><div class="qset-card" id="qset-sp-card"><div class="qset-card-front" id="qset-sp-front"></div><div class="qset-card-back" id="qset-sp-back"></div></div></div><p style="color:rgba(255,255,255,0.7); font-size:0.8rem;">Click card to reveal answer · Esc to close</p></div>' +
           '</div></div>' +
-          
+
           /* Challenge Results Modal Overlay */
           '<div class="qset-spotlight" id="qset-ch-modal">' +
               '<div class="qset-backdrop" id="qset-ch-bd"></div>' +
@@ -498,8 +569,17 @@
         var state = {
             mode: 'study',
             level: 1,
-            study: { q: null, count: 0, total: 0, inputHandler: null },
-            ch: { score: 0, total: 0, time: 600, int: null, history: [], currentQ: null },
+            study: {
+                q: null, count: 0, total: 0, inputHandler: null,
+                // diffState tracks how many questions have been asked at each difficulty
+                // within the current level, driving the unlock progression in Self Study.
+                // diffState[d] = number of questions asked so far at difficulty d (1-indexed, d=1..4).
+                // Diff d+1 is unlocked once diffState[d] >= 2.
+                // Reset to all-zeros whenever the student changes level.
+                diffState: [0, 0, 0, 0, 0]   // index 0 unused; indices 1-4 used
+            },
+            // ch.selectedStepId tracks the clicked step for SPOT_ERROR/STEP questions in challenge mode.
+            ch: { score: 0, total: 0, time: 600, int: null, history: [], currentQ: null, selectedStepId: null },
             spTimer: { int: null, left: 30 }
         };
         var $ = function(id) { return document.getElementById(id); };
@@ -509,15 +589,15 @@
             lvl: $('qset-level'), ok: $('qset-correct'), tot: $('qset-total'),
             card: $('qset-card'), front: $('qset-front'), back: $('qset-back'),
             inp: $('qset-input-area'), check: $('qset-check'), next: $('qset-next'),
-            
+
             // Challenge elements
             chS: $('qset-ch-start'), chP: $('qset-ch-play'), chE: $('qset-ch-end'),
-            chQ: $('qset-ch-qbox'), chC: $('qset-ch-ctrl'), chF: $('qset-ch-fb'), 
+            chQ: $('qset-ch-qbox'), chC: $('qset-ch-ctrl'), chF: $('qset-ch-fb'),
             chSc: $('qset-ch-score'), chT: $('qset-ch-timer'), chBtn: $('qset-ch-start-btn'),
             chTimeInp: $('ch-time-input'), chFScore: $('qset-ch-final-score'), chFTotal: $('qset-ch-final-total'),
             chShowBtn: $('qset-ch-show-btn'), chRestartBtn: $('qset-ch-restart-btn'),
             chModal: $('qset-ch-modal'), chBd: $('qset-ch-bd'), chClose: $('qset-ch-close'), chTbody: $('qset-ch-results-body'),
-            
+
             // Worksheet elements
             wsG: $('qset-ws-grid'), wsT: $('qset-ws-title'), wsGen: $('qset-ws-gen'),
             sp: $('qset-spotlight'), spC: $('qset-sp-card'), spF: $('qset-sp-front'),
@@ -526,6 +606,31 @@
 
         function updCount() { D.ok.textContent = state.study.count; D.tot.textContent = state.study.total; }
         function fmt(t) { return String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0'); }
+
+        // Resets difficulty progression for Self Study. Called on every level change.
+        function resetDiffState() {
+            state.study.diffState = [0, 0, 0, 0, 0];
+        }
+
+        // Returns the difficulty to use for the next Self Study question.
+        // The highest unlocked difficulty is the largest d (1-4) where every lower
+        // difficulty has been asked at least twice.  Within the unlocked range,
+        // we pick randomly so the student still sees variety, but never jump ahead.
+        //
+        // Unlock rules (ds = diffState):
+        //   diff 1  — always unlocked
+        //   diff 2  — unlocked when ds[1] >= 2
+        //   diff 3  — unlocked when ds[1] >= 2 AND ds[2] >= 2
+        //   diff 4  — unlocked when ds[1] >= 2 AND ds[2] >= 2 AND ds[3] >= 2
+        function studyDiff() {
+            var ds = state.study.diffState;
+            var maxUnlocked = 1;
+            if (ds[1] >= 2)                         maxUnlocked = 2;
+            if (ds[1] >= 2 && ds[2] >= 2)           maxUnlocked = 3;
+            if (ds[1] >= 2 && ds[2] >= 2 && ds[3] >= 2) maxUnlocked = 4;
+            // Pick randomly from 1..maxUnlocked so earlier diffs still appear
+            return Math.ceil(Math.random() * maxUnlocked);
+        }
 
         function setMode(m) {
             state.mode = m; clearInterval(state.ch.int);
@@ -536,11 +641,15 @@
             if (m === 'worksheet') genWs();
         }
 
+        // ── Self Study: difficulty gated by progression; resets on level change ──
         function nextStudy() {
             D.card.classList.remove('flipped');
             D.check.classList.remove('qset-hidden');
             D.next.classList.add('qset-hidden');
-            var q = cfg.getQuestion(state.level, null);
+            var diff = studyDiff();
+            var q = cfg.getQuestion(state.level, diff);
+            // Record that one question at this difficulty has been asked
+            state.study.diffState[diff]++;
             state.study.q = q;
             state.study.total++;
             updCount();
@@ -566,12 +675,13 @@
 
         /* ── CHALLENGE MODE LOGIC ── */
         function resetCh() {
-            state.ch.score = 0; state.ch.total = 0; state.ch.history = []; state.ch.currentQ = null;
+            state.ch.score = 0; state.ch.total = 0; state.ch.history = [];
+            state.ch.currentQ = null; state.ch.selectedStepId = null;
             var tVal = parseInt(D.chTimeInp.value);
             if (!tVal || tVal <= 0) tVal = 10;
             state.ch.time = tVal * 60;
             D.chSc.textContent = '0'; D.chT.textContent = fmt(state.ch.time);
-            D.chS.classList.remove('qset-hidden'); 
+            D.chS.classList.remove('qset-hidden');
             D.chP.classList.add('qset-hidden');
             D.chE.classList.add('qset-hidden');
             D.chF.textContent = '';
@@ -590,78 +700,199 @@
             state.ch.time = tVal * 60;
             D.chT.textContent = fmt(state.ch.time);
 
-            D.chS.classList.add('qset-hidden'); 
+            D.chS.classList.add('qset-hidden');
             D.chE.classList.add('qset-hidden');
             D.chP.classList.remove('qset-hidden');
-            
+
             state.ch.int = setInterval(function() {
                 state.ch.time--; D.chT.textContent = fmt(state.ch.time);
-                if (state.ch.time <= 0) { 
-                    clearInterval(state.ch.int); 
-                    D.chQ.innerHTML = "<div style='font-size:1.5rem; color:#dc2626; font-weight:bold; margin:20px 0;'>Time's Up!</div>"; 
-                    if($('ch-inp')) $('ch-inp').disabled = true;
-                    if($('ch-next-btn')) $('ch-next-btn').disabled = true;
-                    playBeep(); 
+                if (state.ch.time <= 0) {
+                    clearInterval(state.ch.int);
+                    D.chQ.innerHTML = "<div style='font-size:1.5rem; color:#dc2626; font-weight:bold; margin:20px 0;'>Time's Up!</div>";
+                    // Disable whatever control is currently shown
+                    if ($('ch-inp'))      $('ch-inp').disabled = true;
+                    if ($('ch-next-btn')) $('ch-next-btn').disabled = true;
+                    D.chC.querySelectorAll('.qset-step-row').forEach(function(r) { r.style.pointerEvents = 'none'; });
+                    playBeep();
                     setTimeout(endChallenge, 1500);
                 }
             }, 1000);
             nextCh();
         };
 
+        // ── Changes 1, 2, 3: random diff · re-roll excluded types · branch control area ──
         function nextCh() {
             D.chF.textContent = '';
-            var q = cfg.getQuestion(state.level, null);
+            state.ch.selectedStepId = null;
+
+            // Re-roll until we get a challenge-eligible type (max 20 attempts to avoid
+            // an infinite loop if a module has no eligible questions at this level).
+            var q, attempts = 0;
+            do {
+                q = cfg.getQuestion(state.level, randDiff());
+                attempts++;
+            } while (!isChallengeType(q) && attempts < 20);
+
             state.ch.currentQ = q;
             renderNativeFront(q, D.chQ, 'challenge');
-            
-            D.chC.innerHTML = 
-                '<span style="font-weight:bold; color:#475569; font-size:1.05rem;">Answer:</span> ' +
-                '<input type="text" id="ch-inp" style="width:120px; padding:8px; font-size:1.05rem; border:2px solid #cbd5e1; border-radius:6px; text-align:center; font-weight:bold;"> ' +
-                '<button id="ch-next-btn" style="background:#3b82f6; color:#fff; padding:8px 16px; font-size:0.95rem; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Next question</button>';
-            
-            var inp = $('ch-inp');
-            var nextBtn = $('ch-next-btn');
-            inp.focus();
-            inp.onkeypress = function(e) { if(e.key === 'Enter') checkCh(); };
-            nextBtn.onclick = function() { checkCh(); };
+
+            if (q.type === 'SPOT_ERROR' && q.subtype === 'STEP') {
+                // ── SPOT_ERROR/STEP control: render clickable step rows + Next button ──
+                var stepListHtml = '<div class="qset-ch-step-list" id="ch-step-list">';
+                q.steps.forEach(function(step) {
+                    stepListHtml += '<div class="qset-step-row" data-id="' + step.id + '">Step ' + step.id + ': ' + step.text + '</div>';
+                });
+                stepListHtml += '</div>';
+                stepListHtml += '<button id="ch-next-btn" style="background:#3b82f6; color:#fff; padding:8px 16px; font-size:0.95rem; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:8px;">Next question</button>';
+                D.chC.innerHTML = stepListHtml;
+
+                // Wire up step selection
+                var stepList = $('ch-step-list');
+                stepList.addEventListener('click', function(e) {
+                    var row = e.target.closest('.qset-step-row');
+                    if (!row) return;
+                    stepList.querySelectorAll('.qset-step-row').forEach(function(r) { r.classList.remove('selected'); });
+                    row.classList.add('selected');
+                    state.ch.selectedStepId = parseInt(row.dataset.id);
+                });
+
+                $('ch-next-btn').onclick = function() { checkCh(); };
+
+            } else {
+                // ── NUMERIC / MCQ control: text input + Next button ──
+                var ctrlHtml = '<span style="font-weight:bold; color:#475569; font-size:1.05rem;">Answer:</span> ';
+
+                if (q.type === 'MCQ') {
+                    // Render a compact inline option list instead of a text box
+                    ctrlHtml = '<div class="qset-mcq-opts" id="ch-mcq-opts" style="max-width:400px; margin:0 auto;">';
+                    q.options.forEach(function(opt, i) {
+                        ctrlHtml += '<button class="qset-mcq-opt" data-idx="' + i + '">' + opt + '</button>';
+                    });
+                    ctrlHtml += '</div>';
+                    ctrlHtml += '<button id="ch-next-btn" style="background:#3b82f6; color:#fff; padding:8px 16px; font-size:0.95rem; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:8px;">Next question</button>';
+                    D.chC.innerHTML = ctrlHtml;
+
+                    // Track selected MCQ option in state so checkCh() can read it
+                    state.ch.selectedMCQIdx = null;
+                    var mcqOpts = $('ch-mcq-opts');
+                    mcqOpts.addEventListener('click', function(e) {
+                        var btn = e.target.closest('.qset-mcq-opt');
+                        if (!btn) return;
+                        mcqOpts.querySelectorAll('.qset-mcq-opt').forEach(function(b) { b.classList.remove('selected'); });
+                        btn.classList.add('selected');
+                        state.ch.selectedMCQIdx = parseInt(btn.dataset.idx);
+                    });
+
+                } else {
+                    // NUMERIC: plain text input
+                    var chPlaceholder = q.requireUnits ? 'e.g. 25 m²' : 'Answer';
+                    var chWidth = q.requireUnits ? '180px' : '120px';
+                    ctrlHtml += '<input type="text" id="ch-inp" placeholder="' + chPlaceholder + '" style="width:' + chWidth + '; padding:8px; font-size:1.05rem; border:2px solid #cbd5e1; border-radius:6px; text-align:center; font-weight:bold;"> ';
+                    ctrlHtml += '<button id="ch-next-btn" style="background:#3b82f6; color:#fff; padding:8px 16px; font-size:0.95rem; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Next question</button>';
+                    D.chC.innerHTML = ctrlHtml;
+                    var inp = $('ch-inp');
+                    inp.focus();
+                    inp.onkeypress = function(e) { if (e.key === 'Enter') checkCh(); };
+                }
+
+                $('ch-next-btn').onclick = function() { checkCh(); };
+            }
+
             mjax(D.chQ);
         }
 
+        // ── Change 3: evaluate correctness per question type ──────────────
         function checkCh() {
             var q = state.ch.currentQ;
             if (!q) return;
 
-            var raw = $('ch-inp').value;
-            var ans = q.type === 'MCQ' ? q.options[q.correctOption] : (q.a || '');
             var isCorrect = false;
+            var userAnsDisplay = '(No answer)';
+            var correctAnsDisplay = '';
 
-            if (q.type === 'NUMERIC' && q.tolerance && q.tolerance > 0 && raw.trim() !== '') {
-                var num = safeEval(raw);
-                if(isNaN(num)) num = parseFloat(raw);
-                isCorrect = !isNaN(num) && Math.abs(num - parseFloat(q.a)) <= q.tolerance;
+            if (q.type === 'SPOT_ERROR' && q.subtype === 'STEP') {
+                var correctStepId = q.steps.find(function(s) { return s.isError; }).id;
+                var correctStep   = q.steps.find(function(s) { return s.isError; });
+                correctAnsDisplay = 'Step ' + correctStepId;
+
+                if (state.ch.selectedStepId !== null) {
+                    isCorrect = state.ch.selectedStepId === correctStepId;
+                    userAnsDisplay = 'Step ' + state.ch.selectedStepId;
+
+                    // Colour the step rows to give instant feedback
+                    var stepList = $('ch-step-list');
+                    if (stepList) {
+                        stepList.querySelectorAll('.qset-step-row').forEach(function(row) {
+                            var id = parseInt(row.dataset.id);
+                            row.style.pointerEvents = 'none';
+                            if (id === correctStepId) row.classList.add('correct');
+                            else if (id === state.ch.selectedStepId && !isCorrect) row.classList.add('wrong');
+                        });
+                    }
+                }
+
+            } else if (q.type === 'MCQ') {
+                correctAnsDisplay = q.options[q.correctOption];
+
+                if (state.ch.selectedMCQIdx !== null) {
+                    isCorrect = state.ch.selectedMCQIdx === q.correctOption;
+                    userAnsDisplay = q.options[state.ch.selectedMCQIdx];
+
+                    // Colour the MCQ buttons
+                    var mcqOpts = $('ch-mcq-opts');
+                    if (mcqOpts) {
+                        mcqOpts.querySelectorAll('.qset-mcq-opt').forEach(function(btn) {
+                            var idx = parseInt(btn.dataset.idx);
+                            btn.style.pointerEvents = 'none';
+                            if (idx === q.correctOption) btn.classList.add('correct');
+                            else if (idx === state.ch.selectedMCQIdx && !isCorrect) btn.classList.add('wrong');
+                        });
+                    }
+                }
+
             } else {
-                isCorrect = raw.toLowerCase().trim() === String(ans).toLowerCase().trim() && raw.trim() !== '';
+                // NUMERIC
+                var raw = $('ch-inp') ? $('ch-inp').value : '';
+                correctAnsDisplay = q.requireUnits
+                    ? String(q.a) + ' ' + (q.units && q.units[0] ? q.units[0] : '')
+                    : String(q.a);
+
+                if (q.requireUnits && raw.trim() !== '') {
+                    var parsed = parseAnswer(raw);
+                    var numOk = !isNaN(parsed.num) && Math.abs(parsed.num - parseFloat(q.a)) <= (q.tolerance || 0);
+                    var unitOk = unitMatch(parsed.unit, q.units);
+                    isCorrect = numOk && unitOk;
+                } else if (q.tolerance && q.tolerance > 0 && raw.trim() !== '') {
+                    var num = safeEval(raw);
+                    if (isNaN(num)) num = parseFloat(raw);
+                    isCorrect = !isNaN(num) && Math.abs(num - parseFloat(q.a)) <= q.tolerance;
+                } else {
+                    isCorrect = raw.toLowerCase().trim() === correctAnsDisplay.toLowerCase().trim() && raw.trim() !== '';
+                }
+                userAnsDisplay = raw.trim() === '' ? '(No answer)' : raw.trim();
+
+                if ($('ch-inp')) $('ch-inp').disabled = true;
             }
+
+            // Disable Next button to prevent double-submit
+            if ($('ch-next-btn')) $('ch-next-btn').disabled = true;
 
             state.ch.total++;
             if (isCorrect) {
-                state.ch.score++; 
+                state.ch.score++;
                 D.chF.style.color = '#16a34a'; D.chF.textContent = '✓ Correct';
             } else {
-                D.chF.style.color = '#dc2626'; D.chF.textContent = '✗ Answer: ' + ans;
+                D.chF.style.color = '#dc2626'; D.chF.textContent = '✗ Answer: ' + correctAnsDisplay;
             }
             D.chSc.textContent = state.ch.score;
 
             // Track for results table
             state.ch.history.push({
-                qHTML: q.q,
-                userAns: raw.trim() === '' ? '(No answer)' : raw.trim(),
-                correctAns: ans,
-                isCorrect: isCorrect
+                qHTML:        q.q,
+                userAns:      userAnsDisplay,
+                correctAns:   correctAnsDisplay,
+                isCorrect:    isCorrect
             });
-
-            $('ch-inp').disabled = true;
-            $('ch-next-btn').disabled = true;
 
             setTimeout(function() {
                 if (state.ch.time > 0 && !D.chP.classList.contains('qset-hidden')) {
@@ -690,10 +921,11 @@
         D.chBd.onclick = function() { D.chModal.classList.remove('visible'); };
 
         /* ── WORKSHEET MODE LOGIC ── */
+        // ── Change 1: pass a real random diff instead of null ──────────────
         function genWs() {
             D.wsG.innerHTML = ''; D.wsT.textContent = cfg.levelNames[state.level - 1];
             for (var i = 0; i < 12; i++) {
-                var q = cfg.getQuestion(state.level, null);
+                var q = cfg.getQuestion(state.level, randDiff());
                 var card = document.createElement('div'); card.className = 'qset-ws-card';
                 var inner = document.createElement('div'); inner.className = 'qset-ws-card-inner';
                 var f = document.createElement('div'); f.className = 'qset-ws-face front';
@@ -728,13 +960,17 @@
         D.bd.onclick = function() { D.sp.classList.remove('visible'); clearInterval(state.spTimer.int); };
         D.spC.onclick = function() { D.spC.classList.toggle('flipped'); };
         D.tabs.forEach(function(t) { t.onclick = function() { setMode(t.dataset.mode); }; });
-        D.lvl.onchange = function(e) { state.level = parseInt(e.target.value); setMode(state.mode); };
-        
-        document.addEventListener('keydown', function(e) { 
+        D.lvl.onchange = function(e) {
+            state.level = parseInt(e.target.value);
+            resetDiffState();   // always restart from diff 1 at the new level
+            setMode(state.mode);
+        };
+
+        document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 if (D.sp.classList.contains('visible')) D.bd.click();
                 if (D.chModal.classList.contains('visible')) D.chBd.click();
-            } 
+            }
         });
 
         setMode('study');
