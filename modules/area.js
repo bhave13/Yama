@@ -409,14 +409,34 @@ function _genLevel3(diff) {
   const unit = "cm";
   const typeRoll = rand(1, 5);
 
+  // Helper: builds a varied question sentence so base/height/slant appear
+  // in different positions each call, preventing students from pattern-matching
+  // on value position.
+  function _paraQ(ctx, b, h, slant, unit) {
+    const variant = rand(0, 5);
+    if (variant === 0)
+      return `A ${ctx} is shaped like a parallelogram with a base of ${b} ${unit}, a perpendicular height of ${h} ${unit}, and a slant side of ${slant} ${unit}. Find its area.`;
+    if (variant === 1)
+      return `A ${ctx} is a parallelogram. Its slant side measures ${slant} ${unit}, its perpendicular height is ${h} ${unit}, and its base is ${b} ${unit}. What is its area?`;
+    if (variant === 2)
+      return `The perpendicular height of a parallelogram-shaped ${ctx} is ${h} ${unit}. The slant side is ${slant} ${unit} and the base is ${b} ${unit}. Calculate its area.`;
+    if (variant === 3)
+      return `A ${ctx} has a slant side of ${slant} ${unit} and a base of ${b} ${unit}. Its perpendicular height is ${h} ${unit}. Find the area.`;
+    if (variant === 4)
+      return `For a parallelogram-shaped ${ctx}: perpendicular height = ${h} ${unit}, base = ${b} ${unit}, slant side = ${slant} ${unit}. Determine its area.`;
+    // variant 5
+    return `A ${ctx} shaped as a parallelogram has these measurements: slant side ${slant} ${unit}, base ${b} ${unit}, and perpendicular height ${h} ${unit}. What is the area?`;
+  }
+
   if (diff === 1) {
     const b = rand(6, 20), h = rand(4, 12), slant = rand(h + 1, h + 5);
     const a = b * h;
     const img = makeSVGParallelogram(b, h, slant, unit);
+    const qText = _paraQ(ctx, b, h, slant, unit);
     if (typeRoll <= 2) {
       return {
         uid: makeUID("NUMERIC", 3, 1), level: 3, diff: 1, type: "NUMERIC",
-        q: `A ${ctx} is shaped like a parallelogram with a base of ${b} ${unit}, a perpendicular height of ${h} ${unit}, and a slant side of ${slant} ${unit}. Find its area.`,
+        q: qText,
         working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = b \\times h\\) (use perpendicular height only)</p><p>\\(A = ${b} \\times ${h} = ${a}\\) ${unit}²</p><p>The slant side (${slant} ${unit}) is not used.</p>`,
         img, imgAlt: `Parallelogram: base ${b} ${unit}, height ${h} ${unit}, slant ${slant} ${unit}`,
         hint: "Use the perpendicular height — not the slant side.",
@@ -435,7 +455,7 @@ function _genLevel3(diff) {
       const correctOption = opts.indexOf(`${correct} ${unit}²`);
       return {
         uid: makeUID("MCQ", 3, 1), level: 3, diff: 1, type: "MCQ",
-        q: `A parallelogram has base ${b} ${unit}, perpendicular height ${h} ${unit}, and slant side ${slant} ${unit}. What is its area?`,
+        q: qText,
         working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = b \\times h = ${b} \\times ${h} = ${a}\\) ${unit}²</p><p>The slant side is not needed.</p>`,
         img, imgAlt: `Parallelogram base ${b}, height ${h}, slant ${slant}`,
         hint: "A = base × perpendicular height.",
@@ -448,7 +468,7 @@ function _genLevel3(diff) {
     return {
       uid: makeUID("SPOT_ERROR/VALUE", 3, 1), level: 3, diff: 1, type: "SPOT_ERROR",
       subtype: "VALUE",
-      q: `A student calculated the area of a parallelogram with base ${b} ${unit}, perpendicular height ${h} ${unit}, and slant side ${slant} ${unit}. Click the token that contains the error.`,
+      q: `A student calculated the area of a parallelogram. ${qText.replace('Find its area.','').replace('What is its area?','').replace('Calculate its area.','').replace('Find the area.','').replace('Determine its area.','').replace('What is the area?','').trim()} Click the token that contains the error in the student's working below.`,
       working: `<p><strong>The error is in the value used for height.</strong></p><p>The student used the slant side (${slant} ${unit}) instead of the perpendicular height (${h} ${unit}).</p><p>Correct: \\(A = ${b} \\times ${h} = ${a}\\) ${unit}²</p>`,
       img, imgAlt: `Parallelogram with base ${b}, slant ${slant}, perpendicular height ${h}`,
       hint: "Check which measurement was substituted as height.",
@@ -465,7 +485,7 @@ function _genLevel3(diff) {
     const img = makeSVGParallelogram(b, h, slant, unit);
     return {
       uid: makeUID("NUMERIC", 3, 2), level: 3, diff: 2, type: "NUMERIC",
-      q: `A ${ctx} is a parallelogram with base ${b} ${unit}, perpendicular height ${h} ${unit}, and slant side ${slant} ${unit}. Calculate its area.`,
+      q: _paraQ(ctx, b, h, slant, unit),
       working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = b \\times h = ${b} \\times ${h} = ${a}\\) ${unit}²</p>`,
       img, imgAlt: `Parallelogram: base ${b}, height ${h}, slant ${slant}, unit ${unit}`,
       hint: "Use only b and h (perpendicular height).",
@@ -482,9 +502,14 @@ function _genLevel3(diff) {
     const aN = bn * hn, aD = bd * hd;
     const g = gcd(aN, aD);
     const sN = aN/g, sD = aD/g;
+    // Vary position of base vs height in the fraction question too
+    const fracVariant = rand(0, 1);
+    const fracQ = fracVariant === 0
+      ? `A parallelogram has base \\(\\frac{${bn}}{${bd}}\\) m and perpendicular height \\(\\frac{${hn}}{${hd}}\\) m. Find its area as a fraction in lowest terms.`
+      : `A parallelogram has a perpendicular height of \\(\\frac{${hn}}{${hd}}\\) m and a base of \\(\\frac{${bn}}{${bd}}\\) m. What is its area? Give your answer as a fraction in lowest terms.`;
     return {
       uid: makeUID("NUMERIC", 3, 3), level: 3, diff: 3, type: "NUMERIC",
-      q: `A parallelogram has base \\(\\frac{${bn}}{${bd}}\\) m and perpendicular height \\(\\frac{${hn}}{${hd}}\\) m. Find its area as a fraction in lowest terms.`,
+      q: fracQ,
       working: `<p><strong>Answer: \\(\\frac{${sN}}{${sD}}\\) m²</strong></p><p>\\(A = \\frac{${bn}}{${bd}} \\times \\frac{${hn}}{${hd}} = \\frac{${aN}}{${aD}} = \\frac{${sN}}{${sD}}\\) m²</p>`,
       img: "", imgAlt: "", hint: "Multiply numerators and denominators, then simplify.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
@@ -526,46 +551,69 @@ function _genLevel4(diff) {
   if (_l4Pool.length === 0) _l4Pool = _l4Contexts.slice();
   const ctx = pickAndRemove(_l4Pool);
 
+  // Synonyms for "base" to vary wording across questions
+  const _baseSynonyms = ["base", "width", "bottom edge", "horizontal side", "span"];
+
+  // Builds a varied question string for a triangle with ALL THREE measurements
+  // (height, base, slant side) always present but in different order/wording.
+  function _triQ(ctx, b, h, slant, unit) {
+    const bWord = _baseSynonyms[rand(0, _baseSynonyms.length - 1)];
+    const variant = rand(0, 5);
+    if (variant === 0)
+      return `A ${ctx} has a ${bWord} of ${b} ${unit}, a perpendicular height of ${h} ${unit}, and a slant side of ${slant} ${unit}. Find its area.`;
+    if (variant === 1)
+      return `A ${ctx} has a perpendicular height of ${h} ${unit}, a slant side of ${slant} ${unit}, and a ${bWord} of ${b} ${unit}. What is its area?`;
+    if (variant === 2)
+      return `The slant side of a ${ctx} is ${slant} ${unit}. Its ${bWord} measures ${b} ${unit} and its perpendicular height is ${h} ${unit}. Calculate the area.`;
+    if (variant === 3)
+      return `A ${ctx} has a slant side of ${slant} ${unit} and a perpendicular height of ${h} ${unit}. The ${bWord} is ${b} ${unit}. Find its area.`;
+    if (variant === 4)
+      return `For a ${ctx}: ${bWord} = ${b} ${unit}, perpendicular height = ${h} ${unit}, slant side = ${slant} ${unit}. Determine the area.`;
+    // variant 5
+    return `A ${ctx} with a slant side of ${slant} ${unit}: the perpendicular height is ${h} ${unit} and the ${bWord} is ${b} ${unit}. Find the area.`;
+  }
+
   if (diff === 1) {
-    const b = rand(6, 20), h = rand(4, 14);
+    const b = rand(6, 20), h = rand(4, 14), slant = rand(h + 1, h + 6);
     const a = 0.5 * b * h;
     const ttype = rand(0,1) === 0 ? "right" : "acute";
     const img = makeSVGTriangle(b, h, "cm", ttype);
+    const qText = _triQ(ctx, b, h, slant, "cm");
     const typeRoll = rand(1, 3);
     if (typeRoll <= 2) {
       return {
         uid: makeUID("NUMERIC", 4, 1), level: 4, diff: 1, type: "NUMERIC",
-        q: `A ${ctx} has a base of ${b} cm and a perpendicular height of ${h} cm. Find its area.`,
-        working: `<p><strong>Answer: ${a} cm²</strong></p><p>\\(A = \\frac{1}{2} \\times b \\times h\\)</p><p>\\(A = \\frac{1}{2} \\times ${b} \\times ${h} = ${a}\\) cm²</p>`,
-        img, imgAlt: `Triangle base ${b} cm height ${h} cm`,
-        hint: "Don't forget the ½ — the triangle is half a parallelogram.",
+        q: qText,
+        working: `<p><strong>Answer: ${a} cm²</strong></p><p>\\(A = \\frac{1}{2} \\times b \\times h\\) (perpendicular height only; slant side not used)</p><p>\\(A = \\frac{1}{2} \\times ${b} \\times ${h} = ${a}\\) cm²</p>`,
+        img, imgAlt: `Triangle base ${b} cm height ${h} cm slant ${slant} cm`,
+        hint: "Use the perpendicular height, not the slant side. Don't forget the ½.",
         ncea: { standard: "GM5-2", ao: "GM4-3" },
         a: String(a), units: ["cm²"], tolerance: 0.01, requireUnits: true
       };
     }
     // MCQ
     const correct = a;
-    const opts = shuffle([correct, b * h, b + h, 0.5 * b * b].map(v => `${v} cm²`));
+    const opts = shuffle([correct, b * h, b + h, 0.5 * b * slant].map(v => `${v} cm²`));
     return {
       uid: makeUID("MCQ", 4, 1), level: 4, diff: 1, type: "MCQ",
-      q: `A triangle has base ${b} cm and perpendicular height ${h} cm. What is its area?`,
-      working: `<p><strong>Answer: ${a} cm²</strong></p><p>\\(A = \\frac{1}{2} \\times ${b} \\times ${h} = ${a}\\) cm²</p>`,
-      img, imgAlt: `Triangle base ${b} cm height ${h} cm`,
-      hint: "A = ½ × b × h",
+      q: qText,
+      working: `<p><strong>Answer: ${a} cm²</strong></p><p>\\(A = \\frac{1}{2} \\times ${b} \\times ${h} = ${a}\\) cm²</p><p>The slant side (${slant} cm) is not needed.</p>`,
+      img, imgAlt: `Triangle base ${b} cm height ${h} cm slant ${slant} cm`,
+      hint: "A = ½ × base × perpendicular height. The slant side is a distractor.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
       options: opts, correctOption: opts.indexOf(`${correct} cm²`)
     };
   }
 
   if (diff === 2) {
-    const b = randF(4, 16, 1), h = randF(3, 10, 1);
+    const b = randF(4, 16, 1), h = randF(3, 10, 1), slant = roundTo(h + randF(1, 4, 1), 1);
     const a = roundTo(0.5 * b * h, 2);
     return {
       uid: makeUID("NUMERIC", 4, 2), level: 4, diff: 2, type: "NUMERIC",
-      q: `A ${ctx} has a base of ${b} m and a perpendicular height of ${h} m. Calculate its area.`,
-      working: `<p><strong>Answer: ${a} m²</strong></p><p>\\(A = \\frac{1}{2} \\times ${b} \\times ${h} = ${a}\\) m²</p>`,
-      img: makeSVGTriangle(b, h, "m", "acute"), imgAlt: `Triangle base ${b} m height ${h} m`,
-      hint: "A = ½ × b × h — remember the half!",
+      q: _triQ(ctx, b, h, slant, "m"),
+      working: `<p><strong>Answer: ${a} m²</strong></p><p>\\(A = \\frac{1}{2} \\times ${b} \\times ${h} = ${a}\\) m²</p><p>The slant side (${slant} m) is not used.</p>`,
+      img: makeSVGTriangle(b, h, "m", "acute"), imgAlt: `Triangle base ${b} m height ${h} m slant ${slant} m`,
+      hint: "A = ½ × base × perpendicular height — remember the ½, and ignore the slant side!",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
       a: String(a), units: ["m²"], tolerance: 0.05, requireUnits: true
     };
@@ -575,14 +623,23 @@ function _genLevel4(diff) {
     function gcd(a,b){return b===0?a:gcd(b,a%b);}
     const bn = rand(3,7)*2, bd = rand(2,4);  // ensure clean halving
     const hn = rand(4,8), hd = rand(2,3);
+    const sn = rand(3,7), sd = rand(2,3);   // slant as fraction (not used in calc)
     const aN = bn * hn, aD = 2 * bd * hd;
     const g = gcd(aN, aD);
     const sN = aN/g, sD = aD/g;
+    const fracVariant = rand(0, 2);
+    let fracQ;
+    if (fracVariant === 0)
+      fracQ = `A triangle has a base of \\(\\frac{${bn}}{${bd}}\\) m, a perpendicular height of \\(\\frac{${hn}}{${hd}}\\) m, and a slant side of \\(\\frac{${sn}}{${sd}}\\) m. Find its area as a fraction in lowest terms.`;
+    else if (fracVariant === 1)
+      fracQ = `A triangle has a perpendicular height of \\(\\frac{${hn}}{${hd}}\\) m, a slant side of \\(\\frac{${sn}}{${sd}}\\) m, and a base of \\(\\frac{${bn}}{${bd}}\\) m. What is the area? Express as a fraction in lowest terms.`;
+    else
+      fracQ = `A triangle: slant side \\(\\frac{${sn}}{${sd}}\\) m, base \\(\\frac{${bn}}{${bd}}\\) m, perpendicular height \\(\\frac{${hn}}{${hd}}\\) m. Calculate the area as a fraction in lowest terms.`;
     return {
       uid: makeUID("NUMERIC", 4, 3), level: 4, diff: 3, type: "NUMERIC",
-      q: `A triangle has base \\(\\frac{${bn}}{${bd}}\\) m and perpendicular height \\(\\frac{${hn}}{${hd}}\\) m. Find its area as a fraction in lowest terms.`,
-      working: `<p><strong>Answer: \\(\\frac{${sN}}{${sD}}\\) m²</strong></p><p>\\(A = \\frac{1}{2} \\times \\frac{${bn}}{${bd}} \\times \\frac{${hn}}{${hd}} = \\frac{${bn * hn}}{${2 * bd * hd}} = \\frac{${sN}}{${sD}}\\) m²</p>`,
-      img: "", imgAlt: "", hint: "Multiply all three numerators and all three denominators, then simplify.",
+      q: fracQ,
+      working: `<p><strong>Answer: \\(\\frac{${sN}}{${sD}}\\) m²</strong></p><p>Use only the base and perpendicular height (the slant side is not needed).</p><p>\\(A = \\frac{1}{2} \\times \\frac{${bn}}{${bd}} \\times \\frac{${hn}}{${hd}} = \\frac{${bn * hn}}{${2 * bd * hd}} = \\frac{${sN}}{${sD}}\\) m²</p>`,
+      img: "", imgAlt: "", hint: "Ignore the slant side. Multiply all three numerators and all three denominators (including the ½), then simplify.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
       a: String(roundTo(aN/aD, 6)), units: ["m²"], tolerance: 0.01, requireUnits: true
     };
@@ -627,65 +684,135 @@ function _genLevel5(diff) {
   const ctx = pickAndRemove(_l5Pool);
   const unit = ctx.unit;
 
+  // makeSVGCircleBoth draws both radius and diameter labelled on the same circle
+  // so students must decide which value to use.
+  function makeSVGCircleBoth(r, unit) {
+    const W = 200, H = 200, cx = 100, cy = 100, cr = 65;
+    const d = r * 2;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+      <circle cx="${cx}" cy="${cy}" r="${cr}" fill="#f5eef8" stroke="#8e44ad" stroke-width="2"/>
+      <!-- diameter line (full width) -->
+      <line x1="${cx - cr}" y1="${cy}" x2="${cx + cr}" y2="${cy}" stroke="#8e44ad" stroke-width="1.5"/>
+      <!-- radius tick at centre -->
+      <circle cx="${cx}" cy="${cy}" r="3" fill="#8e44ad"/>
+      <!-- diameter label above line -->
+      <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-size="11" fill="#6c3483">d = ${d} ${unit}</text>
+      <!-- radius label below line, right half -->
+      <text x="${cx + cr / 2}" y="${cy + 18}" text-anchor="middle" font-size="11" fill="#c0392b">r = ${r} ${unit}</text>
+    </svg>`;
+    return "data:image/svg+xml," + encodeURIComponent(svg);
+  }
+
   if (diff === 1) {
-    // Radius given as integer
+    // Randomly give either radius or diameter (integer), with matching SVG label
+    const giveRadius = rand(0, 1) === 0;
     const r = rand(3, 10);
+    const d = r * 2;
     const a = roundTo(Math.PI * r * r, 2);
-    const img = makeSVGCircle(r, unit, "radius");
+    const img = makeSVGCircle(r, unit, giveRadius ? "radius" : "diameter");
     const typeRoll = rand(1, 3);
-    if (typeRoll <= 2) {
+
+    if (giveRadius) {
+      // ── Radius variant ──────────────────────────────────────────────
+      if (typeRoll <= 2) {
+        return {
+          uid: makeUID("NUMERIC", 5, 1), level: 5, diff: 1, type: "NUMERIC",
+          q: `A ${ctx.name} has a radius of ${r} ${unit}. Calculate its area. Give your answer to 2 decimal places.`,
+          working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = \\pi r^2\\)</p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${r*r} \\approx ${a}\\) ${unit}²</p>`,
+          img, imgAlt: `Circle with radius ${r} ${unit}`,
+          hint: `Use A = πr². Square the radius first, then multiply by π.`,
+          ncea: { standard: "GM5-2", ao: "GM4-3" },
+          a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
+        };
+      }
+      // MCQ with radius
+      const wrong1 = roundTo(Math.PI * d * d, 2);
+      const wrong2 = roundTo(Math.PI * r, 2);
+      const wrong3 = roundTo(2 * Math.PI * r, 2);
+      const opts = shuffle([a, wrong1, wrong2, wrong3].map(v => `${v} ${unit}²`));
       return {
-        uid: makeUID("NUMERIC", 5, 1), level: 5, diff: 1, type: "NUMERIC",
-        q: `A ${ctx.name} has a radius of ${r} ${unit}. Calculate its area. Give your answer to 2 decimal places.`,
-        working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = \\pi r^2\\)</p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${r*r} \\approx ${a}\\) ${unit}²</p>`,
-        img, imgAlt: `Circle with radius ${r} ${unit}`,
-        hint: `Use A = πr². Square the radius first, then multiply by π.`,
+        uid: makeUID("MCQ", 5, 1), level: 5, diff: 1, type: "MCQ",
+        q: `A circle has radius ${r} ${unit}. What is its area? Give your answer to 2 d.p.`,
+        working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${r*r} \\approx ${a}\\) ${unit}²</p>`,
+        img, imgAlt: `Circle radius ${r} ${unit}`,
+        hint: "A = πr² — square r first.", ncea: { standard: "GM5-2", ao: "GM4-3" },
+        options: opts, correctOption: opts.indexOf(`${a} ${unit}²`)
+      };
+    } else {
+      // ── Diameter variant ────────────────────────────────────────────
+      if (typeRoll <= 2) {
+        return {
+          uid: makeUID("NUMERIC", 5, 1), level: 5, diff: 1, type: "NUMERIC",
+          q: `A ${ctx.name} has a diameter of ${d} ${unit}. Calculate its area. Give your answer to 2 decimal places.`,
+          working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>Radius = ${d} ÷ 2 = ${r} ${unit}</p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${r*r} \\approx ${a}\\) ${unit}²</p>`,
+          img, imgAlt: `Circle with diameter ${d} ${unit}`,
+          hint: `Halve the diameter to get the radius first, then use A = πr².`,
+          ncea: { standard: "GM5-2", ao: "GM4-3" },
+          a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
+        };
+      }
+      // MCQ with diameter (common error: forgetting to halve)
+      const wrong1 = roundTo(Math.PI * d * d, 2);  // used diameter directly
+      const wrong2 = roundTo(Math.PI * r, 2);
+      const wrong3 = roundTo(2 * Math.PI * r, 2);
+      const opts = shuffle([a, wrong1, wrong2, wrong3].map(v => `${v} ${unit}²`));
+      return {
+        uid: makeUID("MCQ", 5, 1), level: 5, diff: 1, type: "MCQ",
+        q: `A circle has a diameter of ${d} ${unit}. What is its area? Give your answer to 2 d.p.`,
+        working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>r = ${d} ÷ 2 = ${r} ${unit}</p><p>\\(A = \\pi \\times ${r}^2 \\approx ${a}\\) ${unit}²</p>`,
+        img, imgAlt: `Circle diameter ${d} ${unit}`,
+        hint: "Remember: halve the diameter to get r before applying A = πr².",
         ncea: { standard: "GM5-2", ao: "GM4-3" },
-        a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
+        options: opts, correctOption: opts.indexOf(`${a} ${unit}²`)
       };
     }
-    // MCQ — distractors: using d instead of r, πr not squared, C formula
-    const d = r * 2;
-    const wrong1 = roundTo(Math.PI * d * d, 2);  // used diameter
-    const wrong2 = roundTo(Math.PI * r, 2);       // forgot to square
-    const wrong3 = roundTo(2 * Math.PI * r, 2);   // circumference formula
-    const opts = shuffle([a, wrong1, wrong2, wrong3].map(v => `${v} ${unit}²`));
-    return {
-      uid: makeUID("MCQ", 5, 1), level: 5, diff: 1, type: "MCQ",
-      q: `A circle has radius ${r} ${unit}. What is its area? Give your answer to 2 d.p.`,
-      working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${r*r} \\approx ${a}\\) ${unit}²</p>`,
-      img, imgAlt: `Circle radius ${r} ${unit}`,
-      hint: "A = πr² — square r first.", ncea: { standard: "GM5-2", ao: "GM4-3" },
-      options: opts, correctOption: opts.indexOf(`${a} ${unit}²`)
-    };
   }
 
   if (diff === 2) {
-    // Diameter given
-    const d = rand(6, 20) * 2;
-    const r = d / 2;
+    // Show BOTH radius and diameter on the SVG — student must choose the right one.
+    const r = rand(3, 10);
+    const d = r * 2;
     const a = roundTo(Math.PI * r * r, 2);
-    const img = makeSVGCircle(r, unit, "diameter");
+    const img = makeSVGCircleBoth(r, unit);
+    // Question specifies which measurement to use (randomly asks "using the radius" or
+    // "using the diameter" so students practise reading carefully).
+    const askViaRadius = rand(0, 1) === 0;
+    const qText = askViaRadius
+      ? `The diagram shows a ${ctx.name} with both its radius (${r} ${unit}) and its diameter (${d} ${unit}) labelled. Use the radius to find the area. Give your answer to 2 decimal places.`
+      : `The diagram shows a ${ctx.name} with both its diameter (${d} ${unit}) and its radius (${r} ${unit}) labelled. Use the diameter to calculate the area. Give your answer to 2 decimal places.`;
     return {
       uid: makeUID("NUMERIC", 5, 2), level: 5, diff: 2, type: "NUMERIC",
-      q: `A ${ctx.name} has a diameter of ${d} ${unit}. Find its area. Give your answer to 2 decimal places.`,
-      working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>Radius = ${d} ÷ 2 = ${r} ${unit}</p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${r*r} \\approx ${a}\\) ${unit}²</p>`,
-      img, imgAlt: `Circle with diameter ${d} ${unit}`,
-      hint: "Halve the diameter to get the radius, then use A = πr².",
+      q: qText,
+      working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>${askViaRadius ? `Radius = ${r} ${unit} (given directly).` : `Radius = ${d} ÷ 2 = ${r} ${unit}.`}</p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${r*r} \\approx ${a}\\) ${unit}²</p>`,
+      img, imgAlt: `Circle with both radius ${r} ${unit} and diameter ${d} ${unit} labelled`,
+      hint: askViaRadius
+        ? "The radius is already given — apply A = πr² directly."
+        : "Halve the diameter to find the radius, then apply A = πr².",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
       a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
     };
   }
 
   if (diff === 3) {
+    // Decimal radius or diameter (randomly chosen), student must handle halving if needed.
+    const giveRadius = rand(0, 1) === 0;
     const r = randF(2, 8, 1);
+    const d = roundTo(r * 2, 1);
     const a = roundTo(Math.PI * r * r, 2);
+    const img = makeSVGCircle(r, unit, giveRadius ? "radius" : "diameter");
     return {
       uid: makeUID("NUMERIC", 5, 3), level: 5, diff: 3, type: "NUMERIC",
-      q: `A ${ctx.name} has a radius of ${r} ${unit}. Calculate its area to 2 decimal places.`,
-      working: `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${roundTo(r*r,2)} \\approx ${a}\\) ${unit}²</p>`,
-      img: makeSVGCircle(r, unit, "radius"), imgAlt: `Circle radius ${r} ${unit}`,
-      hint: "Square the decimal radius carefully before multiplying by π.",
+      q: giveRadius
+        ? `A ${ctx.name} has a radius of ${r} ${unit}. Calculate its area to 2 decimal places.`
+        : `A ${ctx.name} has a diameter of ${d} ${unit}. Calculate its area to 2 decimal places.`,
+      working: giveRadius
+        ? `<p><strong>Answer: ${a} ${unit}²</strong></p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${roundTo(r*r,2)} \\approx ${a}\\) ${unit}²</p>`
+        : `<p><strong>Answer: ${a} ${unit}²</strong></p><p>Radius = ${d} ÷ 2 = ${r} ${unit}</p><p>\\(A = \\pi \\times ${r}^2 = \\pi \\times ${roundTo(r*r,2)} \\approx ${a}\\) ${unit}²</p>`,
+      img,
+      imgAlt: giveRadius ? `Circle radius ${r} ${unit}` : `Circle diameter ${d} ${unit}`,
+      hint: giveRadius
+        ? "Square the decimal radius carefully before multiplying by π."
+        : "Halve the diameter first, then square and multiply by π.",
       ncea: { standard: "GM5-2", ao: "GM4-3" },
       a: String(a), units: [`${unit}²`], tolerance: 0.05, requireUnits: true
     };
@@ -1442,29 +1569,3 @@ const config = {
       label: "Para",
       title: "Area of Parallelogram",
       text: "Base times perpendicular height (not slant side):",
-      math: "A = b \\times h"
-    },
-    {
-      label: "Circle",
-      title: "Area of Circle",
-      text: "Pi times the radius squared:",
-      math: "A = \\pi r^2"
-    },
-    {
-      label: "Sector",
-      title: "Area of Sector",
-      text: "Fraction of full circle times pi r squared:",
-      math: "A = \\frac{\\theta}{360} \\times \\pi r^2"
-    },
-    {
-      label: "Units",
-      title: "Area Units",
-      text: "Area is always in square units. Conversions:",
-      math: "1\\text{ cm}^2 = 100\\text{ mm}^2 \\quad 1\\text{ m}^2 = 10{,}000\\text{ cm}^2"
-    }
-  ],
-  referenceLabel: "Formulae"
-};
-
-//QsetFW.init(config, document.getElementById("module-container"));
-export default config;
