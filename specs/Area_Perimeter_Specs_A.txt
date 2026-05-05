@@ -1,0 +1,476 @@
+# YAMA Topic Analysis
+
+## Topic: Area and Perimeter (Polygons and Circles)
+## Year Group: Year 10
+## Curriculum Strand: Geometry and Measurement
+## Achievement Objective: Find the perimeters and areas of circles and composite shapes; deduce and use formulae to find the perimeters and areas of polygons (NZ Curriculum Level 5, Measurement)
+
+---
+
+## 1. Prerequisites
+
+Prerequisites are skills the student must have consolidated before beginning this topic.
+Each row is a single, independently learnable skill, ordered from most fundamental.
+
+| # | Prerequisite Skill | Why It Is Needed |
+|---|---|---|
+| 1 | Multiply and divide whole numbers and decimals fluently | Area and perimeter calculations require confident multiplication and division, including by π |
+| 2 | Use a calculator to evaluate expressions including π | Circle calculations require pressing the π key and interpreting decimal outputs |
+| 3 | Identify and name common 2D shapes (rectangle, square, triangle, parallelogram, trapezoid) | Students must recognise which formula to select before applying it |
+| 4 | Understand that area measures the space inside a shape and is expressed in square units (cm², m²) | Without this conceptual grounding, formula use becomes mechanical and error-prone |
+| 5 | Understand that perimeter measures the total distance around the outside of a shape | Required before extending perimeter to circles (circumference) |
+| 6 | Square a number and find a square root using a calculator | Needed for A = πr² (squaring r) and for reversing the area formula to find r |
+| 7 | Substitute values into a simple formula (e.g., given A = l × w, find A when l = 6 and w = 4) | All area and perimeter work requires formula substitution |
+| 8 | Round a decimal answer to a specified number of decimal places | Many circle calculations produce non-terminating decimals that must be rounded |
+
+---
+
+## 2. Facts and Formulas
+
+Facts and formulas the student must be able to recall and apply without derivation.
+Include correct mathematical notation. Use LaTeX notation where appropriate.
+
+| # | Fact / Formula | Example / Notes |
+|---|---|---|
+| 1 | Perimeter of a rectangle: `P = 2l + 2w` | l = length, w = width; equivalent form P = 2(l + w) |
+| 2 | Perimeter of a square: `P = 4s` | s = side length; special case of rectangle |
+| 3 | Perimeter of any polygon: sum of all side lengths | Apply to triangles, parallelograms, trapezoids, irregular polygons |
+| 4 | Area of a rectangle: `A = l × w` | Units are always squared (e.g., cm²) |
+| 5 | Area of a square: `A = s²` | Special case of rectangle |
+| 6 | Area of a triangle: `A = (b × h) / 2` | b = base, h = perpendicular height (not the slant side) |
+| 7 | Area of a parallelogram: `A = b × h` | h is the perpendicular height between the parallel sides, not the slant side |
+| 8 | Area of a trapezoid: `A = ½(a + b) × h` | a and b are the two parallel sides; h is the perpendicular height |
+| 9 | Relationship between radius and diameter: `d = 2r` | Always halve the diameter to get r before using circle area formula |
+| 10 | Circumference of a circle: `C = πd` or `C = 2πr` | Both forms are equivalent; use whichever matches the given information |
+| 11 | Area of a circle: `A = πr²` | r must be the radius, not the diameter; a very common error is to use d instead |
+| 12 | π ≈ 3.14159… | Use the π key on the calculator for accuracy; only round the final answer |
+
+---
+
+## 3. Skill Levels
+
+ATOMISATION RULE: Each level tests exactly ONE new, independently assessable skill.
+Level count is determined by the topic — use as many as needed.
+
+---
+
+### Level 1: Circle Parts Vocabulary
+
+**Tier:** Pre-req Check
+**Single Skill Tested:** Identify and name the parts of a circle from a diagram (radius, diameter, circumference, chord, arc, sector, tangent)
+**Recommended Question Types:** MATCH, MCQ, TEXT (spelling check)
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Match a labelled diagram arrow to the correct term name | Arrow points to a line from centre to edge → student selects "Radius" |
+| 2 | Identify the part from a written description | "The distance all the way around the circle is called the ___" |
+| 3 | Identify a less familiar part (chord, arc, tangent, sector) from diagram | Arrow points to a line crossing the circle without passing through centre |
+| 4 | Distinguish between easily confused pairs (e.g., chord vs. diameter, arc vs. circumference) in context | "Circle A has a chord of 8 cm. Its diameter is 10 cm. Are these the same line? Explain." |
+
+**Example Question Stem:** The arrow below points to a line segment that starts at the centre of a circle and ends on the circumference. What is this line called?
+
+**Common Misconceptions:**
+- Students confuse diameter and chord — both cross the circle, but only diameter passes through the centre
+- Students use "circumference" and "perimeter" interchangeably but cannot spell or define circumference precisely
+
+---
+
+### Level 2: Perimeter of Rectangles and Squares
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the perimeter of a rectangle or square using the formula P = 2l + 2w or P = 4s
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer side lengths, clean integer answer | Rectangle: l = 9 cm, w = 5 cm → P = 28 cm |
+| 2 | Decimal side lengths (1–2 d.p.) | Rectangle: l = 4.5 m, w = 3.2 m → P = 15.4 m |
+| 3 | Fractional side lengths | Rectangle: l = 5/2 cm, w = 3/4 cm → P = 13/2 cm |
+| 4 | One side expressed algebraically or a mix of units requiring conversion | Rectangle: l = 1.2 m, w = 85 cm → convert then calculate P |
+
+**Example Question Stem:** A rectangle has a length of 8 cm and a width of 3 cm. Work out its perimeter.
+
+**Common Misconceptions:**
+- Students add only two sides (P = l + w) rather than all four, confusing perimeter with the sum of two dimensions
+- Students square units when finding perimeter (writing "28 cm²" instead of "28 cm")
+
+---
+
+### Level 3: Perimeter of Triangles and Other Polygons
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the perimeter of a triangle or polygon by summing all given side lengths
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Triangle or polygon with all integer sides explicitly labelled | Triangle: sides 5 cm, 7 cm, 9 cm → P = 21 cm |
+| 2 | Decimal side lengths | Parallelogram: sides 6.4 cm and 3.7 cm → P = 20.2 cm |
+| 3 | One or more sides are fractions | Isosceles triangle: equal sides 3/2 m, base 4/3 m |
+| 4 | Regular polygon requiring multiplication, or problem where a side must be inferred from shape properties | Regular hexagon with side 4.5 cm; or isosceles triangle where only one equal side and base are given |
+
+**Example Question Stem:** A triangle has side lengths of 6 cm, 8 cm, and 10 cm. What is the perimeter of the triangle?
+
+**Common Misconceptions:**
+- For regular polygons, students add sides instead of multiplying (e.g., writing 7 + 7 + 7 + 7 + 7 for a pentagon instead of 5 × 7)
+- For isosceles triangles, students forget to double the equal side
+
+---
+
+### Level 4: Area of Rectangles and Squares
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the area of a rectangle or square using A = l × w or A = s²
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer dimensions | Square: side = 7 cm → A = 49 cm² |
+| 2 | Decimal dimensions | Rectangle: l = 8.4 m, w = 3.5 m → A = 29.4 m² |
+| 3 | Fractional dimensions | Rectangle: l = 3/4 m, w = 2/3 m → A = 1/2 m² |
+| 4 | Mixed unit dimensions requiring conversion, or one dimension unknown | Rectangle with l = 1.2 m, w = 40 cm — convert then multiply |
+
+**Example Question Stem:** A rectangular room is 6 m long and 4 m wide. What is the area of the room?
+
+**Common Misconceptions:**
+- Students confuse area and perimeter (add instead of multiply)
+- Students forget to write squared units in the answer (e.g., write "24 m" not "24 m²")
+
+---
+
+### Level 5: Area of Triangles
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the area of a triangle using A = (b × h) / 2, given the base and perpendicular height
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer base and height, even product (clean integer area) | b = 10 cm, h = 6 cm → A = 30 cm² |
+| 2 | Decimal base or height | b = 7.4 m, h = 5 m → A = 18.5 m² |
+| 3 | One or both values are fractions | b = 5/2 cm, h = 4/3 cm → A = 5/3 cm² |
+| 4 | Right-angled triangle where height must be identified as one of the legs, not the hypotenuse | Triangle with legs 9 m and 12 m, hypotenuse 15 m labelled — student must identify correct height |
+
+**Example Question Stem:** A triangle has a base of 8 cm and a perpendicular height of 5 cm. Calculate its area.
+
+**Common Misconceptions:**
+- Students use the slant side as the height rather than the perpendicular height
+- Students forget to divide by 2 (finding b × h instead of b × h / 2)
+- Students halve both the base and height rather than halving the product
+
+---
+
+### Level 6: Area of Parallelograms
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the area of a parallelogram using A = b × h, correctly identifying the perpendicular height
+**Recommended Question Types:** NUMERIC, MCQ, SPOT_ERROR/VALUE
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer base and perpendicular height explicitly labelled | b = 12 cm, h = 5 cm → A = 60 cm² |
+| 2 | Decimal dimensions | b = 7.2 m, h = 4.5 m → A = 32.4 m² |
+| 3 | Fractional dimensions | b = 7/2 cm, h = 4/3 cm → A = 14/3 cm² |
+| 4 | Diagram shows the slant side prominently — student must use the perpendicular height (labelled inside) | Parallelogram with slant side 13 km, base 12 km, perpendicular height 5 km |
+
+**Example Question Stem:** A parallelogram has a base of 9 cm and a perpendicular height of 4 cm. Find its area.
+
+**Common Misconceptions:**
+- Students use the slant (oblique) side as the height instead of the perpendicular height
+- Students apply the triangle formula (divide by 2) to a parallelogram
+
+---
+
+### Level 7: Area of Trapezoids
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the area of a trapezoid using A = ½(a + b) × h, correctly identifying the two parallel sides and perpendicular height
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer parallel sides and integer perpendicular height | a = 6 cm, b = 10 cm, h = 4 cm → A = 32 cm² |
+| 2 | Decimal values | a = 5.5 m, b = 8.5 m, h = 3 m → A = 21 m² |
+| 3 | Fractional parallel sides or height | a = 3/2 m, b = 5/2 m, h = 2 m → A = 4 m² |
+| 4 | Slant sides and perpendicular height all labelled — student must select the correct height and parallel sides from a complex diagram | Trapezoid with legs 5 cm and 6 cm, parallel sides 8 cm and 12 cm, height 4 cm clearly marked |
+
+**Example Question Stem:** A trapezoid has parallel sides of 5 cm and 9 cm, and a perpendicular height of 6 cm. Find its area.
+
+**Common Misconceptions:**
+- Students add only one parallel side to the height, rather than both parallel sides to each other
+- Students forget the ½ (halving step), calculating (a + b) × h instead
+- Students use a non-parallel side as one of the a or b values
+
+---
+
+### Level 8: Circumference of a Circle
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the circumference of a circle using C = πd or C = 2πr, given either the radius or the diameter
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer radius or diameter, answer rounded to nearest whole number or given in terms of π | r = 5 cm → C = 10π cm ≈ 31 cm |
+| 2 | Decimal radius or diameter, answer to 2 d.p. | r = 3.7 m → C = 23.25 m |
+| 3 | Fractional radius | r = 3/2 cm → C = 3π cm ≈ 9.42 cm |
+| 4 | Diameter given in one unit, answer required in another (e.g., mm to cm); or answer required exactly in terms of π | d = 14 cm → C = 14π cm (exact) |
+
+**Example Question Stem:** A circle has a radius of 6 cm. Calculate its circumference. Give your answer to 2 decimal places.
+
+**Common Misconceptions:**
+- Students use C = πr² (confusing the circumference and area formulae)
+- Students use the radius in C = πd without first doubling it, or use the diameter in C = 2πr without halving it
+- Students multiply π by d then multiply by 2, effectively calculating C = 2πd
+
+---
+
+### Level 9: Area of a Circle
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Calculate the area of a circle using A = πr², given the radius or diameter
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Integer radius, answer to nearest whole number or in terms of π | r = 4 cm → A = 16π cm² ≈ 50 cm² |
+| 2 | Decimal radius, answer to 1–2 d.p. | r = 3.6 cm → A = 40.7 cm² |
+| 3 | Fractional radius | r = 3/2 m → A = 9π/4 m² ≈ 7.07 m² |
+| 4 | Diameter given (student must halve first); or answer required exactly in terms of π | d = 14 cm → r = 7, A = 49π cm² |
+
+**Example Question Stem:** A circle has a radius of 5 cm. Find its area. Give your answer to 1 decimal place.
+
+**Common Misconceptions:**
+- Students use the diameter instead of the radius in A = πr², getting A = π(2r)² = 4πr² — an answer four times too large
+- Students calculate π × r instead of π × r² (forgetting to square r)
+- Students square then divide by 2, confusing this with the triangle formula
+
+---
+
+### Level 10: Finding a Missing Side from a Given Perimeter
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Find an unknown side length of a polygon given the total perimeter and all other side lengths
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Rectangle: given perimeter and one side length, find the other | P = 26 cm, l = 8 cm → 26 = 2(8) + 2w → w = 5 cm |
+| 2 | Triangle or irregular polygon with decimal values | Triangle P = 19.4 cm, two sides 6.5 cm and 7.3 cm → missing side = 5.6 cm |
+| 3 | Isosceles or equilateral triangle where shape properties must be used | Isosceles triangle P = 31 cm, base = 9 cm → equal sides = 11 cm each |
+| 4 | Algebraic: perimeter given as expression, side lengths involve x | P = 76 units, sides are (w), (w + 10) — solve for w |
+
+**Example Question Stem:** A rectangle has a perimeter of 30 cm and a width of 6 cm. Find the length.
+
+**Common Misconceptions:**
+- Students subtract the known sides from the perimeter without accounting for the rectangle's symmetry (e.g., finding w = 30 − 8 − 8 = 14 instead of 5)
+- Students set up the equation correctly but then forget to divide to find the unknown
+
+---
+
+### Level 11: Finding Radius from Circumference (Reverse)
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Rearrange C = 2πr to find the radius (or diameter) when given the circumference
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Circumference given as a multiple of π (exact), integer answer | C = 20π cm → r = 10 cm |
+| 2 | Circumference given as a decimal, answer to 1 d.p. | C = 37.70 cm → r = 6.0 cm |
+| 3 | Circumference given as a fraction of π | C = 9π/2 m → r = 9/4 m |
+| 4 | Circumference given; find diameter and then use it to find another measurement | C = 62.83 m → d = 20 m → hence find the area |
+
+**Example Question Stem:** A circle has a circumference of 25.13 cm. Find the radius. Give your answer to 1 decimal place.
+
+**Common Misconceptions:**
+- Students divide by π only, forgetting to also divide by 2 (finding diameter, not radius)
+- Students multiply instead of divide when rearranging
+
+---
+
+### Level 12: Finding Radius from Area (Reverse)
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Rearrange A = πr² to find the radius when given the area
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Area given as a perfect-square multiple of π, integer radius | A = 49π cm² → r = 7 cm |
+| 2 | Area given as a decimal, answer to 1 d.p. | A = 150 cm² → r ≈ 6.9 cm |
+| 3 | Area given as a fraction of π | A = 9π/4 m² → r = 3/2 m |
+| 4 | Area given; find radius then find the circumference (two-step) | A = 200 m² → r ≈ 7.98 m → C ≈ 50.1 m |
+
+**Example Question Stem:** The area of a circle is 78.5 cm². Find the radius. Give your answer to 1 decimal place.
+
+**Common Misconceptions:**
+- Students divide by π but forget the square root step, finding r² rather than r
+- Students take the square root of the entire expression A/π incorrectly by dividing by π first then taking √A
+
+---
+
+### Level 13: Perimeter of Composite Shapes (Polygons Only)
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Calculate the perimeter of a composite shape made entirely of straight sides by deducing the lengths of any unlabelled sides from given dimensions
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | L-shaped rectilinear figure, all missing sides deducible by subtraction with integer values | L-shape: overall width 10 cm, notch width 4 cm → missing horizontal = 6 cm |
+| 2 | More complex rectilinear shape (T- or U-shape) with decimal values | Step shape with decimal outer dimensions |
+| 3 | Composite shape with a triangular component where unlabelled side must be found | Rectangle with triangle on top; triangle base = rectangle width |
+| 4 | Shape where multiple unlabelled sides must be found before summing | Complex rectilinear shape with 3+ unlabelled sides |
+
+**Example Question Stem:** The shape below is made of rectangles. The outer dimensions are 10 cm wide and 11 cm tall, with a rectangular notch of 3 cm × 4 cm cut from one corner. Find the perimeter of the shape.
+
+**Common Misconceptions:**
+- Students omit one or more of the unlabelled "hidden" sides when tracing the perimeter
+- Students add the overall outer dimensions instead of the actual boundary sides
+- Students confuse interior lengths with perimeter lengths after deducing missing sides
+
+---
+
+### Level 14: Area of Composite Shapes (Polygons Only)
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Calculate the area of a composite polygon by splitting it into known shapes and adding (or subtracting) their individual areas
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Rectilinear shape split into two rectangles with integer dimensions | L-shape split into two rectangles; add the two areas |
+| 2 | Shape requiring subtraction (e.g., large rectangle minus smaller rectangle), decimal values | Rectangular frame: outer 8.5 m × 6 m, inner 6 m × 4 m removed |
+| 3 | Composite shape involving a triangle and rectangle, fractional dimensions | Rectangle plus triangle on top; each with fractional base/height |
+| 4 | Composite shape involving a parallelogram or trapezoid with a piece subtracted | Rectangle minus triangle; or two trapezoids combined |
+
+**Example Question Stem:** A shape is made by joining a rectangle (8 cm × 5 cm) to a right-angled triangle (base 8 cm, height 3 cm) along one edge. Find the total area.
+
+**Common Misconceptions:**
+- Students calculate area for each sub-shape but add them incorrectly (e.g., add when they should subtract, or vice versa)
+- Students use a dimension from one sub-shape as the height for a different sub-shape
+- Students forget to identify a sub-shape entirely (e.g., count a triangle as part of the rectangle)
+
+---
+
+### Level 15: Perimeter and Area of Shapes Involving Circles
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Calculate the perimeter or area of a composite shape that includes a semicircle or quarter circle combined with straight-sided shapes
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Semicircle: find perimeter (curved arc + diameter) or area (half circle area) with integer radius | Semicircle r = 8 cm → perimeter = πr + 2r = 25.1 + 16 = 41.1 cm |
+| 2 | Rectangle with semicircle on one end: decimal dimensions, answer to 2 d.p. | Stadium shape: rectangle 10.5 cm × 4 cm, semicircle r = 2 cm on each short end |
+| 3 | Annulus (ring): area between two concentric circles with fractional radii | Outer r = 5/2 m, inner r = 3/2 m → shaded area = π(25/4 − 9/4) = 4π m² |
+| 4 | Multi-step problem: large circle minus multiple small circles, or square with circular hole | Square 20 cm × 20 cm with circular hole r = 4 cm cut out; find remaining area |
+
+**Example Question Stem:** A semicircle has a radius of 8 cm. Find the perimeter of the semicircle. Give your answer to 1 decimal place.
+
+**Common Misconceptions:**
+- For semicircle perimeter, students calculate only the curved arc (πr) and forget to add the diameter across the flat edge
+- Students use the full circle formula for a semicircle without halving
+- For annulus problems, students subtract radii before squaring, rather than subtracting the two πr² values
+
+---
+
+### Level 16: Context Problems
+
+**Tier:** Context Problem
+**Single Skill Tested:** Select and apply the appropriate area or perimeter formula to solve a problem described in a real-world context, interpreting the answer in terms of the situation
+**Recommended Question Types:** NUMERIC, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Single-formula context problem with integer values and a clear, direct question | A rectangular rugby field is 100 m × 68 m. How much fencing is needed to go around it? |
+| 2 | Context requires choosing between area and perimeter, with decimal values | A kiwifruit orchard is 24.5 m × 18 m. Find the cost of fencing at $12.50 per metre. |
+| 3 | Two-step context: find one measurement, then use it to answer the final question | A circular garden has an area of 50 m². Find the cost of edging at $6.80 per metre. |
+| 4 | Multi-shape context: find a combined or remaining area (e.g., a lawn minus a circular pool) | A rectangular lawn (15 m × 10 m) has a circular garden bed (r = 2 m) in one corner. Find the grassed area. |
+
+**Example Question Stem:** A rugby field at a school is 100 m long and 68 m wide. The school wants to put a fence around the entire field. How many metres of fencing are needed?
+
+**Common Misconceptions:**
+- Students calculate area when perimeter is needed, and vice versa — misreading "how much carpet" vs "how much border"
+- Students do not include units in their final answer
+- Students fail to interpret the answer (e.g., finding the area of a circular pool but not subtracting it from the total lawn area)
+
+---
+
+## 4. Context Themes
+
+Real-world scenarios suitable for context problems at the higher skill levels.
+NZ-relevant scenarios preferred. Each theme should suggest a genuine application of the topic.
+
+| Theme | Example Scenario |
+|---|---|
+| Sports fields | Calculate the length of rope needed to mark the boundary of a circular discus area at a school athletics day, or find the area of a rectangular rugby field |
+| Building and construction | Find the area of a floor that needs tiling, including a trapezoidal alcove; calculate the length of skirting board for a composite-shaped room |
+| Māori design and tukutuku panels | Calculate the area and perimeter of repeated geometric panels used in a wharenui design, identifying rectangles and triangles within the pattern |
+| Kiwifruit orchards | Find the area of a trapezoidal orchard block to determine how many plants fit; calculate fencing costs around a composite-shaped property boundary |
+| Circular garden beds | A gardener plants a circular flower bed (given diameter); find the area to determine how much compost is needed, or the circumference to determine edging length |
+| Pools and waterways | Find the area of water surface for a circular fountain or a rectangular pool with semicircular ends (stadium shape); calculate the perimeter for pool covers |
+| Pizza / cooking | Compare the area of two circular pizzas of different diameters to find which gives more value per dollar |
+| Online gaming map design | A game designer creates a circular arena with a rectangular safe zone inside; calculate the shaded playing area outside the rectangle |
+
+---
+
+## 5. Curriculum / NCEA Alignment
+
+**Strand:** Geometry and Measurement
+**Achievement Objective:** Find the perimeters and areas of circles and composite shapes; deduce and use formulae to find the perimeters and areas of polygons (NZ Curriculum Level 5, Measurement strand)
+
+This topic is Year 10 (NZ Curriculum Level 5) and is assessed through teacher judgement against curriculum level expectations, not via a specific NCEA Achievement Standard. The NCEA alignment table is not applicable at this year level.
+
+---
+
+## 6. Generation Parameters
+
+These values are passed directly to Prompt 2B.
+Review and edit this section before passing to the code generator.
+
+```
+topic:                 Area and Perimeter (Polygons and Circles)
+year_group:            Year 10
+ncea_level:            N/A
+standard:              N/A
+achievement_objective: Find the perimeters and areas of circles and composite shapes; deduce and use formulae to find the perimeters and areas of polygons (NZ Curriculum Level 5)
+levels:                16
+questions_per_level:   10
+question_type_mix:     25% NUMERIC, 20% MCQ, 15% MATCH, 20% SPOT_ERROR/STEP, 10% SPOT_ERROR/VALUE, 10% EXPLANATION
+include_reference:     Yes
+include_svg:           Yes
+```

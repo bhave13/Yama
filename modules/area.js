@@ -1551,21 +1551,108 @@ const config = {
       label: "Rect",
       title: "Area of Rectangle",
       text: "Multiply length by width:",
-      math: "A = l \\times w"
+      math: "A = l \\times w",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 50" width="48" height="30">
+        <rect x="5" y="8" width="70" height="34" fill="#d6eaf8" stroke="#2471a3" stroke-width="2"/>
+        <text x="40" y="4" font-size="8" fill="#2471a3" text-anchor="middle" font-family="sans-serif">l</text>
+        <text x="1" y="28" font-size="8" fill="#2471a3" text-anchor="middle" font-family="sans-serif">w</text>
+      </svg>`
     },
     {
       label: "Sq",
       title: "Area of Square",
       text: "Square the side length:",
-      math: "A = s^2"
+      math: "A = s^2",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="32" height="32">
+        <rect x="5" y="5" width="40" height="40" fill="#d6eaf8" stroke="#2471a3" stroke-width="2"/>
+        <text x="25" y="2" font-size="8" fill="#2471a3" text-anchor="middle" font-family="sans-serif">s</text>
+        <text x="1" y="28" font-size="8" fill="#2471a3" text-anchor="middle" font-family="sans-serif">s</text>
+      </svg>`
     },
     {
       label: "Tri",
       title: "Area of Triangle",
       text: "Half the base times the perpendicular height:",
-      math: "A = \\frac{1}{2} \\times b \\times h"
+      math: "A = \\frac{1}{2} \\times b \\times h",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 55" width="48" height="33">
+        <polygon points="5,48 75,48 38,8" fill="#fef9e7" stroke="#b7950b" stroke-width="2"/>
+        <line x1="38" y1="8" x2="38" y2="48" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text x="40" y="52" font-size="8" fill="#b7950b" text-anchor="middle" font-family="sans-serif">b</text>
+        <text x="43" y="32" font-size="8" fill="#c0392b" font-family="sans-serif">h</text>
+      </svg>`
     },
     {
       label: "Para",
       title: "Area of Parallelogram",
       text: "Base times perpendicular height (not slant side):",
+      math: "A = b \\times h",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 50" width="48" height="30">
+        <polygon points="15,40 65,40 55,10 5,10" fill="#d5f5e3" stroke="#1e8449" stroke-width="2"/>
+        <line x1="55" y1="10" x2="55" y2="40" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text x="35" y="47" font-size="8" fill="#1e8449" text-anchor="middle" font-family="sans-serif">b</text>
+        <text x="60" y="28" font-size="8" fill="#c0392b" font-family="sans-serif">h</text>
+      </svg>`
+    },
+    {
+      label: "Circ",
+      title: "Area of Circle",
+      text: "Pi times the radius squared. Halve the diameter if only diameter is given:",
+      math: "A = \\pi r^2",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="36" height="36">
+        <circle cx="30" cy="30" r="24" fill="#f5eef8" stroke="#8e44ad" stroke-width="2"/>
+        <line x1="30" y1="30" x2="54" y2="30" stroke="#8e44ad" stroke-width="1.5"/>
+        <circle cx="30" cy="30" r="2.5" fill="#8e44ad"/>
+        <text x="43" y="26" font-size="8" fill="#6c3483" font-family="sans-serif">r</text>
+      </svg>`
+    },
+    {
+      label: "Sector",
+      title: "Area of Sector",
+      text: "Fraction of a full circle based on the central angle:",
+      math: "A = \\frac{\\theta}{360} \\times \\pi r^2",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="36" height="36">
+        <path d="M30,30 L54,30 A24,24 0 0,0 30,6 Z" fill="#fadbd8" stroke="#c0392b" stroke-width="2"/>
+        <text x="38" y="28" font-size="8" fill="#922b21" font-family="sans-serif">r</text>
+        <text x="22" y="22" font-size="7" fill="#922b21" font-family="sans-serif">θ</text>
+      </svg>`
+    }
+  ],
+
+  // ── Self-study formula reference rendering ────────────────────────────────
+  selfStudyOnly: true,
+  referenceMaxLevel: 5,
+
+  buildRefBar(containerEl) {
+    containerEl.innerHTML = "";
+    const colors = [
+      { bg: "#d6eaf8", stroke: "#2471a3" },   // Rect   — blue
+      { bg: "#d5f5e3", stroke: "#1e8449" },   // Square — green
+      { bg: "#fef9e7", stroke: "#b7950b" },   // Tri    — yellow
+      { bg: "#d5f5e3", stroke: "#1e8449" },   // Para   — green
+      { bg: "#f5eef8", stroke: "#8e44ad" },   // Circ   — purple
+      { bg: "#fadbd8", stroke: "#c0392b" },   // Sector — red
+    ];
+    this.referenceItems.forEach((item, i) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "qset-ref-card";
+      chip.title = item.title;
+      const col = colors[i] || { bg: "#f1f5f9", stroke: "#475569" };
+      chip.style.cssText = `background:${col.bg};border:2px solid ${col.stroke};padding:4px;`;
+      
+      if (item.svg) {
+        chip.innerHTML = item.svg;
+      } else {
+        chip.textContent = item.label;
+        chip.style.fontWeight = "900";
+        chip.style.fontSize = "0.75rem";
+      }
+      // Note: Event listener attachment is handled by qs_fwk.js to ensure standard modal opening
+      containerEl.appendChild(chip);
+    });
+  }
+};
+document.addEventListener('DOMContentLoaded', function () {
+    QsetFW.init(config, document.getElementById('module-container'));
+});
+export default config;

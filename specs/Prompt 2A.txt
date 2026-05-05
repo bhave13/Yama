@@ -57,16 +57,18 @@ Difficulty applies to every question at every skill level. It reflects the mathe
 **R5 — Question Types are Guidelines:**
 Recommend question types per level but do not restrict to one. More than one type per level is acceptable. Add types not listed if pedagogically appropriate.
 
-Available types: `NUMERIC`, `MCQ`, `MATCH`, `SPOT_ERROR/STEP`, `SPOT_ERROR/VALUE`, `EXPLANATION`
+Available types: `NUMERIC` / 'TEXT', `MCQ`, `MATCH`, `SPOT_ERROR/STEP`, `SPOT_ERROR/VALUE`, `EXPLANATION`
+
+The default type mix (question_type_mix in Section 6) applies to all levels unless you specify a per-level override. Use per-level overrides (question_type_mix_L{N}) when a particular level's pedagogical purpose calls for a clearly different balance — for example, a Facts level that should be entirely MCQ/MATCH recall, or a Context Problem level that should be entirely NUMERIC/EXPLANATION. Overrides are optional; if a level's recommended types are already well served by the default mix, no override is needed.
 
 **R6 — Terminology Questions are Valid:**
-At Pre-req Check and Facts levels, questions testing mathematical vocabulary — correct spelling of terms, definitions, identification of symbols — are appropriate as MCQ or MATCH questions. Example: "What is the name for the longest side of a right-angled triangle?"
+At Pre-req Check and Facts levels, questions testing mathematical vocabulary — correct spelling of terms, definitions, identification of symbols — are appropriate as MCQ or MATCH questions. They can also be input (to check spelling) questions. Example: "What is the name for the longest side of a right-angled triangle?"
 
 **R7 — Context Problems Use Existing Types:**
 Context problems wrap a real-world scenario around an existing question type. Use `NUMERIC` for calculation-in-context, `EXPLANATION` for reasoning-in-context. Do not invent a new type.
 
 **R8 — NZ-Relevant Contexts:**
-Context scenarios should be relevant to NZ students where possible: rugby fields, kiwifruit orchards, building and construction, coastal navigation, Māori design patterns, cooking and recipes, public transport.
+Context scenarios should be relevant to NZ students where possible: rugby fields, kiwifruit orchards, building and construction, coastal navigation, Māori design patterns, cooking and recipes, public transport, online shopping, online gaming.
 
 **R9 — Year Group Determines NCEA Fields:**
 The year group drives which fields are relevant in Sections 5 and 6:
@@ -130,7 +132,7 @@ Level count is determined by the topic — use as many as needed.
 
 **Tier:** [Pre-req Check / Facts / Simple Skill / Complex Skill / Context Problem]
 **Single Skill Tested:** [One precise, observable skill statement — no "and"]
-**Recommended Question Types:** [e.g. MCQ, MATCH — guideline only, more than one permitted]
+**Recommended Question Types:** [e.g. TEXT, MCQ, MATCH — guideline only, more than one permitted]
 
 **Difficulty Guidance:**
 
@@ -194,7 +196,13 @@ standard:              [e.g. AS91030 — or N/A if year_group is Year 9 or Year 
 achievement_objective: [NZ Curriculum AO — short form]
 levels:                [total number of skill levels listed in Section 3]
 questions_per_level:   [recommended: 8–12]
-question_type_mix:     [e.g. 30% NUMERIC, 20% MCQ, 15% MATCH, 20% SPOT_ERROR, 15% EXPLANATION]
+question_type_mix:     [default proportional type distribution applied to ALL levels unless overridden below]
+                       [e.g. 30% NUMERIC, 20% MCQ, 15% MATCH, 20% SPOT_ERROR, 15% EXPLANATION]
+question_type_mix_L1:  [OPTIONAL — override for Level 1 only. Delete this line if no override is needed.]
+question_type_mix_L2:  [OPTIONAL — override for Level 2 only. Delete this line if no override is needed.]
+<!-- Add a question_type_mix_L{N} line for each level that needs its own mix.
+     Delete all unused override lines before passing to Prompt 2B.
+     Any level without an override line inherits question_type_mix. -->
 include_reference:     [Yes / No]
 include_svg:           [Yes / No]
 ```

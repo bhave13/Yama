@@ -67,7 +67,7 @@ Fields are conditional based on `type` — only include fields relevant to the t
   uid:      "num-001-lev3-d2",   // makeUID(type, level, diff) — NEVER hardcoded
   level:    3,                    // Skill level (matches Level N in Topic Analysis)
   diff:     2,                    // Difficulty 1–4 (1=integers, 2=decimals, 3=fractions, 4=complex)
-  type:     "NUMERIC",            // NUMERIC | MCQ | MATCH | SPOT_ERROR | EXPLANATION
+  type:     "NUMERIC",            // NUMERIC| TEXT | MCQ | MATCH | SPOT_ERROR | EXPLANATION
   q:        "",                   // Question text — HTML supported, MathJax LaTeX supported
   working:  "",                   // Step-by-step solution HTML (see generateSolution rules below)
   img:      "",                   // Inline SVG data URI string, OR "" (empty = centred text layout)
@@ -83,6 +83,11 @@ Fields are conditional based on `type` — only include fields relevant to the t
   units:     ["m", "metres"],     // Accepted unit strings — empty array [] if unitless
   tolerance: 0.05,                // Accepted margin of error as a decimal fraction
 }
+// ── TEXT ────────────────────────────────────────────────────────────
+// Additional fields for type === "TEXT"
+{
+  a:         "12.5",              // Canonical answer string — COMPUTED in code, never a hardcoded literal
+  
 
 // ── MCQ ───────────────────────────────────────────────────────────────
 // Additional fields for type === "MCQ"
@@ -175,6 +180,7 @@ Use `makeUID(type, level, diff)` which returns a string in this format:
 | type | abbr |
 |---|---|
 | NUMERIC | num |
+| TEXT | txt|
 | MCQ | mcq |
 | MATCH | mat |
 | SPOT_ERROR/STEP | sep |
@@ -244,6 +250,7 @@ Return an HTML string. Do not modify the DOM. Show the answer prominently first,
 | Type | Solution Content |
 |---|---|
 | NUMERIC | Answer in large/bold text, then each computation step on a separate line |
+| TEXT | Answer in large bold text.|
 | MCQ | Correct option label + one-line explanation of why it is correct |
 | MATCH | All correct pairs listed clearly |
 | SPOT_ERROR/STEP | All steps listed; error step highlighted in red with explanation of the mistake |
@@ -372,7 +379,19 @@ Use the example problems in Section 2 for style calibration — register, senten
 
 **SVG Diagrams (if include_svg is Yes):**
 Generate diagrams as inline `data:image/svg+xml` URI strings. Set `q.img` to the URI and `q.imgAlt` to an accessibility description. When `q.img === ""`, `renderFront()` must apply a CSS class that centres the question text both horizontally and vertically.
+Never pass algebraic variable names directly to these slots. Always map the question's computed values to the correct geometric position explicitly. 
 
+**MCQ**
+All four MCQ options must be computed values derived from the question parameters. Placeholder strings such as "incorrect option A" are never acceptable, even as temporary stubs. For fractions, distractors must represent operations on the numerator or denominator separately. For surds, distractors must represent halving, doubling, or squaring the radicand.
+
+
+
+**The output module ** 
+The output module will exceed the Write tool's size limit. Always write the file in two stages: use the Write tool for the main body up to and including generateSolution, then use a Python bash script to append the referenceItems, referenceLabel, closing brace, and boot line. Verify completeness after writing by checking that the boot line QsetFW.init(...) is present as the final non-blank line.
+
+
+**Completeness Check**
+After generating the file, always run the following three checks before reporting completion: (1) node --check passes with no errors; (2) the string QsetFW.init appears as the last non-blank line; (3) grep "incorrect option" returns no matches.
 ---
 
 ## BEGIN

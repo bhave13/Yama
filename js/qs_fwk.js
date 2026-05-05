@@ -47,6 +47,124 @@
         if (!/^[-+*/().\deE]+$/.test(clean)) return NaN;
         try { return new Function('return ' + clean)(); } catch(e) { return NaN; }
     }
+
+    // ── Answer validation helpers ─────────────────────────────────────────
+
+    // Extracts the final numeric answer from a working/solution HTML string.
+    // Looks for the last "= number" pattern after stripping HTML and LaTeX delimiters.
+    function extractWorkingAnswer(working) {
+        if (!working || typeof working !== 'string') return NaN;
+        var stripped = working.replace(/<[^>]+>/g, ' ');
+        stripped = stripped.replace(/\\\(|\\\)|\\\[|\\\]/g, ' ');
+        stripped = stripped.replace(/(\d),(\d)/g, '$1$2');
+        var matches = stripped.match(/=\s*(-?[\d]+\.?[\d]*)/g);
+        if (!matches || matches.length === 0) return NaN;
+        var raw = matches[matches.length - 1].replace(/[=\s]/g, '');
+        return parseFloat(raw);
+    }
+
+    // Validates a question object. Returns [] on success, or an array of error strings.
+    function validateQuestion(q) {
+        var errors = [];
+        if (!q || typeof q !== 'object') { return ['Question is null or not an object']; }
+        if (typeof q.q !== 'string' || q.q.trim() === '') {
+            errors.push('Missing or empty question text (q.q)');
+        }
+
+        if (q.type === 'NUMERIC') {
+            var ans = parseFloat(q.a);
+            if (isNaN(ans)) {
+                errors.push('q.a "' + q.a + '" does not parse as a valid number');
+            } else if (q.working) {
+                var workingAns = extractWorkingAnswer(q.working);
+                if (!isNaN(workingAns)) {
+                    var tol = (q.tolerance != null ? q.tolerance : 0.001);
+                    if (Math.abs(workingAns - ans) > Math.max(tol, Math.abs(ans) * 0.001 + 0.001)) {
+                        errors.push(
+                            'q.a "' + q.a + '" does not match answer in working ("' + workingAns +
+                            '") — question text and stored answer may be mismatched'
+                        );
+                    }
+                }
+            }
+
+        } else if (q.type === 'MCQ') {
+            if (!Array.isArray(q.options) || q.options.length === 0) {
+                errors.push('options array is missing or empty');
+            } else if (typeof q.correctOption !== 'number' ||
+                       q.correctOption < 0 || q.correctOption >= q.options.length) {
+                errors.push(
+                    'correctOption ' + q.correctOption +
+                    ' is out of bounds (options.length=' + q.options.length + ')'
+                );
+            } else {
+                var declared = String(q.options[q.correctOption]);
+                if (q.working) {
+                    var wm = q.working.match(/Correct answer:\s*([^<]+)/i);
+                    if (wm) {
+                        var wVal = wm[1].trim();
+                        if (wVal !== declared) {
+                            errors.push(
+                                'options[correctOption] is "' + declared +
+                                '" but working says correct answer is "' + wVal + '"'
+                            );
+                        }
+                    }
+                }
+            }
+
+        } else if (q.type === 'SPOT_ERROR' && q.subtype === 'STEP') {
+            if (!Array.isArray(q.steps) || q.steps.length === 0) {
+                errors.push('steps array is missing or empty');
+            } else {
+                var errorSteps = q.steps.filter(function(s) { return s.isError; });
+                if (errorSteps.length !== 1) {
+                    errors.push('Expected exactly 1 error step, found ' + errorSteps.length);
+                }
+            }
+
+        } else if (q.type === 'TEXT') {
+            if (q.a === undefined || q.a === null || String(q.a).trim() === '') {
+                errors.push('TEXT question is missing q.a (the expected answer)');
+            }
+
+        } else if (q.type === 'MATCH') {
+            if (!Array.isArray(q.pairs) || q.pairs.length === 0) {
+                errors.push('pairs array is missing or empty');
+            } else {
+                var lefts  = q.pairs.map(function(p) { return p.left;  });
+                var rights = q.pairs.map(function(p) { return p.right; });
+                var uL = lefts.filter(function(v,i,a)  { return a.indexOf(v) === i; });
+                var uR = rights.filter(function(v,i,a) { return a.indexOf(v) === i; });
+                if (uL.length !== lefts.length)  errors.push('Duplicate left values in pairs');
+                if (uR.length !== rights.length) errors.push('Duplicate right values in pairs');
+            }
+        }
+        return errors;
+    }
+
+    // Safe wrapper around cfg.getQuestion(). Validates and retries up to 5 times.
+    // Returns null if every attempt produces an invalid question.
+    function safeGetQuestion(cfg, level, diff) {
+        var MAX_ATTEMPTS = 5;
+        for (var attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            var q = cfg.getQuestion(level, diff);
+            var errors = validateQuestion(q);
+            if (errors.length === 0) return q;
+            console.warn(
+                '[QsetFW] Invalid question (attempt ' + attempt + '/' + MAX_ATTEMPTS + ')' +
+                ' uid=' + (q && q.uid ? q.uid : 'unknown') +
+                ' level=' + level + ' diff=' + diff + ':\n  • ' + errors.join('\n  • '),
+                q
+            );
+        }
+        console.error(
+            '[QsetFW] Could not obtain a valid question after ' + MAX_ATTEMPTS +
+            ' attempts for level=' + level + ' diff=' + diff + '. Skipping.'
+        );
+        return null;
+    }
+
     // Normalises a unit string to a canonical form for comparison.
     // Handles common student variants: m^2, m sq, msq, m2 → m²  etc.
     function normaliseUnit(u) {
@@ -216,6 +334,48 @@
         .qset-ch-table th { background: #f8fafc; font-weight: bold; color: #1e293b; position: sticky; top: 0; box-shadow: 0 1px 0 #cbd5e1; }
         .row-correct { background: #dcfce7; }
         .row-wrong { background: #fee2e2; }
+
+        /* ── Formula Reference Bar (Self-Study only) ── */
+        .qset-ref-bar { display:flex; gap:0.55rem; overflow-x:auto; padding:0.4rem 0 0.5rem;
+          margin-bottom:0.9rem; scrollbar-width:thin; scrollbar-color:#cbd5e1 transparent; }
+        .qset-ref-bar::-webkit-scrollbar { height:4px; }
+        .qset-ref-bar::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+        .qset-ref-label { font-size:0.7rem; font-weight:700; text-transform:uppercase;
+          letter-spacing:0.08em; color:#94a3b8; margin-bottom:0.25rem; }
+        .qset-ref-chip { flex-shrink:0; min-width:3.5rem; height:3.5rem; border-radius:8px;
+          display:flex; align-items:center; justify-content:center; cursor:pointer;
+          box-shadow:0 1px 3px rgba(0,0,0,0.09); border:2px solid transparent;
+          transition:transform 0.15s, box-shadow 0.15s; padding:5px;
+          font-size:0.75rem; font-weight:900; background:#f1f5f9; }
+        .qset-ref-chip:hover { transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.14); }
+        .qset-ref-chip svg { display:block; max-width:100%; max-height:100%; }
+        /* ── Formula Modal ── */
+        .qset-fml-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5);
+          backdrop-filter:blur(2px); z-index:3000; display:flex; align-items:center;
+          justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+        .qset-fml-overlay.open { opacity:1; pointer-events:all; }
+        .qset-fml-box { background:#fff; border-radius:12px; width:min(90vw,480px);
+          box-shadow:0 20px 60px rgba(0,0,0,0.22); overflow:hidden;
+          transform:scale(0.94); transition:transform 0.2s; }
+        .qset-fml-overlay.open .qset-fml-box { transform:scale(1); }
+        .qset-fml-hdr { display:flex; align-items:center; gap:0.75rem;
+          padding:1rem 1.25rem; border-bottom:1px solid #e2e8f0; background:#f8fafc; }
+        .qset-fml-badge { width:3.2rem; height:3.2rem; border-radius:8px; background:#dbeafe;
+          display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:4px; }
+        .qset-fml-badge svg { display:block; max-width:100%; max-height:100%; }
+        .qset-fml-title { font-size:1.05rem; font-weight:800; color:#1e293b; margin:0; flex:1; }
+        .qset-fml-close { background:none; border:none; font-size:1.4rem; cursor:pointer;
+          color:#94a3b8; line-height:1; padding:0.2rem 0.4rem; border-radius:4px; margin-left:auto; }
+        .qset-fml-close:hover { color:#1e293b; background:#f1f5f9; }
+        .qset-fml-body { padding:1.25rem 1.5rem; }
+        .qset-fml-text { font-size:0.92rem; color:#374151; line-height:1.65; margin-bottom:1rem; }
+        .qset-fml-formula { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;
+          padding:1rem; text-align:center; font-size:1.4rem; font-weight:700; color:#1e293b; }
+        .qset-fml-foot { padding:0.85rem 1.5rem; border-top:1px solid #e2e8f0;
+          text-align:center; background:#f8fafc; }
+        .qset-fml-ok { background:#f1f5f9; color:#1e293b; border:1px solid #e2e8f0;
+          border-radius:6px; padding:0.55rem 2rem; font-weight:700; cursor:pointer; font-size:0.9rem; }
+        .qset-fml-ok:hover { background:#e2e8f0; }
         `;
         document.head.appendChild(s);
     }
@@ -294,6 +454,11 @@
                 q.markingChecklist.forEach(function(item) { html += '<li>' + item + '</li>'; });
                 html += '</ul>';
             }
+
+        } else if (q.type === 'TEXT') {
+            html += '<div style="font-size:0.7rem; text-transform:uppercase; color:#059669; font-weight:bold; margin-bottom:4px;">Answer</div>';
+            html += '<div style="font-size:2.25rem; font-weight:900; color:#065f46; margin-bottom:12px; word-break:break-word; line-height:1.1;">' + q.a + '</div>';
+            if (q.working) html += '<div style="font-size:0.85rem; color:#374151; line-height:1.6;">' + q.working + '</div>';
         }
 
         html += '</div>';
@@ -347,6 +512,12 @@
             return {
                 getResult: function() {
                     if (selectedIdx === null) return null;
+                    // Guard: correctOption must be a valid index
+                    if (typeof q.correctOption !== 'number' ||
+                        q.correctOption < 0 || q.correctOption >= q.options.length) {
+                        console.error('[QsetFW] MCQ correctOption out of bounds:', q);
+                        return { isCorrect: false, isSelfMark: true };
+                    }
                     var isCorrect = selectedIdx === q.correctOption;
                     inpEl.querySelectorAll('.qset-mcq-opt').forEach(function(btn) {
                         var idx = parseInt(btn.dataset.idx);
@@ -492,6 +663,21 @@
             };
         }
 
+        if (q.type === 'TEXT') {
+            inpEl.innerHTML = '<input type="text" id="study-inp" '
+                + 'style="width:100%; padding:12px; font-size:1.1rem; text-align:center; '
+                + 'border:2px solid #cbd5e1; border-radius:6px;" placeholder="Answer...">';
+            return {
+                getResult: function() {
+                    var inp = document.getElementById('study-inp');
+                    var raw = inp ? inp.value.trim() : '';
+                    if (raw === '') return null;
+                    var isCorrect = raw.toLowerCase() === String(q.a).toLowerCase();
+                    return { isCorrect: isCorrect, isSelfMark: false };
+                }
+            };
+        }
+
         inpEl.innerHTML = '<div style="color:#94a3b8; font-size:0.9rem;">No input available for this question type.</div>';
         return {
             getResult: function() { return { isCorrect: false, isSelfMark: true }; }
@@ -513,6 +699,10 @@
           '<span class="qset-counter"><span id="qset-correct" class="qc-ok">0</span> / <span id="qset-total">0</span></span>' +
           '</div>' +
           '<div class="qset-panel active" id="qset-panel-study">' +
+          '<div id="qset-ref-section" style="display:none;">' +
+          '<div class="qset-ref-label">Formulas — click to expand</div>' +
+          '<div class="qset-ref-bar" id="qset-ref-bar"></div>' +
+          '</div>' +
           '<div class="qset-study-layout">' +
           '<div class="qset-card-wrap"><div class="qset-card" id="qset-card"><div class="qset-card-front" id="qset-front"></div><div class="qset-card-back" id="qset-back"></div></div></div>' +
           '<div style="background:#fafafa; border:2px solid #e2e8f0; border-radius:10px; padding:1.25rem; display:flex; flex-direction:column; gap:10px; justify-content:center; min-height:300px;">' +
@@ -564,6 +754,20 @@
                   '</table>' +
               '</div>' +
           '</div>' +
+          '<div class="qset-fml-overlay" id="qset-fml-overlay">' +
+              '<div class="qset-fml-box">' +
+              '<div class="qset-fml-hdr">' +
+              '<div class="qset-fml-badge" id="qset-fml-badge"></div>' +
+              '<p class="qset-fml-title" id="qset-fml-title"></p>' +
+              '<button class="qset-fml-close" id="qset-fml-close">&times;</button>' +
+              '</div>' +
+              '<div class="qset-fml-body">' +
+              '<p class="qset-fml-text" id="qset-fml-text"></p>' +
+              '<div class="qset-fml-formula" id="qset-fml-formula"></div>' +
+              '</div>' +
+              '<div class="qset-fml-foot">' +
+              '<button class="qset-fml-ok" id="qset-fml-ok">Got it ✓</button>' +
+              '</div></div></div>' +
           '</div>';
 
         var state = {
@@ -571,14 +775,8 @@
             level: 1,
             study: {
                 q: null, count: 0, total: 0, inputHandler: null,
-                // diffState tracks how many questions have been asked at each difficulty
-                // within the current level, driving the unlock progression in Self Study.
-                // diffState[d] = number of questions asked so far at difficulty d (1-indexed, d=1..4).
-                // Diff d+1 is unlocked once diffState[d] >= 2.
-                // Reset to all-zeros whenever the student changes level.
-                diffState: [0, 0, 0, 0, 0]   // index 0 unused; indices 1-4 used
+                diffState: [0, 0, 0, 0, 0]
             },
-            // ch.selectedStepId tracks the clicked step for SPOT_ERROR/STEP questions in challenge mode.
             ch: { score: 0, total: 0, time: 600, int: null, history: [], currentQ: null, selectedStepId: null },
             spTimer: { int: null, left: 30 }
         };
@@ -590,7 +788,6 @@
             card: $('qset-card'), front: $('qset-front'), back: $('qset-back'),
             inp: $('qset-input-area'), check: $('qset-check'), next: $('qset-next'),
 
-            // Challenge elements
             chS: $('qset-ch-start'), chP: $('qset-ch-play'), chE: $('qset-ch-end'),
             chQ: $('qset-ch-qbox'), chC: $('qset-ch-ctrl'), chF: $('qset-ch-fb'),
             chSc: $('qset-ch-score'), chT: $('qset-ch-timer'), chBtn: $('qset-ch-start-btn'),
@@ -598,37 +795,66 @@
             chShowBtn: $('qset-ch-show-btn'), chRestartBtn: $('qset-ch-restart-btn'),
             chModal: $('qset-ch-modal'), chBd: $('qset-ch-bd'), chClose: $('qset-ch-close'), chTbody: $('qset-ch-results-body'),
 
-            // Worksheet elements
             wsG: $('qset-ws-grid'), wsT: $('qset-ws-title'), wsGen: $('qset-ws-gen'),
             sp: $('qset-spotlight'), spC: $('qset-sp-card'), spF: $('qset-sp-front'),
             spB: $('qset-sp-back'), spT: $('qset-sp-timer'), bd: $('qset-backdrop')
         };
 
+        // ── Formula reference bar (Self-Study only) ───────────────────────────
+        var hasRef = !!(cfg.selfStudyOnly && cfg.referenceItems && cfg.referenceItems.length &&
+                        typeof cfg.buildRefBar === 'function');
+        var refSection = $('qset-ref-section');
+        var refBar     = $('qset-ref-bar');
+        var fmlOverlay = $('qset-fml-overlay');
+
+        function openFmlModal(item) {
+            if (!fmlOverlay) return;
+            var badge = $('qset-fml-badge');
+            var title = $('qset-fml-title');
+            var text  = $('qset-fml-text');
+            var fmla  = $('qset-fml-formula');
+            if (badge) badge.innerHTML  = item.svg || '<span style="font-weight:900;font-size:0.85rem;">' + item.label + '</span>';
+            if (title) title.textContent = item.title;
+            if (text)  text.textContent  = item.text;
+            if (fmla) {
+                var mathStr = item.math ? item.math.replace(/\\\\/g, '\\') : '';
+                fmla.textContent = mathStr;
+                mjax(fmla);
+            }
+            fmlOverlay.classList.add('open');
+        }
+        function closeFmlModal() { if (fmlOverlay) fmlOverlay.classList.remove('open'); }
+
+        if ($('qset-fml-close')) $('qset-fml-close').onclick = closeFmlModal;
+        if ($('qset-fml-ok'))    $('qset-fml-ok').onclick    = closeFmlModal;
+        if (fmlOverlay) fmlOverlay.addEventListener('click', function(e) { if (e.target === fmlOverlay) closeFmlModal(); });
+
+        function buildRefChips() {
+            if (!hasRef || !refBar) return;
+            cfg.buildRefBar(refBar);
+            var chips = refBar.querySelectorAll('button, [class*="ref-card"], [class*="ref-chip"]');
+            chips.forEach(function(chip, i) {
+                chip.className = 'qset-ref-chip';
+                var fresh = chip.cloneNode(true); // Strpis any old/invalid event listeners
+                chip.parentNode.replaceChild(fresh, chip);
+                var item = cfg.referenceItems[i];
+                if (item) (function(it){ fresh.addEventListener('click', function() { openFmlModal(it); }); })(item);
+            });
+        }
+
         function updCount() { D.ok.textContent = state.study.count; D.tot.textContent = state.study.total; }
         function fmt(t) { return String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0'); }
 
-        // Resets difficulty progression for Self Study. Called on every level change.
         function resetDiffState() {
             state.study.diffState = [0, 0, 0, 0, 0];
         }
 
-        // Returns the difficulty to use for the next Self Study question.
-        // The highest unlocked difficulty is the largest d (1-4) where every lower
-        // difficulty has been asked at least twice.  Within the unlocked range,
-        // we pick randomly so the student still sees variety, but never jump ahead.
-        //
-        // Unlock rules (ds = diffState):
-        //   diff 1  — always unlocked
-        //   diff 2  — unlocked when ds[1] >= 2
-        //   diff 3  — unlocked when ds[1] >= 2 AND ds[2] >= 2
-        //   diff 4  — unlocked when ds[1] >= 2 AND ds[2] >= 2 AND ds[3] >= 2
         function studyDiff() {
             var ds = state.study.diffState;
             var maxUnlocked = 1;
             if (ds[1] >= 2)                         maxUnlocked = 2;
             if (ds[1] >= 2 && ds[2] >= 2)           maxUnlocked = 3;
             if (ds[1] >= 2 && ds[2] >= 2 && ds[3] >= 2) maxUnlocked = 4;
-            // Pick randomly from 1..maxUnlocked so earlier diffs still appear
             return Math.ceil(Math.random() * maxUnlocked);
         }
 
@@ -636,20 +862,32 @@
             state.mode = m; clearInterval(state.ch.int);
             D.tabs.forEach(function(t) { t.classList.toggle('active', t.dataset.mode === m); });
             D.panels.forEach(function(p) { p.classList.toggle('active', p.id === 'qset-panel-' + m); });
+            
+            // Formula restriction: Evaluate if reference bar is allowed for current mode and level
+            var showRef = m === 'study' && hasRef;
+            if (cfg.referenceMaxLevel && state.level > cfg.referenceMaxLevel) {
+                showRef = false;
+            }
+            if (refSection) refSection.style.display = showRef ? 'block' : 'none';
+            if (showRef) buildRefChips();
+
             if (m === 'study') nextStudy();
             if (m === 'challenge') resetCh();
             if (m === 'worksheet') genWs();
         }
 
-        // ── Self Study: difficulty gated by progression; resets on level change ──
         function nextStudy() {
             D.card.classList.remove('flipped');
             D.check.classList.remove('qset-hidden');
             D.next.classList.add('qset-hidden');
             var diff = studyDiff();
-            var q = cfg.getQuestion(state.level, diff);
-            // Record that one question at this difficulty has been asked
+            var q = safeGetQuestion(cfg, state.level, diff);
             state.study.diffState[diff]++;
+            if (!q) {
+                D.inp.innerHTML = '<div style="color:#dc2626;font-weight:bold;padding:12px;">'
+                    + '[QsetFW] No valid question available. Check browser console for details.</div>';
+                return;
+            }
             state.study.q = q;
             state.study.total++;
             updCount();
@@ -709,7 +947,6 @@
                 if (state.ch.time <= 0) {
                     clearInterval(state.ch.int);
                     D.chQ.innerHTML = "<div style='font-size:1.5rem; color:#dc2626; font-weight:bold; margin:20px 0;'>Time's Up!</div>";
-                    // Disable whatever control is currently shown
                     if ($('ch-inp'))      $('ch-inp').disabled = true;
                     if ($('ch-next-btn')) $('ch-next-btn').disabled = true;
                     D.chC.querySelectorAll('.qset-step-row').forEach(function(r) { r.style.pointerEvents = 'none'; });
@@ -720,24 +957,26 @@
             nextCh();
         };
 
-        // ── Changes 1, 2, 3: random diff · re-roll excluded types · branch control area ──
         function nextCh() {
             D.chF.textContent = '';
             state.ch.selectedStepId = null;
 
-            // Re-roll until we get a challenge-eligible type (max 20 attempts to avoid
-            // an infinite loop if a module has no eligible questions at this level).
             var q, attempts = 0;
             do {
-                q = cfg.getQuestion(state.level, randDiff());
+                q = safeGetQuestion(cfg, state.level, randDiff());
                 attempts++;
-            } while (!isChallengeType(q) && attempts < 20);
+            } while (q && !isChallengeType(q) && attempts < 20);
+            if (!q) {
+                D.chQ.innerHTML = '<div style="color:#dc2626;font-weight:bold;padding:12px;">'
+                    + '[QsetFW] No valid question available. Check browser console.</div>';
+                D.chC.innerHTML = '';
+                return;
+            }
 
             state.ch.currentQ = q;
             renderNativeFront(q, D.chQ, 'challenge');
 
             if (q.type === 'SPOT_ERROR' && q.subtype === 'STEP') {
-                // ── SPOT_ERROR/STEP control: render clickable step rows + Next button ──
                 var stepListHtml = '<div class="qset-ch-step-list" id="ch-step-list">';
                 q.steps.forEach(function(step) {
                     stepListHtml += '<div class="qset-step-row" data-id="' + step.id + '">Step ' + step.id + ': ' + step.text + '</div>';
@@ -746,7 +985,6 @@
                 stepListHtml += '<button id="ch-next-btn" style="background:#3b82f6; color:#fff; padding:8px 16px; font-size:0.95rem; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:8px;">Next question</button>';
                 D.chC.innerHTML = stepListHtml;
 
-                // Wire up step selection
                 var stepList = $('ch-step-list');
                 stepList.addEventListener('click', function(e) {
                     var row = e.target.closest('.qset-step-row');
@@ -759,11 +997,9 @@
                 $('ch-next-btn').onclick = function() { checkCh(); };
 
             } else {
-                // ── NUMERIC / MCQ control: text input + Next button ──
                 var ctrlHtml = '<span style="font-weight:bold; color:#475569; font-size:1.05rem;">Answer:</span> ';
 
                 if (q.type === 'MCQ') {
-                    // Render a compact inline option list instead of a text box
                     ctrlHtml = '<div class="qset-mcq-opts" id="ch-mcq-opts" style="max-width:400px; margin:0 auto;">';
                     q.options.forEach(function(opt, i) {
                         ctrlHtml += '<button class="qset-mcq-opt" data-idx="' + i + '">' + opt + '</button>';
@@ -772,7 +1008,6 @@
                     ctrlHtml += '<button id="ch-next-btn" style="background:#3b82f6; color:#fff; padding:8px 16px; font-size:0.95rem; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:8px;">Next question</button>';
                     D.chC.innerHTML = ctrlHtml;
 
-                    // Track selected MCQ option in state so checkCh() can read it
                     state.ch.selectedMCQIdx = null;
                     var mcqOpts = $('ch-mcq-opts');
                     mcqOpts.addEventListener('click', function(e) {
@@ -784,7 +1019,6 @@
                     });
 
                 } else {
-                    // NUMERIC: plain text input
                     var chPlaceholder = q.requireUnits ? 'e.g. 25 m²' : 'Answer';
                     var chWidth = q.requireUnits ? '180px' : '120px';
                     ctrlHtml += '<input type="text" id="ch-inp" placeholder="' + chPlaceholder + '" style="width:' + chWidth + '; padding:8px; font-size:1.05rem; border:2px solid #cbd5e1; border-radius:6px; text-align:center; font-weight:bold;"> ';
@@ -801,7 +1035,6 @@
             mjax(D.chQ);
         }
 
-        // ── Change 3: evaluate correctness per question type ──────────────
         function checkCh() {
             var q = state.ch.currentQ;
             if (!q) return;
@@ -817,9 +1050,8 @@
 
                 if (state.ch.selectedStepId !== null) {
                     isCorrect = state.ch.selectedStepId === correctStepId;
-                    userAnsDisplay = 'Step ' + state.ch.selectedStepId;
+                                        userAnsDisplay = 'Step ' + state.ch.selectedStepId;
 
-                    // Colour the step rows to give instant feedback
                     var stepList = $('ch-step-list');
                     if (stepList) {
                         stepList.querySelectorAll('.qset-step-row').forEach(function(row) {
@@ -832,13 +1064,19 @@
                 }
 
             } else if (q.type === 'MCQ') {
-                correctAnsDisplay = q.options[q.correctOption];
+                // Guard: correctOption must be a valid index
+                if (typeof q.correctOption !== 'number' ||
+                    q.correctOption < 0 || q.correctOption >= q.options.length) {
+                    console.error('[QsetFW] Challenge MCQ correctOption out of bounds:', q);
+                    correctAnsDisplay = '(invalid — see console)';
+                } else {
+                    correctAnsDisplay = q.options[q.correctOption];
+                }
 
                 if (state.ch.selectedMCQIdx !== null) {
                     isCorrect = state.ch.selectedMCQIdx === q.correctOption;
                     userAnsDisplay = q.options[state.ch.selectedMCQIdx];
 
-                    // Colour the MCQ buttons
                     var mcqOpts = $('ch-mcq-opts');
                     if (mcqOpts) {
                         mcqOpts.querySelectorAll('.qset-mcq-opt').forEach(function(btn) {
@@ -851,7 +1089,6 @@
                 }
 
             } else {
-                // NUMERIC
                 var raw = $('ch-inp') ? $('ch-inp').value : '';
                 correctAnsDisplay = q.requireUnits
                     ? String(q.a) + ' ' + (q.units && q.units[0] ? q.units[0] : '')
@@ -874,19 +1111,17 @@
                 if ($('ch-inp')) $('ch-inp').disabled = true;
             }
 
-            // Disable Next button to prevent double-submit
             if ($('ch-next-btn')) $('ch-next-btn').disabled = true;
 
             state.ch.total++;
             if (isCorrect) {
                 state.ch.score++;
-                D.chF.style.color = '#16a34a'; D.chF.textContent = '✓ Correct';
+                D.chF.style.color = '#16a34a'; D.chF.textContent = '\u2713 Correct';
             } else {
-                D.chF.style.color = '#dc2626'; D.chF.textContent = '✗ Answer: ' + correctAnsDisplay;
+                D.chF.style.color = '#dc2626'; D.chF.textContent = '\u2717 Answer: ' + correctAnsDisplay;
             }
             D.chSc.textContent = state.ch.score;
 
-            // Track for results table
             state.ch.history.push({
                 qHTML:        q.q,
                 userAns:      userAnsDisplay,
@@ -921,11 +1156,11 @@
         D.chBd.onclick = function() { D.chModal.classList.remove('visible'); };
 
         /* ── WORKSHEET MODE LOGIC ── */
-        // ── Change 1: pass a real random diff instead of null ──────────────
         function genWs() {
             D.wsG.innerHTML = ''; D.wsT.textContent = cfg.levelNames[state.level - 1];
             for (var i = 0; i < 12; i++) {
-                var q = cfg.getQuestion(state.level, randDiff());
+                var q = safeGetQuestion(cfg, state.level, randDiff());
+                if (!q) continue;
                 var card = document.createElement('div'); card.className = 'qset-ws-card';
                 var inner = document.createElement('div'); inner.className = 'qset-ws-card-inner';
                 var f = document.createElement('div'); f.className = 'qset-ws-face front';
@@ -976,5 +1211,47 @@
         setMode('study');
     }
 
-    global.QsetFW = { init };
+
+    // ── Audit utility (call from browser console) ─────────────────────────
+    // Basic:   QsetFW.audit(cfg, 1)
+    // Custom:  QsetFW.audit(cfg, 1, { iterations: 500, diffs: [1,2,3,4] })
+    function audit(cfg, level, opts) {
+        opts = opts || {};
+        var ITERS = opts.iterations || 200;
+        var diffs = opts.diffs || [1, 2, 3, 4];
+        var totalPass = 0, totalFail = 0;
+        console.group('[QsetFW Audit] Level ' + level + ' — ' + ITERS + ' iterations per diff');
+        diffs.forEach(function(diff) {
+            var pass = 0, failures = [];
+            for (var i = 0; i < ITERS; i++) {
+                var q      = cfg.getQuestion(level, diff);
+                var errors = validateQuestion(q);
+                if (errors.length === 0) { pass++; }
+                else { failures.push({ uid: q && q.uid ? q.uid : 'unknown', errors: errors, q: q }); }
+            }
+            if (failures.length === 0) {
+                console.log('  diff ' + diff + ': ' + pass + '/' + ITERS + ' passed ✓');
+            } else {
+                console.group('  diff ' + diff + ': FAILED ' + failures.length + '/' + ITERS);
+                failures.slice(0, 10).forEach(function(f) {
+                    console.warn('  ✗ ' + f.uid + ' — ' + f.errors.join('; '), f.q);
+                });
+                if (failures.length > 10) {
+                    console.warn('  ... and ' + (failures.length - 10) +
+                        ' more (run with {iterations:500} to see all)');
+                }
+                console.groupEnd();
+            }
+            totalPass += pass;
+            totalFail += failures.length;
+        });
+        console.log(
+            '[QsetFW Audit] Level ' + level + ' complete. ' +
+            totalPass + ' passed, ' + totalFail + ' failed.'
+        );
+        console.groupEnd();
+        return { level: level, passed: totalPass, failed: totalFail };
+    }
+
+    global.QsetFW = { init, audit };
 })(window);

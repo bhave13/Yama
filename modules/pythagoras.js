@@ -1004,4 +1004,6 @@ const config = {
   referenceLabel: "Formulae"
 };
 
-export default config;
+document.addEventListener('DOMContentLoaded', function () {
+    QsetFW.init(config, document.getElementById('module-container'));
+});export default config;

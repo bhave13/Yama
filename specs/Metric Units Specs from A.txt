@@ -1,0 +1,363 @@
+# YAMA Topic Analysis
+
+## Topic: Metric Unit Conversions
+## Year Group: Year 9
+## Curriculum Strand: Geometry and Measurement
+## Achievement Objective: Select and use appropriate metric units for length, volume and capacity, and weight (mass); convert between metric units using whole number and decimal multipliers (NZ Curriculum Level 5)
+
+---
+
+## 1. Prerequisites
+
+Prerequisites are skills the student must have consolidated before beginning this topic.
+Each row is a single, independently learnable skill, ordered from most fundamental.
+
+| # | Prerequisite Skill | Why It Is Needed |
+|---|---|---|
+| 1 | Multiply whole numbers by 10, 100, and 1000 | Converting from a larger unit to a smaller unit requires multiplication by a power of 10 |
+| 2 | Divide whole numbers by 10, 100, and 1000 | Converting from a smaller unit to a larger unit requires division by a power of 10 |
+| 3 | Multiply and divide decimal numbers by 10, 100, and 1000 | Many measurement values (e.g. 1.75 kg, 2.3 km) are given as decimals; students must move the decimal point correctly |
+| 4 | Recognise powers of 10 up to 10^6 and express large multipliers in standard form | Mass conversions span six powers of 10 (µg to Mt); students need to handle very large and very small multipliers |
+| 5 | Read and write common fractions and convert between fractions and decimals | Some conversions produce fractional results (e.g. 500 m = ½ km); students must express and interpret these correctly |
+
+---
+
+## 2. Facts and Formulas
+
+Facts and formulas the student must be able to recall and apply without derivation.
+Include correct mathematical notation. Use LaTeX notation where appropriate.
+
+| # | Fact / Formula | Example / Notes |
+|---|---|---|
+| 1 | 1 km = 1000 m | Length: kilometres to metres |
+| 2 | 1 m = 100 cm | Length: metres to centimetres |
+| 3 | 1 m = 1000 mm | Length: metres to millimetres (derived: 1 m = 100 cm = 1000 mm) |
+| 4 | 1 cm = 10 mm | Length: centimetres to millimetres |
+| 5 | 1 Megatonne (Mt) = 1000 t | Mass: Megatonnes to tonnes |
+| 6 | 1 tonne (t) = 1000 kg | Mass: tonnes to kilograms |
+| 7 | 1 kg = 1000 g | Mass: kilograms to grams |
+| 8 | 1 g = 1000 mg | Mass: grams to milligrams |
+| 9 | 1 mg = 1000 µg | Mass: milligrams to micrograms |
+| 10 | 1 kL = 1000 L | Volume/Capacity: kilolitres to litres |
+| 11 | 1 L = 1000 mL | Volume/Capacity: litres to millilitres |
+| 12 | 1 cm^3 = 1 mL | Volume–Capacity equivalence: one cubic centimetre holds exactly one millilitre |
+| 13 | 1 L = 1000 cm^3 | Derived from F12: 1 L fills a 10 cm × 10 cm × 10 cm cube |
+| 14 | 1 m^3 = 1000 L = 1 kL | Volume of a 1 m cube equals one kilolitre |
+| 15 | 1 day = 24 hours | Time |
+| 16 | 1 hour = 60 minutes | Time |
+| 17 | 1 minute = 60 seconds | Time |
+| 18 | 1 hour = 3600 seconds | Derived: 60 × 60 — useful for direct conversion bypassing the minute step |
+
+---
+
+## 3. Skill Levels
+
+ATOMISATION RULE: Each level tests exactly ONE new, independently assessable skill.
+Level count is determined by the topic — use as many as needed.
+
+---
+
+### Level 1: Multiply and Divide by Powers of Ten
+
+**Tier:** Pre-req Check
+**Single Skill Tested:** Multiply or divide a given number by 10, 100, or 1000
+**Recommended Question Types:** NUMERIC, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Multiply or divide a whole number by 10, 100, or 1000 | 45 × 1000 = ? |
+| 2 | Multiply or divide a decimal by 10, 100, or 1000 | 3.72 × 100 = ? |
+| 3 | Multiply or divide a fraction by 10, 100, or 1000 | ¾ × 1000 = ? |
+| 4 | Multiply or divide by 10 000 or 1 000 000, or divide to produce a small decimal | 0.0075 × 1 000 000 = ? |
+
+**Example Question Stem:** 240 × 1000 = ?
+
+**Common Misconceptions:**
+- Student adds zeros without adjusting the decimal point (e.g. writes 3.7 × 100 = 3.700 rather than 370)
+- Student moves the decimal in the wrong direction when dividing (e.g. 4500 ÷ 1000 = 45 000 instead of 4.5)
+
+---
+
+### Level 2: Length Conversion Facts
+
+**Tier:** Facts
+**Single Skill Tested:** Recall and state the conversion factor between any two adjacent length units (km, m, cm, mm)
+**Recommended Question Types:** MCQ, MATCH, TEXT
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | State how many of the smaller unit equal one of the larger unit (whole number answer) | How many centimetres are in one metre? |
+| 2 | State the factor for a less familiar adjacent pair | How many millimetres are in one centimetre? |
+| 3 | Express the conversion as a unit fraction going upward | 1 mm = 1/? m |
+| 4 | State the combined factor between non-adjacent units (derived from the chain) | How many millimetres are in one kilometre? |
+
+**Example Question Stem:** How many metres are in one kilometre?
+
+**Common Misconceptions:**
+- Student confuses 1 m = 100 cm with 1 m = 1000 mm, mixing up the 100 and 1000 factors
+- Student applies the m → cm factor (100) to the cm → mm step, believing 1 cm = 100 mm
+
+---
+
+### Level 3: Mass Conversion Facts
+
+**Tier:** Facts
+**Single Skill Tested:** Recall and state the conversion factor between any two adjacent mass units (Mt, t, kg, g, mg, µg)
+**Recommended Question Types:** MCQ, MATCH, TEXT
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | State the conversion for the most familiar adjacent pair (kg ↔ g) | How many grams are in one kilogram? |
+| 2 | State the conversion for less familiar pairs (g ↔ mg, or t ↔ kg) | How many milligrams are in one gram? |
+| 3 | State the conversion as a unit fraction going upward | 1 g = 1/? kg |
+| 4 | Name the unit given its position in the chain relative to the base unit g | Which unit is 1000 times bigger than a gram and 1000 times smaller than a tonne? |
+
+**Example Question Stem:** How many grams are in one kilogram?
+
+**Common Misconceptions:**
+- Student uses a factor of 100 instead of 1000 for mass conversions (confusion with cm → m)
+- Student assumes the factor varies across steps (e.g. thinks t → kg uses 100 and kg → g uses 1000)
+- Student confuses milligram (mg) and microgram (µg), or does not know the symbol µ
+
+---
+
+### Level 4: Volume and Capacity Conversion Facts
+
+**Tier:** Facts
+**Single Skill Tested:** Recall and state the conversion factors for volume and capacity, including the cm^3 = mL equivalence
+**Recommended Question Types:** MCQ, MATCH, TEXT
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | State the most common capacity conversion (L ↔ mL) | How many millilitres are in one litre? |
+| 2 | State the kilolitre conversion (kL ↔ L) | How many litres are in one kilolitre? |
+| 3 | State the volume–capacity bridge (cm^3 = mL) | One cubic centimetre holds how many millilitres? |
+| 4 | State the derived relationship between m^3 and L | How many litres are in one cubic metre? |
+
+**Example Question Stem:** How many millilitres are in one litre?
+
+**Common Misconceptions:**
+- Student believes 1 L = 100 mL (borrowing the m → cm factor of 100)
+- Student does not recognise that cm^3 and mL are equivalent, treating them as unrelated units
+- Student cannot recall whether 1 m^3 = 100 L or 1000 L
+
+---
+
+### Level 5: Time Conversion Facts
+
+**Tier:** Facts
+**Single Skill Tested:** Recall and state the conversion factors between seconds, minutes, hours, and days
+**Recommended Question Types:** MCQ, MATCH
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | State the conversion between the most familiar adjacent pair (min ↔ sec or hr ↔ min) | How many seconds are in one minute? |
+| 2 | State the day–hour conversion | How many hours are in one day? |
+| 3 | State a derived non-adjacent conversion factor | How many seconds are in one hour? |
+| 4 | State the full chain conversion (day → sec) | How many seconds are in one day? |
+
+**Example Question Stem:** How many minutes are in one hour?
+
+**Common Misconceptions:**
+- Student applies the metric ×1000 rule to time (e.g. believes 1 hour = 1000 minutes)
+- Student confuses base-60 counting (time) with base-10 counting (metric), producing incorrect factors
+
+---
+
+### Level 6: Convert from a Larger Unit to a Smaller Unit (Single Step)
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Convert a measurement from a larger unit to its adjacent smaller unit by multiplying by the correct conversion factor
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Whole number input, whole number output | 5 km = ? m |
+| 2 | Decimal input, simple decimal or whole number output | 2.4 m = ? cm |
+| 3 | Fractional input | ¾ kg = ? g |
+| 4 | Values producing very large outputs or involving less familiar units (Mt → t, mg → µg) | 0.003 Mt = ? t |
+
+**Example Question Stem:** A length of timber is 3 m. How many centimetres is this?
+
+**Common Misconceptions:**
+- Student divides instead of multiplies, converting in the wrong direction
+- Student uses the wrong conversion factor (e.g. multiplies by 100 when converting km → m instead of 1000)
+- Student places the decimal point incorrectly when the input is a decimal (e.g. 2.4 m = 24 cm instead of 240 cm)
+
+---
+
+### Level 7: Convert from a Smaller Unit to a Larger Unit (Single Step)
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Convert a measurement from a smaller unit to its adjacent larger unit by dividing by the correct conversion factor
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Input exactly divisible, giving a whole number result | 3000 m = ? km |
+| 2 | Division gives a simple decimal result | 250 cm = ? m |
+| 3 | Division gives a result best expressed as a fraction | 750 mL = ? L |
+| 4 | Very small values or less familiar units | 500 µg = ? mg |
+
+**Example Question Stem:** A bottle contains 2000 mL. How many litres is this?
+
+**Common Misconceptions:**
+- Student multiplies instead of divides, converting in the wrong direction
+- Student writes the decimal point in the wrong position (e.g. 250 cm = 25.0 m instead of 2.5 m)
+- Student is uncertain whether to multiply or divide and guesses, lacking a decision strategy
+
+---
+
+### Level 8: Apply the cm^3 = mL Volume–Capacity Equivalence
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Convert between volume expressed in cm^3 and capacity expressed in mL or L using the equivalence 1 cm^3 = 1 mL
+**Recommended Question Types:** NUMERIC, MCQ, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Convert whole number cm^3 directly to mL | 350 cm^3 = ? mL |
+| 2 | Convert cm^3 to L using the chain: cm^3 → mL → L | 2500 cm^3 = ? L |
+| 3 | Convert in the reverse direction: L or mL → cm^3 | 0.75 L = ? cm^3 |
+| 4 | Extend to m^3 ↔ kL, or chain across three unit changes | 1 500 000 cm^3 = ? kL |
+
+**Example Question Stem:** A container holds 500 cm^3 of water. How many millilitres is this?
+
+**Common Misconceptions:**
+- Student does not recognise cm^3 and mL as equivalent, inventing a separate conversion factor
+- Student confuses cm^3 (a unit of volume) with cm (a unit of length), thinking "cubic" means "multiply by 3"
+- Student converts cm^3 to mL correctly but fails to apply the subsequent mL → L step
+
+---
+
+### Level 9: Convert Between Adjacent Time Units (Single Step)
+
+**Tier:** Simple Skill
+**Single Skill Tested:** Convert a time measurement between two adjacent units by applying the correct non-decimal conversion factor (×60, ×24, ÷60, or ÷24)
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/VALUE, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Multiply or divide by 60 or 24 with a whole number input giving a whole number result | 3 hours = ? minutes |
+| 2 | Divide to produce a simple decimal result | 90 seconds = ? minutes |
+| 3 | Multiply or divide where the result requires careful handling of the non-decimal factor | 2.5 hours = ? seconds (via minutes) |
+| 4 | Convert between non-adjacent time units in a single calculated step using a known derived factor | 1.5 days = ? minutes (using 1 day = 1440 min) |
+
+**Example Question Stem:** A YouTube video is 150 minutes long. How many hours is this?
+
+**Common Misconceptions:**
+- Student applies the metric ×1000 rule to time (e.g. writes 2 hours = 2000 minutes)
+- Student divides when converting from hours to minutes, or multiplies when converting from minutes to hours (wrong direction)
+- Student uses ×100 for the hour → minute step by analogy with m → cm
+
+---
+
+### Level 10: Challenge — Mixed Multi-Step Conversions
+
+**Tier:** Complex Skill
+**Single Skill Tested:** Select and execute the correct multi-step conversion strategy for a problem drawn from any metric or time measurement domain, without being told which domain or how many steps are required
+**Recommended Question Types:** NUMERIC, SPOT_ERROR/STEP, SPOT_ERROR/VALUE, EXPLANATION, MCQ
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Two-step chain, whole number values, single domain (length or mass) | 4 km = ? cm  (km → m → cm) |
+| 2 | Two-step chain with decimal values, OR mixed time units to a single unit | 1.5 t = ? g  OR  2 hours 30 minutes = ? minutes |
+| 3 | Three-step metric chain, OR time across three units | 2 km = ? mm  OR  1 day 6 hours 20 minutes = ? minutes |
+| 4 | Long chain (4+ steps) across mass or time, or questions spanning two different domains in the same set | 0.002 Mt = ? mg  OR  2 days 3 hours 45 minutes 30 seconds = ? seconds |
+
+**Example Question Stem:** A road is 3 km long. Express this distance in millimetres.
+
+**Common Misconceptions:**
+- Student stops after one conversion step and does not continue the chain
+- Student applies the metric ×1000 rule to time conversions (e.g. 1 hour = 1000 minutes)
+- Student uses an incorrect intermediate unit when chaining (e.g. jumps directly from km to mm, applying the wrong combined factor)
+- Student sequences the correct individual factors in the wrong order
+
+---
+
+### Level 11: Real-World Conversion Problems (NZ Context)
+
+**Tier:** Context Problem
+**Single Skill Tested:** Select and apply the appropriate metric conversion to solve a problem embedded in a real-world NZ context
+**Recommended Question Types:** NUMERIC, EXPLANATION
+
+**Difficulty Guidance:**
+
+| Diff | Description for This Skill | Concrete Example |
+|---|---|---|
+| 1 | Single-step conversion with whole number values in a simple NZ context | A kiwifruit weighs 98 g. A tray holds 36 fruit. What is the total mass in kilograms? |
+| 2 | Single-step conversion with decimal values in context | A builder needs 2.4 m of timber. The cut-list is in centimetres. How many cm does the builder need? |
+| 3 | Two-step or multi-unit conversion in context | A farm water tank holds 3.5 kL. A trough holds 250 L. How many troughs can the tank fill? |
+| 4 | Conversion followed by a further calculation (rate, comparison, or area) | A runner completes a 5 km race in 22 minutes 15 seconds. Express the time in seconds and calculate their average speed in m/s. |
+
+**Example Question Stem:** A water storage tank on a farm holds 15 kL. The farmer uses 500 L per day for irrigation. How many days will the tank last?
+
+**Common Misconceptions:**
+- Student performs the arithmetic without first converting units, mixing kL and L in the same calculation
+- Student converts correctly but makes an error in the subsequent arithmetic step (e.g. divides instead of multiplies when combining rates)
+- Student identifies the correct units but cannot decide whether to multiply or divide in a real-world setting
+
+---
+
+## 4. Context Themes
+
+Real-world scenarios suitable for context problems at the higher skill levels.
+NZ-relevant scenarios preferred. Each theme should suggest a genuine application of the topic.
+
+| Theme | Example Scenario |
+|---|---|
+| Farming and horticulture | Converting kiwifruit crop mass from grams per fruit → kg per crate → tonnes per harvest, or converting irrigation water between kL and L |
+| Building and construction | Expressing timber lengths in mm for cutting plans; calculating tank volume in cm^3 and converting to litres for plumbing |
+| Water storage and supply | Converting household water-tank capacity between kL and L; calculating daily usage in mL and expressing it in L |
+| Sport and athletics | Converting race distances between km and m; expressing track and field times in seconds; comparing running speeds |
+| Cooking and food preparation | Scaling a hāngī recipe from grams to kilograms; converting liquid ingredients between mL and L |
+| Online shopping and courier delivery | Converting parcel mass between g and kg for postage rates; comparing product volumes in mL and L when choosing between sizes |
+| Online gaming | Converting download file sizes or server response times; discussing storage capacity across different units |
+| Public transport and travel | Calculating bus journey times in minutes and seconds; converting distance signage from km to m on a map |
+
+---
+
+## 5. Curriculum / NCEA Alignment
+
+**Strand:** Geometry and Measurement
+**Achievement Objective:** Select and use appropriate metric units for length, area, volume and capacity, weight (mass), temperature, angle, and time, with awareness that measurements are approximate; convert between metric units, using decimals (NZ Curriculum Level 5, Years 9–10)
+
+---
+
+## 6. Generation Parameters
+
+These values are passed directly to Prompt 2B.
+Review and edit this section before passing to the code generator.
+
+```
+topic:                 Metric Unit Conversions
+year_group:            Year 9
+ncea_level:            N/A
+standard:              N/A
+achievement_objective: Convert between metric units of length, mass, volume, capacity, and time using whole number and decimal multipliers
+levels:                11
+questions_per_level:   10
+question_type_mix:     35% NUMERIC, 20% MCQ, 15% MATCH, 15% SPOT_ERROR/VALUE, 10% EXPLANATION, 5% TEXT
+include_reference:     Yes
+include_svg:           Yes
+```
